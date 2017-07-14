@@ -247,13 +247,46 @@ CRCEA_VISIBILITY CRCEA_INLINE size_t
 CRCEA_TABLESIZE(int algo)
 {
     switch (algo) {
-    case CRCEA_HALFBYTE_TABLE:
+    case CRCEA_BY_SOLO:
+        return sizeof(CRCEA_TYPE[2]);
+    case CRCEA_BY1_SOLO:
+    case CRCEA_BY2_SOLO:
+    case CRCEA_BY4_SOLO:
+    case CRCEA_BY8_SOLO:
+    case CRCEA_BY16_SOLO:
+    case CRCEA_BY32_SOLO:
+        return sizeof(CRCEA_TYPE[algo & 0xff][2]);
+    case CRCEA_BY_DUO:
+        return sizeof(CRCEA_TYPE[4]);
+    case CRCEA_BY1_DUO:
+    case CRCEA_BY2_DUO:
+    case CRCEA_BY4_DUO:
+    case CRCEA_BY8_DUO:
+    case CRCEA_BY16_DUO:
+    case CRCEA_BY32_DUO:
+        return sizeof(CRCEA_TYPE[algo & 0xff][4]);
+    case CRCEA_BY_QUARTET:
         return sizeof(CRCEA_TYPE[16]);
-    case CRCEA_STANDARD_TABLE:
-    case CRCEA_SLICING_BY_4:
-    case CRCEA_SLICING_BY_8:
-    case CRCEA_SLICING_BY_16:
-        return sizeof(CRCEA_TYPE[algo][256]);
+    case CRCEA_BY1_QUARTET:
+    case CRCEA_BY2_QUARTET:
+    case CRCEA_BY4_QUARTET:
+    case CRCEA_BY8_QUARTET:
+    case CRCEA_BY16_QUARTET:
+    case CRCEA_BY32_QUARTET:
+        return sizeof(CRCEA_TYPE[algo & 0xff][16]);
+    case CRCEA_BY1_OCTET:
+    case CRCEA_BY2_OCTET:
+    case CRCEA_BY4_OCTET:
+    case CRCEA_BY8_OCTET:
+    case CRCEA_BY16_OCTET:
+    case CRCEA_BY32_OCTET:
+        return sizeof(CRCEA_TYPE[algo & 0xff][256]);
+    case CRCEA_BY2_SEXDECTET:
+    case CRCEA_BY4_SEXDECTET:
+    case CRCEA_BY8_SEXDECTET:
+    case CRCEA_BY16_SEXDECTET:
+    case CRCEA_BY32_SEXDECTET:
+        return sizeof(CRCEA_TYPE[algo & 0xff][65536]);
     default:
         return 0;
     }
@@ -263,21 +296,59 @@ CRCEA_VISIBILITY CRCEA_INLINE void
 CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 {
     int times, slice, bits;
-    if (cc->algorithm < 0) {
-        return;
-    } else if (cc->algorithm == CRCEA_HALFBYTE_TABLE) {
-        times = 16;
-        slice = 1;
+    switch (cc->algorithm) {
+    case CRCEA_BY_SOLO:
+    case CRCEA_BY1_SOLO:
+    case CRCEA_BY2_SOLO:
+    case CRCEA_BY4_SOLO:
+    case CRCEA_BY8_SOLO:
+    case CRCEA_BY16_SOLO:
+    case CRCEA_BY32_SOLO:
+        slice = 8 * (1 << (cc->algorithm & 0xff) >> 1);
+        bits = 1;
+        break;
+    case CRCEA_BY_DUO:
+    case CRCEA_BY1_DUO:
+    case CRCEA_BY2_DUO:
+    case CRCEA_BY4_DUO:
+    case CRCEA_BY8_DUO:
+    case CRCEA_BY16_DUO:
+    case CRCEA_BY32_DUO:
+        slice = 4 * (1 << (cc->algorithm & 0xff) >> 1);
+        bits = 2;
+        break;
+    case CRCEA_BY_QUARTET:
+    case CRCEA_BY1_QUARTET:
+    case CRCEA_BY2_QUARTET:
+    case CRCEA_BY4_QUARTET:
+    case CRCEA_BY8_QUARTET:
+    case CRCEA_BY16_QUARTET:
+    case CRCEA_BY32_QUARTET:
+        slice = 2 * (1 << (cc->algorithm & 0xff) >> 1);
         bits = 4;
-    } else {
-        // CRCEA_STANDARD_TABLE
-        // CRCEA_SLICING_BY_4
-        // CRCEA_SLICING_BY_8
-        // CRCEA_SLICING_BY_16
-        times = 256;
-        slice = cc->algorithm;
+        break;
+    case CRCEA_BY1_OCTET:
+    case CRCEA_BY2_OCTET:
+    case CRCEA_BY4_OCTET:
+    case CRCEA_BY8_OCTET:
+    case CRCEA_BY16_OCTET:
+    case CRCEA_BY32_OCTET:
+        slice = (1 << (cc->algorithm & 0xff) >> 1);
         bits = 8;
+        break;
+    case CRCEA_BY2_SEXDECTET:
+    case CRCEA_BY4_SEXDECTET:
+    case CRCEA_BY8_SEXDECTET:
+    case CRCEA_BY16_SEXDECTET:
+    case CRCEA_BY32_SEXDECTET:
+        slice = (1 << (cc->algorithm & 0xff) >> 2);
+        bits = 16;
+        break;
+    default:
+        return;
     }
+
+    times = 1 << bits;
 
     CRCEA_TYPE *t = table;
     const CRCEA_TYPE *tt = t;
@@ -293,10 +364,11 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
             *t = r;
         }
 
+        const int bitmask = ~(~0 << bits);
         for (s = 1; s < slice; s ++) {
             const CRCEA_TYPE *q = t - times;
             for (b = 0; b < times; b ++, t ++, q ++) {
-                *t = tt[*q & 0xff] ^ (*q >> 8);
+                *t = tt[*q & bitmask] ^ (*q >> bits);
             }
         }
     } else {
@@ -314,7 +386,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
         for (s = 1; s < slice; s ++) {
             const CRCEA_TYPE *q = t - times;
             for (b = 0; b < times; b ++, t ++, q ++) {
-                *t = tt[*q >> (CRCEA_BITSIZE - 8)] ^ (*q << 8);
+                *t = tt[*q >> (CRCEA_BITSIZE - bits)] ^ (*q << bits);
             }
         }
     }
@@ -533,7 +605,7 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
 {
     int algo = cc->algorithm;
 
-    if (!cc->table && algo >= CRCEA_HALFBYTE_TABLE) {
+    if (!cc->table && algo >= CRCEA_TABLE_ALGORITHM) {
         crcea_alloc_f *alloc = cc->alloc;
         if (!alloc) {
 #ifdef CRCEA_DEFAULT_MALLOC
@@ -543,7 +615,7 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
 #endif
         }
 
-        if (alloc && algo >= CRCEA_HALFBYTE_TABLE) {
+        if (alloc) {
             void *bufp = alloc(cc, CRCEA_TABLESIZE(algo));
             CRCEA_BUILD_TABLE(cc, bufp);
             cc->table = bufp;

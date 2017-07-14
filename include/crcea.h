@@ -21,13 +21,60 @@
 
 enum crcea_algorithms
 {
-    CRCEA_BITBYBIT          = -2,
-    CRCEA_BITBYBIT_FAST     = -1,
-    CRCEA_HALFBYTE_TABLE    =  0,
-    CRCEA_STANDARD_TABLE    =  1,
-    CRCEA_SLICING_BY_4      =  4,
-    CRCEA_SLICING_BY_8      =  8,
-    CRCEA_SLICING_BY_16     = 16,
+    CRCEA_BITBYBIT              = 0,
+    CRCEA_BITBYBIT_FAST         = 1,
+
+    CRCEA_TABLE_ALGORITHM       = 0x0100,
+
+    CRCEA_BY_SOLO_GROUP         = 0x0100,
+    CRCEA_BY_SOLO               = 0 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY1_SOLO              = 1 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY2_SOLO              = 2 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY4_SOLO              = 3 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY8_SOLO              = 4 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY16_SOLO             = 5 | CRCEA_BY_SOLO_GROUP,
+    CRCEA_BY32_SOLO             = 6 | CRCEA_BY_SOLO_GROUP,
+
+    CRCEA_BY_DUO_GROUP          = 0x0200,
+    CRCEA_BY_DUO                = 0 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY1_DUO               = 1 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY2_DUO               = 2 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY4_DUO               = 3 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY8_DUO               = 4 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY16_DUO              = 5 | CRCEA_BY_DUO_GROUP,
+    CRCEA_BY32_DUO              = 6 | CRCEA_BY_DUO_GROUP,
+
+    CRCEA_BY_QUARTET_GROUP      = 0x0300,
+    CRCEA_BY_QUARTET            = 0 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY1_QUARTET           = 1 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY2_QUARTET           = 2 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY4_QUARTET           = 3 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY8_QUARTET           = 4 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY16_QUARTET          = 5 | CRCEA_BY_QUARTET_GROUP,
+    CRCEA_BY32_QUARTET          = 6 | CRCEA_BY_QUARTET_GROUP,
+
+    CRCEA_BY_OCTET_GROUP        = 0x0400,
+    CRCEA_BY_OCTET              = 1 | CRCEA_BY_OCTET_GROUP,
+    CRCEA_BY1_OCTET             = CRCEA_BY_OCTET,
+    CRCEA_BY2_OCTET             = 2 | CRCEA_BY_OCTET_GROUP,
+    CRCEA_BY4_OCTET             = 3 | CRCEA_BY_OCTET_GROUP,
+    CRCEA_BY8_OCTET             = 4 | CRCEA_BY_OCTET_GROUP,
+    CRCEA_BY16_OCTET            = 5 | CRCEA_BY_OCTET_GROUP,
+    CRCEA_BY32_OCTET            = 6 | CRCEA_BY_OCTET_GROUP,
+
+    CRCEA_BY_SEXDECTET_GROUP    = 0x0500,
+    CRCEA_BY_SEXDECTET          = 2 | CRCEA_BY_SEXDECTET_GROUP,
+    CRCEA_BY2_SEXDECTET         = CRCEA_BY_SEXDECTET,
+    CRCEA_BY4_SEXDECTET         = 3 | CRCEA_BY_SEXDECTET_GROUP,
+    CRCEA_BY8_SEXDECTET         = 4 | CRCEA_BY_SEXDECTET_GROUP,
+    CRCEA_BY16_SEXDECTET        = 5 | CRCEA_BY_SEXDECTET_GROUP,
+    CRCEA_BY32_SEXDECTET        = 6 | CRCEA_BY_SEXDECTET_GROUP,
+
+    CRCEA_HALFBYTE_TABLE        = CRCEA_BY_QUARTET,
+    CRCEA_STANDARD_TABLE        = CRCEA_BY_OCTET,
+    CRCEA_SLICING_BY_4          = CRCEA_BY4_OCTET,
+    CRCEA_SLICING_BY_8          = CRCEA_BY8_OCTET,
+    CRCEA_SLICING_BY_16         = CRCEA_BY16_OCTET,
 };
 
 enum crcea_int_types
@@ -68,7 +115,7 @@ struct crcea_context
 {
     const crcea_model *model;
     int8_t inttype;    /*< enum crcea_int_types */
-    int8_t algorithm;  /*< enum crcea_algorithms */
+    int16_t algorithm;  /*< enum crcea_algorithms */
     const void *table;
     crcea_alloc_f *alloc;
 
