@@ -17,9 +17,9 @@
 
 #if !defined(CRCEA_NO_MALLOC) && !defined(CRCEA_DEFAULT_MALLOC)
 #   define CRCEA_DEFAULT_MALLOC crcea_default_malloc
-static void *CRCEA_DEFAULT_MALLOC(crcea_t *cc, size_t size);
+static void *CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size);
 #elif defined(CRCEA_DEFAULT_MALLOC)
-void *CRCEA_DEFAULT_MALLOC(crcea_t *cc, size_t size);
+void *CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size);
 #endif
 
 #if defined(CRCEA_ONLY_INT32)
@@ -107,7 +107,7 @@ void *CRCEA_DEFAULT_MALLOC(crcea_t *cc, size_t size);
 #endif /* CRCEA_ONLY_UINT*** */
 
 crcea_int
-crcea_setup(crcea_t *cc, crcea_int crc)
+crcea_setup(crcea_context *cc, crcea_int crc)
 {
 #define CRCEA_SETUP(T, P) return P ## _setup(cc, crc)
 
@@ -117,7 +117,7 @@ crcea_setup(crcea_t *cc, crcea_int crc)
 }
 
 crcea_int
-crcea_update(crcea_t *cc, const void *p, const void *pp, crcea_int state)
+crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 {
 #define CRCEA_UPDATE(T, P) return P ## _update(cc, p, pp, state)
 
@@ -127,7 +127,7 @@ crcea_update(crcea_t *cc, const void *p, const void *pp, crcea_int state)
 }
 
 crcea_int
-crcea_finish(crcea_t *cc, crcea_int state)
+crcea_finish(crcea_context *cc, crcea_int state)
 {
 #define CRCEA_FINISH(T, P) return P ## _finish(cc, state)
 
@@ -138,7 +138,7 @@ crcea_finish(crcea_t *cc, crcea_int state)
 
 #ifndef CRCEA_NO_MALLOC
 static void *
-CRCEA_DEFAULT_MALLOC(crcea_t *cc, size_t size)
+CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size)
 {
     return CRCEA_MALLOC(size);
 }

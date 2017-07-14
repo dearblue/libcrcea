@@ -53,67 +53,77 @@
  *      extern uint32_t
  *      crc32(const void *ptr, const void *ptrend, uint32_t previous_crc)
  *      {
- *          static crcea_t spec = {
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_STANDARD_TABLE,
+ *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x04c11db7ul,
  *              .reflect_input = 1,
  *              .reflect_output = 1,
  *              .xor_output = ~0ul,
+ *          };
+ *
+ *          static crcea_context cc = {
+ *              .model = &model,
+ *              .inttype = CRCEA_TYPE_INT32,
+ *              .algorithm = CRCEA_ALGORITHM_STANDARD_TABLE,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
  *
- *          if (!spec.table) {
- *              void *table = malloc(mycrc_tablesize(spec.algorithm));
- *              mycrc_build_table(&spec, table);
- *              spec.table = table;
+ *          if (!cc.table) {
+ *              void *table = malloc(mycrc_tablesize(cc.algorithm));
+ *              mycrc_build_table(&cc, table);
+ *              cc.table = table;
  *          }
  *
- *          uint32_t state = mycrc_setup(&spec, previous_crc);
- *          state = mycrc_update_standard_table(&spec, ptr, ptrend, state);
- *          return mycrc_finish(&spec, state);
+ *          uint32_t state = mycrc_setup(&cc, previous_crc);
+ *          state = mycrc_update_standard_table(&cc, ptr, ptrend, state);
+ *          return mycrc_finish(&cc, state);
  *      }
  *
  *      extern uint32_t
  *      crc32c(const void *ptr, const void *ptrend, uint32_t previous_crc)
  *      {
- *          static crcea_t spec = {
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_SLICING_BY_4,
+ *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x1edc6f41ul,
  *              .reflect_input = 1,
  *              .reflect_output = 1,
  *              .xor_output = ~0ul,
+ *          };
+ *          static crcea_context cc = {
+ *              .model = &model,
+ *              .inttype = CRCEA_TYPE_INT32,
+ *              .algorithm = CRCEA_ALGORITHM_SLICING_BY_4,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
  *
- *          uint32_t s = mycrc_update(&spec, previous_crc);
- *          s = mycrc_update(&spec, ptr, ptrend, s);
- *          return mycrc_finish(&spec, s);
+ *          uint32_t s = mycrc_update(&cc, previous_crc);
+ *          s = mycrc_update(&cc, ptr, ptrend, s);
+ *          return mycrc_finish(&cc, s);
  *      }
  *
  *      extern uint32_t
  *      crc32_bzip2(const void *ptr, const void *ptrend, uint32_t previous_crc)
  *      {
- *          static crcea_t spec = {
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_BITBYBIT_FAST,
+ *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x04c11db7ul,
  *              .reflect_input = 0,
  *              .reflect_output = 0,
  *              .xor_output = ~0ul,
+ *          };
+ *          static crcea_context cc = {
+ *              .model = &model,
+ *              .inttype = CRCEA_TYPE_INT32,
+ *              .algorithm = CRCEA_ALGORITHM_BITBYBIT_FAST,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
  *
- *          uint32_t s = mycrc_setup(&spec, previous_crc);
- *          s = mycrc_update(&spec, ptr, ptrend, s);
- *          return mycrc_finish(&spec, s);
+ *          uint32_t s = mycrc_setup(&cc, previous_crc);
+ *          s = mycrc_update(&cc, ptr, ptrend, s);
+ *          return mycrc_finish(&cc, s);
  *      }
  */
 
@@ -203,34 +213,34 @@ CRCEA_BITREFLECT(CRCEA_TYPE n)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_SETUP(const crcea_t *cc, CRCEA_TYPE crc)
+CRCEA_SETUP(const crcea_context *cc, CRCEA_TYPE crc)
 {
-    CRCEA_TYPE state = (crc ^ cc->xor_output) & CRCEA_BITMASK(cc->bitsize);
-    if (cc->reflect_input ^ cc->reflect_output) {
-        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->bitsize));
+    CRCEA_TYPE state = (crc ^ cc->model->xor_output) & CRCEA_BITMASK(cc->model->bitsize);
+    if (cc->model->reflect_input ^ cc->model->reflect_output) {
+        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->model->bitsize));
     }
 
-    if (!cc->reflect_input) {
-        state <<= (CRCEA_BITSIZE - cc->bitsize);
+    if (!cc->model->reflect_input) {
+        state <<= (CRCEA_BITSIZE - cc->model->bitsize);
     }
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_FINISH(const crcea_t *cc, CRCEA_TYPE state)
+CRCEA_FINISH(const crcea_context *cc, CRCEA_TYPE state)
 {
-    if (!cc->reflect_input) {
-        state >>= (CRCEA_BITSIZE - cc->bitsize);
+    if (!cc->model->reflect_input) {
+        state >>= (CRCEA_BITSIZE - cc->model->bitsize);
     }
 
-    if (cc->reflect_input ^ cc->reflect_output) {
-        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->bitsize));
+    if (cc->model->reflect_input ^ cc->model->reflect_output) {
+        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->model->bitsize));
     }
 
-    state ^= cc->xor_output;
+    state ^= cc->model->xor_output;
 
-    return state & CRCEA_BITMASK(cc->bitsize);
+    return state & CRCEA_BITMASK(cc->model->bitsize);
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE size_t
@@ -250,7 +260,7 @@ CRCEA_TABLESIZE(int algo)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE void
-CRCEA_BUILD_TABLE(const crcea_t *cc, void *table)
+CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 {
     int times, slice, bits;
     if (cc->algorithm < 0) {
@@ -271,9 +281,9 @@ CRCEA_BUILD_TABLE(const crcea_t *cc, void *table)
 
     CRCEA_TYPE *t = table;
     const CRCEA_TYPE *tt = t;
-    if (cc->reflect_input) {
+    if (cc->model->reflect_input) {
         int s, b, i;
-        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(cc->polynomial << (CRCEA_BITSIZE - cc->bitsize));
+        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(cc->model->polynomial << (CRCEA_BITSIZE - cc->model->bitsize));
 
         for (b = 0; b < times; b ++, t ++) {
             CRCEA_TYPE r = b;
@@ -291,7 +301,7 @@ CRCEA_BUILD_TABLE(const crcea_t *cc, void *table)
         }
     } else {
         int s, b, i;
-        CRCEA_TYPE polynomial = cc->polynomial << (CRCEA_BITSIZE - cc->bitsize);
+        CRCEA_TYPE polynomial = cc->model->polynomial << (CRCEA_BITSIZE - cc->model->bitsize);
 
         for (b = 0; b < times; b ++) {
             CRCEA_TYPE r = (CRCEA_TYPE)b << (CRCEA_BITSIZE - bits);
@@ -342,7 +352,7 @@ CRCEA_BUILD_TABLE(const crcea_t *cc, void *table)
 
 #define CRCEA_UPDATE_DECL(CC, STATE, F)                                       \
     do {                                                                    \
-        if ((CC)->reflect_input) {                                          \
+        if ((CC)->model->reflect_input) {                                          \
             F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_POPBIT_R); \
         } else {                                                            \
             F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_POPBIT);  \
@@ -351,10 +361,10 @@ CRCEA_BUILD_TABLE(const crcea_t *cc, void *table)
 
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITBYBIT(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT)     \
-    CRCEA_TYPE poly = SETUP_POLYNOMIAL(cc->polynomial, cc->bitsize);          \
+    CRCEA_TYPE poly = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize);          \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         int i;                                                              \
         state ^= SHIFT_INPUT(*p);                                           \
@@ -373,10 +383,10 @@ CRCEA_UPDATE_BITBYBIT(const crcea_t *cc, const char *p, const char *pp, CRCEA_TY
  * * http://www.hackersdelight.org/hdcodetxt/crc.c.txt#crc32h
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITBYBIT_FAST(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT) \
-    const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(cc->polynomial, cc->bitsize),      \
+    const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize),      \
                    g1 = SHIFT(g0, 1) ^ (g0 & -POPBIT(g0, 0, 1)),            \
                    g2 = SHIFT(g1, 1) ^ (g0 & -POPBIT(g1, 0, 1)),            \
                    g3 = SHIFT(g2, 1) ^ (g0 & -POPBIT(g2, 0, 1)),            \
@@ -404,7 +414,7 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_t *cc, const char *p, const char *pp, CRC
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_HALFBYTE_TABLE(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_HALFBYTE_TABLE(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE *t = cc->table;
 
@@ -421,7 +431,7 @@ CRCEA_UPDATE_HALFBYTE_TABLE(const crcea_t *cc, const char *p, const char *pp, CR
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_STANDARD_TABLE(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_STANDARD_TABLE(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE *t = cc->table;
 
@@ -436,7 +446,7 @@ CRCEA_UPDATE_STANDARD_TABLE(const crcea_t *cc, const char *p, const char *pp, CR
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_4(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_SLICING_BY_4(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
@@ -457,7 +467,7 @@ CRCEA_UPDATE_SLICING_BY_4(const crcea_t *cc, const char *p, const char *pp, CRCE
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_8(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_SLICING_BY_8(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
@@ -482,7 +492,7 @@ CRCEA_UPDATE_SLICING_BY_8(const crcea_t *cc, const char *p, const char *pp, CRCE
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_16(const crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_SLICING_BY_16(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
@@ -515,7 +525,7 @@ CRCEA_UPDATE_SLICING_BY_16(const crcea_t *cc, const char *p, const char *pp, CRC
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE int
-CRCEA_PREPARE_TABLE(crcea_t *cc)
+CRCEA_PREPARE_TABLE(crcea_context *cc)
 {
     int algo = cc->algorithm;
 
@@ -540,7 +550,7 @@ CRCEA_PREPARE_TABLE(crcea_t *cc)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE(crcea_t *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     int algo = CRCEA_PREPARE_TABLE(cc);
 

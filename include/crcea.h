@@ -41,8 +41,9 @@ enum crcea_int_types
 #endif
 };
 
-typedef struct crcea_t crcea_t;
-typedef void *(crcea_alloc_f)(crcea_t *cc, size_t size);
+typedef struct crcea_model crcea_model;
+typedef struct crcea_context crcea_context;
+typedef void *(crcea_alloc_f)(void *opaque, size_t size);
 
 #if defined(CRCEA_ONLY_INT32)
 typedef uint32_t crcea_int;
@@ -54,23 +55,28 @@ typedef uint8_t crcea_int;
 typedef uint64_t crcea_int;
 #endif
 
-struct crcea_t
+struct crcea_model
 {
-    int8_t inttype;    /*< enum crcea_int_types */
-    int8_t algorithm;  /*< enum crcea_algorithms */
-    int8_t bitsize;
-    uint8_t reflect_input:1;
-    uint8_t reflect_output:1;
+    uint32_t bitsize:8;
+    uint32_t reflect_input:1;
+    uint32_t reflect_output:1;
     crcea_int polynomial;
     crcea_int xor_output;
+};
+
+struct crcea_context
+{
+    const crcea_model *model;
+    int8_t inttype;    /*< enum crcea_int_types */
+    int8_t algorithm;  /*< enum crcea_algorithms */
     const void *table;
     crcea_alloc_f *alloc;
 
     /** ... user data field ... */
 };
 
-crcea_int crcea_setup(crcea_t *cc, crcea_int crc);
-crcea_int crcea_update(crcea_t *cc, const void *src, const void *srcend, crcea_int state);
-crcea_int crcea_finish(crcea_t *cc, crcea_int state);
+crcea_int crcea_setup(crcea_context *cc, crcea_int crc);
+crcea_int crcea_update(crcea_context *cc, const void *src, const void *srcend, crcea_int state);
+crcea_int crcea_finish(crcea_context *cc, crcea_int state);
 
 #endif /* CRCEA_H__ */
