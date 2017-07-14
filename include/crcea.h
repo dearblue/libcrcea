@@ -21,23 +21,23 @@
 
 enum crcea_algorithms
 {
-    CRCEA_ALGORITHM_BITBYBIT          = -2,
-    CRCEA_ALGORITHM_BITBYBIT_FAST     = -1,
-    CRCEA_ALGORITHM_HALFBYTE_TABLE    =  0,
-    CRCEA_ALGORITHM_STANDARD_TABLE    =  1,
-    CRCEA_ALGORITHM_SLICING_BY_4      =  4,
-    CRCEA_ALGORITHM_SLICING_BY_8      =  8,
-    CRCEA_ALGORITHM_SLICING_BY_16     = 16,
+    CRCEA_BITBYBIT          = -2,
+    CRCEA_BITBYBIT_FAST     = -1,
+    CRCEA_HALFBYTE_TABLE    =  0,
+    CRCEA_STANDARD_TABLE    =  1,
+    CRCEA_SLICING_BY_4      =  4,
+    CRCEA_SLICING_BY_8      =  8,
+    CRCEA_SLICING_BY_16     = 16,
 };
 
 enum crcea_int_types
 {
-    CRCEA_TYPE_INT8 = 1,
-    CRCEA_TYPE_INT16 = 2,
-    CRCEA_TYPE_INT32 = 4,
-    CRCEA_TYPE_INT64 = 8,
+    CRCEA_INT8 = 1,
+    CRCEA_INT16 = 2,
+    CRCEA_INT32 = 4,
+    CRCEA_INT64 = 8,
 #ifdef HAVE_TYPE_UINT128_T
-    CRCEA_TYPE_INT128 = 16,
+    CRCEA_INT128 = 16,
 #endif
 };
 

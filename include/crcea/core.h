@@ -63,8 +63,8 @@
  *
  *          static crcea_context cc = {
  *              .model = &model,
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_STANDARD_TABLE,
+ *              .inttype = CRCEA_INT32,
+ *              .algorithm = CRCEA_STANDARD_TABLE,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -92,8 +92,8 @@
  *          };
  *          static crcea_context cc = {
  *              .model = &model,
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_SLICING_BY_4,
+ *              .inttype = CRCEA_INT32,
+ *              .algorithm = CRCEA_SLICING_BY_4,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -115,8 +115,8 @@
  *          };
  *          static crcea_context cc = {
  *              .model = &model,
- *              .inttype = CRCEA_TYPE_INT32,
- *              .algorithm = CRCEA_ALGORITHM_BITBYBIT_FAST,
+ *              .inttype = CRCEA_INT32,
+ *              .algorithm = CRCEA_BITBYBIT_FAST,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -247,12 +247,12 @@ CRCEA_VISIBILITY CRCEA_INLINE size_t
 CRCEA_TABLESIZE(int algo)
 {
     switch (algo) {
-    case CRCEA_ALGORITHM_HALFBYTE_TABLE:
+    case CRCEA_HALFBYTE_TABLE:
         return sizeof(CRCEA_TYPE[16]);
-    case CRCEA_ALGORITHM_STANDARD_TABLE:
-    case CRCEA_ALGORITHM_SLICING_BY_4:
-    case CRCEA_ALGORITHM_SLICING_BY_8:
-    case CRCEA_ALGORITHM_SLICING_BY_16:
+    case CRCEA_STANDARD_TABLE:
+    case CRCEA_SLICING_BY_4:
+    case CRCEA_SLICING_BY_8:
+    case CRCEA_SLICING_BY_16:
         return sizeof(CRCEA_TYPE[algo][256]);
     default:
         return 0;
@@ -265,15 +265,15 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     int times, slice, bits;
     if (cc->algorithm < 0) {
         return;
-    } else if (cc->algorithm == CRCEA_ALGORITHM_HALFBYTE_TABLE) {
+    } else if (cc->algorithm == CRCEA_HALFBYTE_TABLE) {
         times = 16;
         slice = 1;
         bits = 4;
     } else {
-        // CRCEA_ALGORITHM_STANDARD_TABLE
-        // CRCEA_ALGORITHM_SLICING_BY_4
-        // CRCEA_ALGORITHM_SLICING_BY_8
-        // CRCEA_ALGORITHM_SLICING_BY_16
+        // CRCEA_STANDARD_TABLE
+        // CRCEA_SLICING_BY_4
+        // CRCEA_SLICING_BY_8
+        // CRCEA_SLICING_BY_16
         times = 256;
         slice = cc->algorithm;
         bits = 8;
@@ -533,17 +533,17 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
 {
     int algo = cc->algorithm;
 
-    if (!cc->table && algo >= CRCEA_ALGORITHM_HALFBYTE_TABLE) {
+    if (!cc->table && algo >= CRCEA_HALFBYTE_TABLE) {
         crcea_alloc_f *alloc = cc->alloc;
         if (!alloc) {
 #ifdef CRCEA_DEFAULT_MALLOC
             alloc = CRCEA_DEFAULT_MALLOC;
 #else
-            return CRCEA_ALGORITHM_BITBYBIT_FAST;
+            return CRCEA_BITBYBIT_FAST;
 #endif
         }
 
-        if (alloc && algo >= CRCEA_ALGORITHM_HALFBYTE_TABLE) {
+        if (alloc && algo >= CRCEA_HALFBYTE_TABLE) {
             void *bufp = alloc(cc, CRCEA_TABLESIZE(algo));
             CRCEA_BUILD_TABLE(cc, bufp);
             cc->table = bufp;
@@ -559,19 +559,19 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     int algo = CRCEA_PREPARE_TABLE(cc);
 
     switch (algo) {
-    case CRCEA_ALGORITHM_BITBYBIT:
+    case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc, p, pp, state);
-    case CRCEA_ALGORITHM_HALFBYTE_TABLE:
+    case CRCEA_HALFBYTE_TABLE:
         return CRCEA_UPDATE_HALFBYTE_TABLE(cc, p, pp, state);
-    case CRCEA_ALGORITHM_STANDARD_TABLE:
+    case CRCEA_STANDARD_TABLE:
         return CRCEA_UPDATE_STANDARD_TABLE(cc, p, pp, state);
-    case CRCEA_ALGORITHM_SLICING_BY_4:
+    case CRCEA_SLICING_BY_4:
         return CRCEA_UPDATE_SLICING_BY_4(cc, p, pp, state);
-    case CRCEA_ALGORITHM_SLICING_BY_8:
+    case CRCEA_SLICING_BY_8:
         return CRCEA_UPDATE_SLICING_BY_8(cc, p, pp, state);
-    case CRCEA_ALGORITHM_SLICING_BY_16:
+    case CRCEA_SLICING_BY_16:
         return CRCEA_UPDATE_SLICING_BY_16(cc, p, pp, state);
-    case CRCEA_ALGORITHM_BITBYBIT_FAST:
+    case CRCEA_BITBYBIT_FAST:
     default:
         return CRCEA_UPDATE_BITBYBIT_FAST(cc, p, pp, state);
     }

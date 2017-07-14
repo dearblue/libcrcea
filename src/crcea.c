@@ -77,7 +77,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #      include "../include/crcea/core.h"
 
 #      define CRCEA_HAVE_TYPE_UINT128_T_CASE \
-       case CRCEA_TYPE_INT128:               \
+       case CRCEA_INT128:               \
            F(uint128_t, crcea128);           \
            break;                          \
 
@@ -87,16 +87,16 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 
 #   define CRCEA_SWITCH_BY_TYPE(C, F)         \
         switch (C->inttype) {               \
-        case CRCEA_TYPE_INT8:                 \
+        case CRCEA_INT8:                 \
             F(uint8_t, crcea8);               \
             break;                          \
-        case CRCEA_TYPE_INT16:                \
+        case CRCEA_INT16:                \
             F(uint16_t, crcea16);             \
             break;                          \
-        case CRCEA_TYPE_INT32:                \
+        case CRCEA_INT32:                \
             F(uint32_t, crcea32);             \
             break;                          \
-        case CRCEA_TYPE_INT64:                \
+        case CRCEA_INT64:                \
             F(uint64_t, crcea64);             \
             break;                          \
         CRCEA_HAVE_TYPE_UINT128_T_CASE        \
