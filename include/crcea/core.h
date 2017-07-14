@@ -64,7 +64,7 @@
  *          static crcea_context cc = {
  *              .model = &model,
  *              .inttype = CRCEA_INT32,
- *              .algorithm = CRCEA_STANDARD_TABLE,
+ *              .algorithm = CRCEA_BY1_OCTET,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -93,7 +93,7 @@
  *          static crcea_context cc = {
  *              .model = &model,
  *              .inttype = CRCEA_INT32,
- *              .algorithm = CRCEA_SLICING_BY_4,
+ *              .algorithm = CRCEA_BY4_OCTET,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -169,11 +169,12 @@
 #define CRCEA_BUILD_TABLE             CRCEA_TOKEN(_build_table)
 #define CRCEA_UPDATE_BITBYBIT         CRCEA_TOKEN(_update_bitbybit)
 #define CRCEA_UPDATE_BITBYBIT_FAST    CRCEA_TOKEN(_update_bitbybit_fast)
-#define CRCEA_UPDATE_HALFBYTE_TABLE   CRCEA_TOKEN(_update_halfbyte_table)
-#define CRCEA_UPDATE_STANDARD_TABLE   CRCEA_TOKEN(_update_standard_table)
-#define CRCEA_UPDATE_SLICING_BY_4     CRCEA_TOKEN(_update_slicing_by_4)
-#define CRCEA_UPDATE_SLICING_BY_8     CRCEA_TOKEN(_update_slicing_by_8)
-#define CRCEA_UPDATE_SLICING_BY_16    CRCEA_TOKEN(_update_slicing_by_16)
+#define CRCEA_UPDATE_BY_QUARTET       CRCEA_TOKEN(_update_by_quartet)
+#define CRCEA_UPDATE_BY1_OCTET        CRCEA_TOKEN(_update_by1_octet)
+#define CRCEA_UPDATE_BY2_OCTET        CRCEA_TOKEN(_update_by2_octet)
+#define CRCEA_UPDATE_BY4_OCTET        CRCEA_TOKEN(_update_by4_octet)
+#define CRCEA_UPDATE_BY8_OCTET        CRCEA_TOKEN(_update_by8_octet)
+#define CRCEA_UPDATE_BY16_OCTET       CRCEA_TOKEN(_update_by16_octet)
 
 #define CRCEA_BITSIZE         (sizeof(CRCEA_TYPE) * CHAR_BIT)
 #define CRCEA_LSH(N, OFF)     ((OFF) < CRCEA_BITSIZE ? (N) << (OFF) : 0)
@@ -490,43 +491,43 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *p
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_HALFBYTE_TABLE(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE *t = cc->table;
 
-#define CRCEA_HALFBYTE_TABLE_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
         state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
         state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_HALFBYTE_TABLE_DECL);
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY_QUARTET_DECL);
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_STANDARD_TABLE(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE *t = cc->table;
 
-#define CRCEA_STANDARD_TABLE_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state = SHIFT(state, 8) ^ t[(uint8_t)*p ^ POPBIT(state, 0, 8)];     \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_STANDARD_TABLE_DECL);
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY1_OCTET_DECL);
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_4(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
-#define CRCEA_SLICING_BY_4_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
         state = SHIFT(state, 32) ^                                          \
                 t[3][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
@@ -537,17 +538,17 @@ CRCEA_UPDATE_SLICING_BY_4(const crcea_context *cc, const char *p, const char *pp
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_SLICING_BY_4_DECL);
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY4_OCTET_DECL);
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_8(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
-#define CRCEA_SLICING_BY_8_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
         state = SHIFT(state, 64) ^                                          \
                 t[7][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
@@ -562,17 +563,17 @@ CRCEA_UPDATE_SLICING_BY_8(const crcea_context *cc, const char *p, const char *pp
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_SLICING_BY_8_DECL);
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY8_OCTET_DECL);
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_SLICING_BY_16(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
     const CRCEA_TYPE (*t)[256] = cc->table;
 
-#define CRCEA_SLICING_BY_16_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                            \
         state = SHIFT(state, 128) ^                                         \
                 t[15][(uint8_t)p[ 0] ^ POPBIT(state,   0, 8)] ^             \
@@ -595,7 +596,7 @@ CRCEA_UPDATE_SLICING_BY_16(const crcea_context *cc, const char *p, const char *p
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_SLICING_BY_16_DECL);
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY16_OCTET_DECL);
 
     return state;
 }
@@ -633,16 +634,16 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     switch (algo) {
     case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc, p, pp, state);
-    case CRCEA_HALFBYTE_TABLE:
-        return CRCEA_UPDATE_HALFBYTE_TABLE(cc, p, pp, state);
-    case CRCEA_STANDARD_TABLE:
-        return CRCEA_UPDATE_STANDARD_TABLE(cc, p, pp, state);
-    case CRCEA_SLICING_BY_4:
-        return CRCEA_UPDATE_SLICING_BY_4(cc, p, pp, state);
-    case CRCEA_SLICING_BY_8:
-        return CRCEA_UPDATE_SLICING_BY_8(cc, p, pp, state);
-    case CRCEA_SLICING_BY_16:
-        return CRCEA_UPDATE_SLICING_BY_16(cc, p, pp, state);
+    case CRCEA_BY_QUARTET:
+        return CRCEA_UPDATE_BY_QUARTET(cc, p, pp, state);
+    case CRCEA_BY1_OCTET:
+        return CRCEA_UPDATE_BY1_OCTET(cc, p, pp, state);
+    case CRCEA_BY4_OCTET:
+        return CRCEA_UPDATE_BY4_OCTET(cc, p, pp, state);
+    case CRCEA_BY8_OCTET:
+        return CRCEA_UPDATE_BY8_OCTET(cc, p, pp, state);
+    case CRCEA_BY16_OCTET:
+        return CRCEA_UPDATE_BY16_OCTET(cc, p, pp, state);
     case CRCEA_BITBYBIT_FAST:
     default:
         return CRCEA_UPDATE_BITBYBIT_FAST(cc, p, pp, state);
@@ -671,11 +672,11 @@ CRCEA_END_C_DECL
 #undef CRCEA_BUILD_TABLE
 #undef CRCEA_UPDATE_BITBYBIT
 #undef CRCEA_UPDATE_BITBYBIT_FAST
-#undef CRCEA_UPDATE_HALFBYTE_TABLE
-#undef CRCEA_UPDATE_STANDARD_TABLE
-#undef CRCEA_UPDATE_SLICING_BY_4
-#undef CRCEA_UPDATE_SLICING_BY_8
-#undef CRCEA_UPDATE_SLICING_BY_16
+#undef CRCEA_UPDATE_BY_QUARTET
+#undef CRCEA_UPDATE_BY1_OCTET
+#undef CRCEA_UPDATE_BY4_OCTET
+#undef CRCEA_UPDATE_BY8_OCTET
+#undef CRCEA_UPDATE_BY16_OCTET
 #undef CRCEA_BITSIZE
 #undef CRCEA_LSH
 #undef CRCEA_RSH
@@ -693,8 +694,8 @@ CRCEA_END_C_DECL
 #undef CRCEA_UPDATE_DECL
 #undef CRCEA_BITBYBIT_DECL
 #undef CRCEA_BITBYBIT_FAST_DECL
-#undef CRCEA_HALFBYTE_TABLE_DECL
-#undef CRCEA_STANDARD_TABLE_DECL
-#undef CRCEA_SLICING_BY_16_DECL
-#undef CRCEA_SLICING_BY_4_DECL
-#undef CRCEA_SLICING_BY_8_DECL
+#undef CRCEA_BY_QUARTET_DECL
+#undef CRCEA_BY1_OCTET_DECL
+#undef CRCEA_BY16_OCTET_DECL
+#undef CRCEA_BY4_OCTET_DECL
+#undef CRCEA_BY8_OCTET_DECL
