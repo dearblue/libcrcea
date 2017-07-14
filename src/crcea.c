@@ -17,9 +17,9 @@
 
 #if !defined(CRCEA_NO_MALLOC) && !defined(CRCEA_DEFAULT_MALLOC)
 #   define CRCEA_DEFAULT_MALLOC crcea_default_malloc
-static void *CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size);
+static void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #elif defined(CRCEA_DEFAULT_MALLOC)
-void *CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size);
+void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #endif
 
 #if defined(CRCEA_ONLY_INT32)
@@ -138,7 +138,7 @@ crcea_finish(crcea_context *cc, crcea_int state)
 
 #ifndef CRCEA_NO_MALLOC
 static void *
-CRCEA_DEFAULT_MALLOC(crcea_context *cc, size_t size)
+CRCEA_DEFAULT_MALLOC(void *opaque, size_t size)
 {
     return CRCEA_MALLOC(size);
 }
