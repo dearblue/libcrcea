@@ -396,10 +396,12 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 #define CRCEA_SETUP_POLYNOMIAL(POLY, BS)  ((POLY) << (CRCEA_BITSIZE - (BS)))
 #define CRCEA_SHIFT_INPUT(B)              ((CRCEA_TYPE)(uint8_t)(B) << (CRCEA_BITSIZE - 8))
 #define CRCEA_POPBIT(ST, N, L)            (CRCEA_RSH(ST, CRCEA_BITSIZE - ((N) + (L))) & CRCEA_BITMASK(L))
+#define CRCEA_POPBIT8(X, N, L)            (CRCEA_RSH(X, 8 - ((N) + (L))) & CRCEA_BITMASK(L))
 #define CRCEA_HEAD(ST)                    (int8_t)(CRCEA_RSH(ST, CRCEA_BITSIZE - 1))
 #define CRCEA_SETUP_POLYNOMIAL_R(POLY, BS)    (CRCEA_BITREFLECT(POLY) >> (CRCEA_BITSIZE - (BS)))
 #define CRCEA_SHIFT_INPUT_R(B)            ((CRCEA_TYPE)(uint8_t)(B))
 #define CRCEA_POPBIT_R(ST, N, L)          (CRCEA_RSH(ST, N) & CRCEA_BITMASK(L))
+#define CRCEA_POPBIT8_R(X, N, L)          (CRCEA_RSH(X, N) & CRCEA_BITMASK(L))
 #define CRCEA_HEAD_R(ST)                  ((int8_t)(ST) & 1)
 
 
@@ -428,9 +430,9 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 #define CRCEA_UPDATE_DECL(CC, STATE, F)                                       \
     do {                                                                    \
         if ((CC)->model->reflect_input) {                                          \
-            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_POPBIT_R, CRCEA_HEAD_R); \
+            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_POPBIT_R, CRCEA_POPBIT8_R, CRCEA_HEAD_R); \
         } else {                                                            \
-            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_POPBIT, CRCEA_HEAD);  \
+            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_POPBIT, CRCEA_POPBIT8, CRCEA_HEAD);  \
         }                                                                   \
     } while (0)                                                             \
 
@@ -438,7 +440,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-#define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD)     \
+#define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD)     \
     CRCEA_TYPE poly = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize);          \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         int i;                                                              \
@@ -462,7 +464,7 @@ CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CR
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-#define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize),      \
                    g1 = SHIFT(g0, 1) ^ (g0 & -POPBIT(g0, 0, 1)),            \
                    g2 = SHIFT(g1, 1) ^ (g0 & -POPBIT(g1, 0, 1)),            \
@@ -495,7 +497,7 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
 
-#define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
         state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
@@ -512,7 +514,7 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
 
-#define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state = SHIFT(state, 8) ^ t[(uint8_t)*p ^ POPBIT(state, 0, 8)];     \
     }, );                                                                   \
@@ -527,7 +529,7 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
-#define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
         state = SHIFT(state, 32) ^                                          \
                 t[3][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
@@ -548,7 +550,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
-#define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
         state = SHIFT(state, 64) ^                                          \
                 t[7][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
@@ -573,7 +575,7 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, 
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
-#define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
+#define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                            \
         state = SHIFT(state, 128) ^                                         \
                 t[15][(uint8_t)p[ 0] ^ POPBIT(state,   0, 8)] ^             \
@@ -686,10 +688,12 @@ CRCEA_END_C_DECL
 #undef CRCEA_SHIFT_INPUT
 #undef CRCEA_SHIFT
 #undef CRCEA_POPBIT
+#undef CRCEA_POPBIT8
 #undef CRCEA_SETUP_POLYNOMIAL_R
 #undef CRCEA_SHIFT_INPUT_R
 #undef CRCEA_SHIFT_R
 #undef CRCEA_POPBIT_R
+#undef CRCEA_POPBIT8_R
 #undef CRCEA_UPDATE_CORE
 #undef CRCEA_UPDATE_DECL
 #undef CRCEA_BITBYBIT_DECL
