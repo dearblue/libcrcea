@@ -282,7 +282,7 @@ CRCEA_TABLESIZE(int algo)
     case CRCEA_BY8_SOLO:
     case CRCEA_BY16_SOLO:
     case CRCEA_BY32_SOLO:
-        return sizeof(CRCEA_TYPE[algo & 0xff][2]);
+        return sizeof(CRCEA_TYPE[8 * (1 << (algo & 0xff) >> 1)][2]);
     case CRCEA_BY_DUO:
         return sizeof(CRCEA_TYPE[4]);
     case CRCEA_BY1_DUO:
@@ -291,7 +291,7 @@ CRCEA_TABLESIZE(int algo)
     case CRCEA_BY8_DUO:
     case CRCEA_BY16_DUO:
     case CRCEA_BY32_DUO:
-        return sizeof(CRCEA_TYPE[algo & 0xff][4]);
+        return sizeof(CRCEA_TYPE[4 * (1 << (algo & 0xff) >> 1)][4]);
     case CRCEA_BY_QUARTET:
         return sizeof(CRCEA_TYPE[16]);
     case CRCEA_BY1_QUARTET:
@@ -300,20 +300,20 @@ CRCEA_TABLESIZE(int algo)
     case CRCEA_BY8_QUARTET:
     case CRCEA_BY16_QUARTET:
     case CRCEA_BY32_QUARTET:
-        return sizeof(CRCEA_TYPE[algo & 0xff][16]);
+        return sizeof(CRCEA_TYPE[2 * (1 << (algo & 0xff) >> 1)][16]);
     case CRCEA_BY1_OCTET:
     case CRCEA_BY2_OCTET:
     case CRCEA_BY4_OCTET:
     case CRCEA_BY8_OCTET:
     case CRCEA_BY16_OCTET:
     case CRCEA_BY32_OCTET:
-        return sizeof(CRCEA_TYPE[algo & 0xff][256]);
+        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 1)][256]);
     case CRCEA_BY2_SEXDECTET:
     case CRCEA_BY4_SEXDECTET:
     case CRCEA_BY8_SEXDECTET:
     case CRCEA_BY16_SEXDECTET:
     case CRCEA_BY32_SEXDECTET:
-        return sizeof(CRCEA_TYPE[algo & 0xff][65536]);
+        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 2)][65536]);
     default:
         return 0;
     }
