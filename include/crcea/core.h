@@ -518,6 +518,9 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *p
     return state;
 }
 
+/*
+ * Slicing by Single Quartet
+ */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
@@ -535,6 +538,9 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
     return state;
 }
 
+/*
+ * Slicing by Single Octet
+ */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
@@ -550,6 +556,9 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, C
     return state;
 }
 
+/*
+ * Slicing by Quadruple Octet
+ */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
@@ -571,6 +580,9 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, C
     return state;
 }
 
+/*
+ * Slicing by Quadruple Octet
+ */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
@@ -596,6 +608,9 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, C
     return state;
 }
 
+/*
+ * Slicing by Sexdecuple Octet
+ */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
