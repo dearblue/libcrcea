@@ -539,6 +539,334 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
 }
 
 /*
+ * Slicing by Double Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY1_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY1_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    }, );                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY1_QUARTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Quadruple Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY2_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY2_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
+        const uint8_t n0 = (uint8_t)p[0] ^ POPBIT(state, 0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ POPBIT(state, 8, 8); \
+        state = SHIFT(state, 16) ^ \
+                t[3][POPBIT8(n0, 0, 4)] ^ \
+                t[2][POPBIT8(n0, 4, 4)] ^ \
+                t[1][POPBIT8(n1, 0, 4)] ^ \
+                t[0][POPBIT8(n1, 4, 4)]; \
+    }, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    });                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY2_QUARTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Octuple Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY4_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY4_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
+        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)POPBIT(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)POPBIT(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)POPBIT(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)POPBIT(state, 24, 8); \
+        state = SHIFT(state, 32) ^ \
+                t[7][POPBIT8(n0, 0, 4)] ^ \
+                t[6][POPBIT8(n0, 4, 4)] ^ \
+                t[5][POPBIT8(n1, 0, 4)] ^ \
+                t[4][POPBIT8(n1, 4, 4)] ^ \
+                t[3][POPBIT8(n2, 0, 4)] ^ \
+                t[2][POPBIT8(n2, 4, 4)] ^ \
+                t[1][POPBIT8(n3, 0, 4)] ^ \
+                t[0][POPBIT8(n3, 4, 4)]; \
+    }, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    });                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY4_QUARTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Sexdecuple Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY8_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY8_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
+        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)POPBIT(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)POPBIT(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)POPBIT(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)POPBIT(state, 24, 8); \
+        const uint8_t n4 = (uint8_t)p[4] ^ (uint8_t)POPBIT(state, 32, 8); \
+        const uint8_t n5 = (uint8_t)p[5] ^ (uint8_t)POPBIT(state, 40, 8); \
+        const uint8_t n6 = (uint8_t)p[6] ^ (uint8_t)POPBIT(state, 48, 8); \
+        const uint8_t n7 = (uint8_t)p[7] ^ (uint8_t)POPBIT(state, 56, 8); \
+        state = SHIFT(state, 64) ^ \
+                t[15][POPBIT8(n0, 0, 4)] ^ \
+                t[14][POPBIT8(n0, 4, 4)] ^ \
+                t[13][POPBIT8(n1, 0, 4)] ^ \
+                t[12][POPBIT8(n1, 4, 4)] ^ \
+                t[11][POPBIT8(n2, 0, 4)] ^ \
+                t[10][POPBIT8(n2, 4, 4)] ^ \
+                t[ 9][POPBIT8(n3, 0, 4)] ^ \
+                t[ 8][POPBIT8(n3, 4, 4)] ^ \
+                t[ 7][POPBIT8(n4, 0, 4)] ^ \
+                t[ 6][POPBIT8(n4, 4, 4)] ^ \
+                t[ 5][POPBIT8(n5, 0, 4)] ^ \
+                t[ 4][POPBIT8(n5, 4, 4)] ^ \
+                t[ 3][POPBIT8(n6, 0, 4)] ^ \
+                t[ 2][POPBIT8(n6, 4, 4)] ^ \
+                t[ 1][POPBIT8(n7, 0, 4)] ^ \
+                t[ 0][POPBIT8(n7, 4, 4)]; \
+    }, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    });                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY8_QUARTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Duotriguple Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY16_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY16_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)POPBIT(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)POPBIT(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)POPBIT(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)POPBIT(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)POPBIT(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)POPBIT(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)POPBIT(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)POPBIT(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)POPBIT(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)POPBIT(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)POPBIT(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)POPBIT(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)POPBIT(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)POPBIT(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)POPBIT(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)POPBIT(state, 120, 8); \
+        state = SHIFT(state, 128) ^ \
+                t[31][POPBIT8(n0,  0, 4)] ^ \
+                t[30][POPBIT8(n0,  4, 4)] ^ \
+                t[29][POPBIT8(n1,  0, 4)] ^ \
+                t[28][POPBIT8(n1,  4, 4)] ^ \
+                t[27][POPBIT8(n2,  0, 4)] ^ \
+                t[26][POPBIT8(n2,  4, 4)] ^ \
+                t[25][POPBIT8(n3,  0, 4)] ^ \
+                t[24][POPBIT8(n3,  4, 4)] ^ \
+                t[23][POPBIT8(n4,  0, 4)] ^ \
+                t[22][POPBIT8(n4,  4, 4)] ^ \
+                t[21][POPBIT8(n5,  0, 4)] ^ \
+                t[20][POPBIT8(n5,  4, 4)] ^ \
+                t[19][POPBIT8(n6,  0, 4)] ^ \
+                t[18][POPBIT8(n6,  4, 4)] ^ \
+                t[17][POPBIT8(n7,  0, 4)] ^ \
+                t[16][POPBIT8(n7,  4, 4)] ^ \
+                t[15][POPBIT8(n8,  0, 4)] ^ \
+                t[14][POPBIT8(n8,  4, 4)] ^ \
+                t[13][POPBIT8(n9,  0, 4)] ^ \
+                t[12][POPBIT8(n9,  4, 4)] ^ \
+                t[11][POPBIT8(n10, 0, 4)] ^ \
+                t[10][POPBIT8(n10, 4, 4)] ^ \
+                t[ 9][POPBIT8(n11, 0, 4)] ^ \
+                t[ 8][POPBIT8(n11, 4, 4)] ^ \
+                t[ 7][POPBIT8(n12, 0, 4)] ^ \
+                t[ 6][POPBIT8(n12, 4, 4)] ^ \
+                t[ 5][POPBIT8(n13, 0, 4)] ^ \
+                t[ 4][POPBIT8(n13, 4, 4)] ^ \
+                t[ 3][POPBIT8(n14, 0, 4)] ^ \
+                t[ 2][POPBIT8(n14, 4, 4)] ^ \
+                t[ 1][POPBIT8(n15, 0, 4)] ^ \
+                t[ 0][POPBIT8(n15, 4, 4)]; \
+    }, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    });                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY16_QUARTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Quattuorsexaguple Quartet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY32_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+{
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+
+#define CRCEA_BY32_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
+    CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)POPBIT(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)POPBIT(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)POPBIT(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)POPBIT(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)POPBIT(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)POPBIT(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)POPBIT(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)POPBIT(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)POPBIT(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)POPBIT(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)POPBIT(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)POPBIT(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)POPBIT(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)POPBIT(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)POPBIT(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)POPBIT(state, 120, 8); \
+        const uint8_t n16 = (uint8_t)p[16] ^ (uint8_t)POPBIT(state, 128, 8); \
+        const uint8_t n17 = (uint8_t)p[17] ^ (uint8_t)POPBIT(state, 136, 8); \
+        const uint8_t n18 = (uint8_t)p[18] ^ (uint8_t)POPBIT(state, 144, 8); \
+        const uint8_t n19 = (uint8_t)p[19] ^ (uint8_t)POPBIT(state, 152, 8); \
+        const uint8_t n20 = (uint8_t)p[20] ^ (uint8_t)POPBIT(state, 160, 8); \
+        const uint8_t n21 = (uint8_t)p[21] ^ (uint8_t)POPBIT(state, 168, 8); \
+        const uint8_t n22 = (uint8_t)p[22] ^ (uint8_t)POPBIT(state, 176, 8); \
+        const uint8_t n23 = (uint8_t)p[23] ^ (uint8_t)POPBIT(state, 184, 8); \
+        const uint8_t n24 = (uint8_t)p[24] ^ (uint8_t)POPBIT(state, 192, 8); \
+        const uint8_t n25 = (uint8_t)p[25] ^ (uint8_t)POPBIT(state, 200, 8); \
+        const uint8_t n26 = (uint8_t)p[26] ^ (uint8_t)POPBIT(state, 208, 8); \
+        const uint8_t n27 = (uint8_t)p[27] ^ (uint8_t)POPBIT(state, 216, 8); \
+        const uint8_t n28 = (uint8_t)p[28] ^ (uint8_t)POPBIT(state, 224, 8); \
+        const uint8_t n29 = (uint8_t)p[29] ^ (uint8_t)POPBIT(state, 232, 8); \
+        const uint8_t n30 = (uint8_t)p[30] ^ (uint8_t)POPBIT(state, 240, 8); \
+        const uint8_t n31 = (uint8_t)p[31] ^ (uint8_t)POPBIT(state, 248, 8); \
+        state = SHIFT(state, 256) ^ \
+                t[63][POPBIT8(n0,  0, 4)] ^ \
+                t[62][POPBIT8(n0,  4, 4)] ^ \
+                t[61][POPBIT8(n1,  0, 4)] ^ \
+                t[60][POPBIT8(n1,  4, 4)] ^ \
+                t[59][POPBIT8(n2,  0, 4)] ^ \
+                t[58][POPBIT8(n2,  4, 4)] ^ \
+                t[57][POPBIT8(n3,  0, 4)] ^ \
+                t[56][POPBIT8(n3,  4, 4)] ^ \
+                t[55][POPBIT8(n4,  0, 4)] ^ \
+                t[54][POPBIT8(n4,  4, 4)] ^ \
+                t[53][POPBIT8(n5,  0, 4)] ^ \
+                t[52][POPBIT8(n5,  4, 4)] ^ \
+                t[51][POPBIT8(n6,  0, 4)] ^ \
+                t[50][POPBIT8(n6,  4, 4)] ^ \
+                t[49][POPBIT8(n7,  0, 4)] ^ \
+                t[48][POPBIT8(n7,  4, 4)] ^ \
+                t[47][POPBIT8(n8,  0, 4)] ^ \
+                t[46][POPBIT8(n8,  4, 4)] ^ \
+                t[45][POPBIT8(n9,  0, 4)] ^ \
+                t[44][POPBIT8(n9,  4, 4)] ^ \
+                t[43][POPBIT8(n10, 0, 4)] ^ \
+                t[42][POPBIT8(n10, 4, 4)] ^ \
+                t[41][POPBIT8(n11, 0, 4)] ^ \
+                t[40][POPBIT8(n11, 4, 4)] ^ \
+                t[39][POPBIT8(n12, 0, 4)] ^ \
+                t[38][POPBIT8(n12, 4, 4)] ^ \
+                t[37][POPBIT8(n13, 0, 4)] ^ \
+                t[36][POPBIT8(n13, 4, 4)] ^ \
+                t[35][POPBIT8(n14, 0, 4)] ^ \
+                t[34][POPBIT8(n14, 4, 4)] ^ \
+                t[33][POPBIT8(n15, 0, 4)] ^ \
+                t[32][POPBIT8(n15, 4, 4)] ^ \
+                t[31][POPBIT8(n16, 0, 4)] ^ \
+                t[30][POPBIT8(n16, 4, 4)] ^ \
+                t[29][POPBIT8(n17, 0, 4)] ^ \
+                t[28][POPBIT8(n17, 4, 4)] ^ \
+                t[27][POPBIT8(n18, 0, 4)] ^ \
+                t[26][POPBIT8(n18, 4, 4)] ^ \
+                t[25][POPBIT8(n19, 0, 4)] ^ \
+                t[24][POPBIT8(n19, 4, 4)] ^ \
+                t[23][POPBIT8(n20, 0, 4)] ^ \
+                t[22][POPBIT8(n20, 4, 4)] ^ \
+                t[21][POPBIT8(n21, 0, 4)] ^ \
+                t[20][POPBIT8(n21, 4, 4)] ^ \
+                t[19][POPBIT8(n22, 0, 4)] ^ \
+                t[18][POPBIT8(n22, 4, 4)] ^ \
+                t[17][POPBIT8(n23, 0, 4)] ^ \
+                t[16][POPBIT8(n23, 4, 4)] ^ \
+                t[15][POPBIT8(n24, 0, 4)] ^ \
+                t[14][POPBIT8(n24, 4, 4)] ^ \
+                t[13][POPBIT8(n25, 0, 4)] ^ \
+                t[12][POPBIT8(n25, 4, 4)] ^ \
+                t[11][POPBIT8(n26, 0, 4)] ^ \
+                t[10][POPBIT8(n26, 4, 4)] ^ \
+                t[ 9][POPBIT8(n27, 0, 4)] ^ \
+                t[ 8][POPBIT8(n27, 4, 4)] ^ \
+                t[ 7][POPBIT8(n28, 0, 4)] ^ \
+                t[ 6][POPBIT8(n28, 4, 4)] ^ \
+                t[ 5][POPBIT8(n29, 0, 4)] ^ \
+                t[ 4][POPBIT8(n29, 4, 4)] ^ \
+                t[ 3][POPBIT8(n30, 0, 4)] ^ \
+                t[ 2][POPBIT8(n30, 4, 4)] ^ \
+                t[ 1][POPBIT8(n31, 0, 4)] ^ \
+                t[ 0][POPBIT8(n31, 4, 4)]; \
+    }, {                                             \
+        state ^= SHIFT_INPUT(*p);                                           \
+        const uint8_t n = POPBIT(state, 0, 8); \
+        state = SHIFT(state, 8) ^ \
+                t[1][POPBIT8(n, 0, 4)] ^ \
+                t[0][POPBIT8(n, 4, 4)];                   \
+    });                                                                   \
+
+    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY32_QUARTET_DECL);
+
+    return state;
+}
+
+/*
  * Slicing by Single Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
@@ -753,6 +1081,18 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
         return CRCEA_UPDATE_BITBYBIT(cc, p, pp, state);
     case CRCEA_BY_QUARTET:
         return CRCEA_UPDATE_BY_QUARTET(cc, p, pp, state);
+    case CRCEA_BY1_QUARTET:
+        return CRCEA_UPDATE_BY1_QUARTET(cc, p, pp, state);
+    case CRCEA_BY2_QUARTET:
+        return CRCEA_UPDATE_BY2_QUARTET(cc, p, pp, state);
+    case CRCEA_BY4_QUARTET:
+        return CRCEA_UPDATE_BY4_QUARTET(cc, p, pp, state);
+    case CRCEA_BY8_QUARTET:
+        return CRCEA_UPDATE_BY8_QUARTET(cc, p, pp, state);
+    case CRCEA_BY16_QUARTET:
+        return CRCEA_UPDATE_BY16_QUARTET(cc, p, pp, state);
+    case CRCEA_BY32_QUARTET:
+        return CRCEA_UPDATE_BY32_QUARTET(cc, p, pp, state);
     case CRCEA_BY1_OCTET:
         return CRCEA_UPDATE_BY1_OCTET(cc, p, pp, state);
     case CRCEA_BY2_OCTET:
