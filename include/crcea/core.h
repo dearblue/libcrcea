@@ -493,7 +493,7 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *p
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-    const CRCEA_TYPE *t = cc->table;
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
 
 #define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -510,7 +510,7 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-    const CRCEA_TYPE *t = cc->table;
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
 
 #define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -525,7 +525,7 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-    const CRCEA_TYPE (*t)[256] = cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
 #define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
@@ -546,7 +546,7 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-    const CRCEA_TYPE (*t)[256] = cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
 #define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
@@ -571,7 +571,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, C
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 {
-    const CRCEA_TYPE (*t)[256] = cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
 
 #define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                            \
