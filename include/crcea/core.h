@@ -1563,6 +1563,8 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     switch (algo) {
     case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
+    case CRCEA_BITBYBIT_FAST:
+        return CRCEA_UPDATE_BITBYBIT_FAST(cc->model, p, pp, state);
     case CRCEA_BY_DUO:
         return CRCEA_UPDATE_BY_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY1_DUO:
@@ -1603,9 +1605,8 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
         return CRCEA_UPDATE_BY16_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY32_OCTET:
         return CRCEA_UPDATE_BY32_OCTET(cc->model, p, pp, state, cc->table);
-    case CRCEA_BITBYBIT_FAST:
     default:
-        return CRCEA_UPDATE_BITBYBIT_FAST(cc->model, p, pp, state);
+        return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
     }
 }
 
