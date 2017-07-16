@@ -1534,6 +1534,168 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
     return state;
 }
 
+/*
+ * Slicing by Single Sexdectet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY2_SEXDECTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+{
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
+
+#define CRCEA_BY2_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+    CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
+        const uint16_t n = LOAD16(p); \
+        state = SHIFT(state, 16) ^                                          \
+                t[n ^ POPBIT(state,  0, 16)];                 \
+    }, {                                                                    \
+        state = SHIFT(state, 8) ^ t[INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+    });                                                                     \
+
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_SEXDECTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Double Sexdectet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY4_SEXDECTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+{
+    const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
+
+#define CRCEA_BY4_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+    CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
+        const uint16_t n0 = LOAD16(p + 0); \
+        const uint16_t n1 = LOAD16(p + 2); \
+        state = SHIFT(state, 32) ^                                          \
+                t[1][n0 ^ POPBIT(state,  0, 16)] ^                                          \
+                t[0][n1 ^ POPBIT(state, 16, 16)];                 \
+    }, {                                                                    \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+    });                                                                     \
+
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_SEXDECTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Quadruple Sexdectet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY8_SEXDECTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+{
+    const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
+
+#define CRCEA_BY8_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+    CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
+        const uint16_t n0 = LOAD16(p + 0); \
+        const uint16_t n1 = LOAD16(p + 2); \
+        const uint16_t n2 = LOAD16(p + 4); \
+        const uint16_t n3 = LOAD16(p + 6); \
+        state = SHIFT(state, 64) ^                                          \
+                t[3][n0 ^ POPBIT(state,  0, 16)] ^                                          \
+                t[2][n1 ^ POPBIT(state, 16, 16)] ^                                          \
+                t[1][n2 ^ POPBIT(state, 32, 16)] ^                                          \
+                t[0][n3 ^ POPBIT(state, 48, 16)];                 \
+    }, {                                                                    \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+    });                                                                     \
+
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_SEXDECTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Octuple Sexdectet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY16_SEXDECTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+{
+    const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
+
+#define CRCEA_BY16_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+    CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
+        const uint16_t n0 = LOAD16(p +  0); \
+        const uint16_t n1 = LOAD16(p +  2); \
+        const uint16_t n2 = LOAD16(p +  4); \
+        const uint16_t n3 = LOAD16(p +  6); \
+        const uint16_t n4 = LOAD16(p +  8); \
+        const uint16_t n5 = LOAD16(p + 10); \
+        const uint16_t n6 = LOAD16(p + 12); \
+        const uint16_t n7 = LOAD16(p + 14); \
+        state = SHIFT(state, 128) ^                                          \
+                t[7][n0 ^ POPBIT(state,   0, 16)] ^                                          \
+                t[6][n1 ^ POPBIT(state,  16, 16)] ^                                          \
+                t[5][n2 ^ POPBIT(state,  32, 16)] ^                                          \
+                t[4][n3 ^ POPBIT(state,  48, 16)] ^                                          \
+                t[3][n4 ^ POPBIT(state,  64, 16)] ^                                          \
+                t[2][n5 ^ POPBIT(state,  80, 16)] ^                                          \
+                t[1][n6 ^ POPBIT(state,  96, 16)] ^                                          \
+                t[0][n7 ^ POPBIT(state, 112, 16)];                 \
+    }, {                                                                    \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+    });                                                                     \
+
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_SEXDECTET_DECL);
+
+    return state;
+}
+
+/*
+ * Slicing by Sexdecuple Sexdectet
+ */
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_BY32_SEXDECTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+{
+    const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
+
+#define CRCEA_BY32_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+    CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
+        const uint16_t n0  = LOAD16(p +  0); \
+        const uint16_t n1  = LOAD16(p +  2); \
+        const uint16_t n2  = LOAD16(p +  4); \
+        const uint16_t n3  = LOAD16(p +  6); \
+        const uint16_t n4  = LOAD16(p +  8); \
+        const uint16_t n5  = LOAD16(p + 10); \
+        const uint16_t n6  = LOAD16(p + 12); \
+        const uint16_t n7  = LOAD16(p + 14); \
+        const uint16_t n8  = LOAD16(p + 16); \
+        const uint16_t n9  = LOAD16(p + 18); \
+        const uint16_t n10 = LOAD16(p + 20); \
+        const uint16_t n11 = LOAD16(p + 22); \
+        const uint16_t n12 = LOAD16(p + 24); \
+        const uint16_t n13 = LOAD16(p + 26); \
+        const uint16_t n14 = LOAD16(p + 28); \
+        const uint16_t n15 = LOAD16(p + 30); \
+        state = SHIFT(state, 256) ^                                          \
+                t[15][n0  ^ POPBIT(state,   0, 16)] ^                                          \
+                t[14][n1  ^ POPBIT(state,  16, 16)] ^                                          \
+                t[13][n2  ^ POPBIT(state,  32, 16)] ^                                          \
+                t[12][n3  ^ POPBIT(state,  48, 16)] ^                                          \
+                t[11][n4  ^ POPBIT(state,  64, 16)] ^                                          \
+                t[10][n5  ^ POPBIT(state,  80, 16)] ^                                          \
+                t[ 9][n6  ^ POPBIT(state,  96, 16)] ^                                          \
+                t[ 8][n7  ^ POPBIT(state, 112, 16)] ^                                          \
+                t[ 7][n8  ^ POPBIT(state, 128, 16)] ^                                          \
+                t[ 6][n9  ^ POPBIT(state, 144, 16)] ^                                          \
+                t[ 5][n10 ^ POPBIT(state, 160, 16)] ^                                          \
+                t[ 4][n11 ^ POPBIT(state, 176, 16)] ^                                          \
+                t[ 3][n12 ^ POPBIT(state, 192, 16)] ^                                          \
+                t[ 2][n13 ^ POPBIT(state, 208, 16)] ^                                          \
+                t[ 1][n14 ^ POPBIT(state, 224, 16)] ^                                          \
+                t[ 0][n15 ^ POPBIT(state, 240, 16)];                 \
+    }, {                                                                    \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+    });                                                                     \
+
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_SEXDECTET_DECL);
+
+    return state;
+}
+
 CRCEA_VISIBILITY CRCEA_INLINE int
 CRCEA_PREPARE_TABLE(crcea_context *cc)
 {
@@ -1609,6 +1771,16 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
         return CRCEA_UPDATE_BY16_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY32_OCTET:
         return CRCEA_UPDATE_BY32_OCTET(cc->model, p, pp, state, cc->table);
+    case CRCEA_BY2_SEXDECTET:
+        return CRCEA_UPDATE_BY2_SEXDECTET(cc->model, p, pp, state, cc->table);
+    case CRCEA_BY4_SEXDECTET:
+        return CRCEA_UPDATE_BY4_SEXDECTET(cc->model, p, pp, state, cc->table);
+    case CRCEA_BY8_SEXDECTET:
+        return CRCEA_UPDATE_BY8_SEXDECTET(cc->model, p, pp, state, cc->table);
+    case CRCEA_BY16_SEXDECTET:
+        return CRCEA_UPDATE_BY16_SEXDECTET(cc->model, p, pp, state, cc->table);
+    case CRCEA_BY32_SEXDECTET:
+        return CRCEA_UPDATE_BY32_SEXDECTET(cc->model, p, pp, state, cc->table);
     default:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
     }
