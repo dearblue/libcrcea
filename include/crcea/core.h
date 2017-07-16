@@ -240,34 +240,34 @@ CRCEA_BITREFLECT(CRCEA_TYPE n)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_SETUP(const crcea_context *cc, CRCEA_TYPE crc)
+CRCEA_SETUP(const crcea_model *model, CRCEA_TYPE crc)
 {
-    CRCEA_TYPE state = (crc ^ cc->model->xor_output) & CRCEA_BITMASK(cc->model->bitsize);
-    if (cc->model->reflect_input ^ cc->model->reflect_output) {
-        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->model->bitsize));
+    CRCEA_TYPE state = (crc ^ model->xor_output) & CRCEA_BITMASK(model->bitsize);
+    if (model->reflect_input ^ model->reflect_output) {
+        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - model->bitsize));
     }
 
-    if (!cc->model->reflect_input) {
-        state <<= (CRCEA_BITSIZE - cc->model->bitsize);
+    if (!model->reflect_input) {
+        state <<= (CRCEA_BITSIZE - model->bitsize);
     }
 
     return state;
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_FINISH(const crcea_context *cc, CRCEA_TYPE state)
+CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 {
-    if (!cc->model->reflect_input) {
-        state >>= (CRCEA_BITSIZE - cc->model->bitsize);
+    if (!model->reflect_input) {
+        state >>= (CRCEA_BITSIZE - model->bitsize);
     }
 
-    if (cc->model->reflect_input ^ cc->model->reflect_output) {
-        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - cc->model->bitsize));
+    if (model->reflect_input ^ model->reflect_output) {
+        state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - model->bitsize));
     }
 
-    state ^= cc->model->xor_output;
+    state ^= model->xor_output;
 
-    return state & CRCEA_BITMASK(cc->model->bitsize);
+    return state & CRCEA_BITMASK(model->bitsize);
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE size_t
@@ -320,10 +320,10 @@ CRCEA_TABLESIZE(int algo)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE void
-CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
+CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 {
     int times, slice, bits;
-    switch (cc->algorithm) {
+    switch (algorithm) {
     case CRCEA_BY_SOLO:
     case CRCEA_BY1_SOLO:
     case CRCEA_BY2_SOLO:
@@ -331,7 +331,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     case CRCEA_BY8_SOLO:
     case CRCEA_BY16_SOLO:
     case CRCEA_BY32_SOLO:
-        slice = 8 * (1 << (cc->algorithm & 0xff) >> 1);
+        slice = 8 * (1 << (algorithm & 0xff) >> 1);
         bits = 1;
         break;
     case CRCEA_BY_DUO:
@@ -341,7 +341,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     case CRCEA_BY8_DUO:
     case CRCEA_BY16_DUO:
     case CRCEA_BY32_DUO:
-        slice = 4 * (1 << (cc->algorithm & 0xff) >> 1);
+        slice = 4 * (1 << (algorithm & 0xff) >> 1);
         bits = 2;
         break;
     case CRCEA_BY_QUARTET:
@@ -351,7 +351,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     case CRCEA_BY8_QUARTET:
     case CRCEA_BY16_QUARTET:
     case CRCEA_BY32_QUARTET:
-        slice = 2 * (1 << (cc->algorithm & 0xff) >> 1);
+        slice = 2 * (1 << (algorithm & 0xff) >> 1);
         bits = 4;
         break;
     case CRCEA_BY1_OCTET:
@@ -360,7 +360,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     case CRCEA_BY8_OCTET:
     case CRCEA_BY16_OCTET:
     case CRCEA_BY32_OCTET:
-        slice = (1 << (cc->algorithm & 0xff) >> 1);
+        slice = (1 << (algorithm & 0xff) >> 1);
         bits = 8;
         break;
     case CRCEA_BY2_SEXDECTET:
@@ -368,7 +368,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
     case CRCEA_BY8_SEXDECTET:
     case CRCEA_BY16_SEXDECTET:
     case CRCEA_BY32_SEXDECTET:
-        slice = (1 << (cc->algorithm & 0xff) >> 2);
+        slice = (1 << (algorithm & 0xff) >> 2);
         bits = 16;
         break;
     default:
@@ -379,9 +379,9 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 
     CRCEA_TYPE *t = table;
     const CRCEA_TYPE *tt = t;
-    if (cc->model->reflect_input) {
+    if (model->reflect_input) {
         int s, b, i;
-        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(cc->model->polynomial << (CRCEA_BITSIZE - cc->model->bitsize));
+        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(model->polynomial << (CRCEA_BITSIZE - model->bitsize));
 
         for (b = 0; b < times; b ++, t ++) {
             CRCEA_TYPE r = b;
@@ -400,7 +400,7 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
         }
     } else {
         int s, b, i;
-        CRCEA_TYPE polynomial = cc->model->polynomial << (CRCEA_BITSIZE - cc->model->bitsize);
+        CRCEA_TYPE polynomial = model->polynomial << (CRCEA_BITSIZE - model->bitsize);
 
         for (b = 0; b < times; b ++) {
             CRCEA_TYPE r = (CRCEA_TYPE)b << (CRCEA_BITSIZE - bits);
@@ -453,9 +453,9 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
         }                                                                   \
     } while (0)                                                             \
 
-#define CRCEA_UPDATE_DECL(CC, STATE, F)                                       \
+#define CRCEA_UPDATE_DECL(MODEL, STATE, F)                                       \
     do {                                                                    \
-        if ((CC)->model->reflect_input) {                                          \
+        if ((MODEL)->reflect_input) {                                          \
             F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_POPBIT_R, CRCEA_POPBIT8_R, CRCEA_HEAD_R); \
         } else {                                                            \
             F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_POPBIT, CRCEA_POPBIT8, CRCEA_HEAD);  \
@@ -464,10 +464,10 @@ CRCEA_BUILD_TABLE(const crcea_context *cc, void *table)
 
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD)     \
-    CRCEA_TYPE poly = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize);          \
+    CRCEA_TYPE poly = SETUP_POLYNOMIAL(model->polynomial, model->bitsize);          \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         int i;                                                              \
         state ^= SHIFT_INPUT(*p);                                           \
@@ -478,7 +478,7 @@ CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CR
         }                                                                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BITBYBIT_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BITBYBIT_DECL);
 
     return state;
 }
@@ -488,10 +488,10 @@ CRCEA_UPDATE_BITBYBIT(const crcea_context *cc, const char *p, const char *pp, CR
  * * http://www.hackersdelight.org/hdcodetxt/crc.c.txt#crc32h
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITBYBIT_FAST(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
-    const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(cc->model->polynomial, cc->model->bitsize),      \
+    const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(model->polynomial, model->bitsize),      \
                    g1 = SHIFT(g0, 1) ^ (g0 & -POPBIT(g0, 0, 1)),            \
                    g2 = SHIFT(g1, 1) ^ (g0 & -POPBIT(g1, 0, 1)),            \
                    g3 = SHIFT(g2, 1) ^ (g0 & -POPBIT(g2, 0, 1)),            \
@@ -513,7 +513,7 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *p
                 (g0 & -POPBIT(state, 7, 1));                                \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BITBYBIT_FAST_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BITBYBIT_FAST_DECL);
 
     return state;
 }
@@ -522,9 +522,9 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_context *cc, const char *p, const char *p
  * Slicing by Single Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
 #define CRCEA_BY_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -535,7 +535,7 @@ CRCEA_UPDATE_BY_DUO(const crcea_context *cc, const char *p, const char *pp, CRCE
         state = SHIFT(state, 2) ^ t[POPBIT(state, 0, 2)];                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY_DUO_DECL);
 
     return state;
 }
@@ -544,9 +544,9 @@ CRCEA_UPDATE_BY_DUO(const crcea_context *cc, const char *p, const char *pp, CRCE
  * Slicing by Quadruple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY1_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -559,7 +559,7 @@ CRCEA_UPDATE_BY1_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
                 t[0][POPBIT8(n, 6, 2)];                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY1_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_DUO_DECL);
 
     return state;
 }
@@ -568,9 +568,9 @@ CRCEA_UPDATE_BY1_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
  * Slicing by Octuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY2_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
@@ -595,7 +595,7 @@ CRCEA_UPDATE_BY2_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
                 t[0][POPBIT8(n, 6, 2)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY2_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_DUO_DECL);
 
     return state;
 }
@@ -604,9 +604,9 @@ CRCEA_UPDATE_BY2_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
  * Slicing by Sexdecuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY4_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
@@ -641,7 +641,7 @@ CRCEA_UPDATE_BY4_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
                 t[0][POPBIT8(n, 6, 2)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY4_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_DUO_DECL);
 
     return state;
 }
@@ -650,9 +650,9 @@ CRCEA_UPDATE_BY4_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
  * Slicing by Duotriguple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY8_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
@@ -707,7 +707,7 @@ CRCEA_UPDATE_BY8_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
                 t[0][POPBIT8(n, 6, 2)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY8_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_DUO_DECL);
 
     return state;
 }
@@ -716,9 +716,9 @@ CRCEA_UPDATE_BY8_DUO(const crcea_context *cc, const char *p, const char *pp, CRC
  * Slicing by Quattuorsexaguple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY16_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
@@ -813,7 +813,7 @@ CRCEA_UPDATE_BY16_DUO(const crcea_context *cc, const char *p, const char *pp, CR
                 t[0][POPBIT8(n, 6, 2)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY16_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_DUO_DECL);
 
     return state;
 }
@@ -822,9 +822,9 @@ CRCEA_UPDATE_BY16_DUO(const crcea_context *cc, const char *p, const char *pp, CR
  * Slicing by Octovigcentuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_DUO(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY32_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])cc->table;
+    const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
 #define CRCEA_BY32_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
@@ -999,7 +999,7 @@ CRCEA_UPDATE_BY32_DUO(const crcea_context *cc, const char *p, const char *pp, CR
                 t[0][POPBIT8(n, 6, 2)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY32_DUO_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_DUO_DECL);
 
     return state;
 }
@@ -1008,9 +1008,9 @@ CRCEA_UPDATE_BY32_DUO(const crcea_context *cc, const char *p, const char *pp, CR
  * Slicing by Single Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
 #define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -1019,7 +1019,7 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
         state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY_QUARTET_DECL);
 
     return state;
 }
@@ -1028,9 +1028,9 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_context *cc, const char *p, const char *pp, 
  * Slicing by Double Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY1_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
@@ -1041,7 +1041,7 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_context *cc, const char *p, const char *pp,
                 t[0][POPBIT8(n, 4, 4)];                   \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY1_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_QUARTET_DECL);
 
     return state;
 }
@@ -1050,9 +1050,9 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_context *cc, const char *p, const char *pp,
  * Slicing by Quadruple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY2_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
@@ -1071,7 +1071,7 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_context *cc, const char *p, const char *pp,
                 t[0][POPBIT8(n, 4, 4)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY2_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_QUARTET_DECL);
 
     return state;
 }
@@ -1080,9 +1080,9 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_context *cc, const char *p, const char *pp,
  * Slicing by Octuple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY4_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
@@ -1107,7 +1107,7 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_context *cc, const char *p, const char *pp,
                 t[0][POPBIT8(n, 4, 4)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY4_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_QUARTET_DECL);
 
     return state;
 }
@@ -1116,9 +1116,9 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_context *cc, const char *p, const char *pp,
  * Slicing by Sexdecuple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY8_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
@@ -1155,7 +1155,7 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_context *cc, const char *p, const char *pp,
                 t[0][POPBIT8(n, 4, 4)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY8_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_QUARTET_DECL);
 
     return state;
 }
@@ -1164,9 +1164,9 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_context *cc, const char *p, const char *pp,
  * Slicing by Duotriguple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY16_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
@@ -1227,7 +1227,7 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_context *cc, const char *p, const char *pp
                 t[0][POPBIT8(n, 4, 4)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY16_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_QUARTET_DECL);
 
     return state;
 }
@@ -1236,9 +1236,9 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_context *cc, const char *p, const char *pp
  * Slicing by Quattuorsexaguple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_QUARTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY32_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])cc->table;
+    const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
 #define CRCEA_BY32_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
@@ -1347,7 +1347,7 @@ CRCEA_UPDATE_BY32_QUARTET(const crcea_context *cc, const char *p, const char *pp
                 t[0][POPBIT8(n, 4, 4)];                   \
     });                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY32_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_QUARTET_DECL);
 
     return state;
 }
@@ -1356,16 +1356,16 @@ CRCEA_UPDATE_BY32_QUARTET(const crcea_context *cc, const char *p, const char *pp
  * Slicing by Single Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE *t = (const CRCEA_TYPE *)cc->table;
+    const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
 #define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state = SHIFT(state, 8) ^ t[(uint8_t)*p ^ POPBIT(state, 0, 8)];     \
     }, );                                                                   \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY1_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_OCTET_DECL);
 
     return state;
 }
@@ -1374,9 +1374,9 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_context *cc, const char *p, const char *pp, C
  * Slicing by Double Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY2_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
@@ -1387,7 +1387,7 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_context *cc, const char *p, const char *pp, C
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY2_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_OCTET_DECL);
 
     return state;
 }
@@ -1396,9 +1396,9 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_context *cc, const char *p, const char *pp, C
  * Slicing by Quadruple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
@@ -1411,7 +1411,7 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, C
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY4_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_OCTET_DECL);
 
     return state;
 }
@@ -1420,9 +1420,9 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_context *cc, const char *p, const char *pp, C
  * Slicing by Quadruple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
@@ -1439,7 +1439,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, C
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY8_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_OCTET_DECL);
 
     return state;
 }
@@ -1448,9 +1448,9 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_context *cc, const char *p, const char *pp, C
  * Slicing by Sexdecuple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                            \
@@ -1475,7 +1475,7 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY16_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_OCTET_DECL);
 
     return state;
 }
@@ -1484,9 +1484,9 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_context *cc, const char *p, const char *pp, 
  * Slicing by Slicing by Duotriguple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_OCTET(const crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
-    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])cc->table;
+    const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY32_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, HEAD) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                            \
@@ -1527,7 +1527,7 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_context *cc, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
     });                                                                     \
 
-    CRCEA_UPDATE_DECL(cc, state, CRCEA_BY32_OCTET_DECL);
+    CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_OCTET_DECL);
 
     return state;
 }
@@ -1549,7 +1549,7 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
 
         if (alloc) {
             void *bufp = alloc(cc, CRCEA_TABLESIZE(algo));
-            CRCEA_BUILD_TABLE(cc, bufp);
+            CRCEA_BUILD_TABLE(cc->model, cc->algorithm, bufp);
             cc->table = bufp;
         }
     }
@@ -1564,50 +1564,50 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
 
     switch (algo) {
     case CRCEA_BITBYBIT:
-        return CRCEA_UPDATE_BITBYBIT(cc, p, pp, state);
+        return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
     case CRCEA_BY_DUO:
-        return CRCEA_UPDATE_BY_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY1_DUO:
-        return CRCEA_UPDATE_BY1_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY1_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY2_DUO:
-        return CRCEA_UPDATE_BY2_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY2_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY4_DUO:
-        return CRCEA_UPDATE_BY4_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY4_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY8_DUO:
-        return CRCEA_UPDATE_BY8_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY8_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY16_DUO:
-        return CRCEA_UPDATE_BY16_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY16_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY32_DUO:
-        return CRCEA_UPDATE_BY32_DUO(cc, p, pp, state);
+        return CRCEA_UPDATE_BY32_DUO(cc->model, p, pp, state, cc->table);
     case CRCEA_BY_QUARTET:
-        return CRCEA_UPDATE_BY_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY1_QUARTET:
-        return CRCEA_UPDATE_BY1_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY1_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY2_QUARTET:
-        return CRCEA_UPDATE_BY2_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY2_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY4_QUARTET:
-        return CRCEA_UPDATE_BY4_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY4_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY8_QUARTET:
-        return CRCEA_UPDATE_BY8_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY8_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY16_QUARTET:
-        return CRCEA_UPDATE_BY16_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY16_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY32_QUARTET:
-        return CRCEA_UPDATE_BY32_QUARTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY32_QUARTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY1_OCTET:
-        return CRCEA_UPDATE_BY1_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY1_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY2_OCTET:
-        return CRCEA_UPDATE_BY2_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY2_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY4_OCTET:
-        return CRCEA_UPDATE_BY4_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY4_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY8_OCTET:
-        return CRCEA_UPDATE_BY8_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY8_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY16_OCTET:
-        return CRCEA_UPDATE_BY16_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY16_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BY32_OCTET:
-        return CRCEA_UPDATE_BY32_OCTET(cc, p, pp, state);
+        return CRCEA_UPDATE_BY32_OCTET(cc->model, p, pp, state, cc->table);
     case CRCEA_BITBYBIT_FAST:
     default:
-        return CRCEA_UPDATE_BITBYBIT_FAST(cc, p, pp, state);
+        return CRCEA_UPDATE_BITBYBIT_FAST(cc->model, p, pp, state);
     }
 }
 

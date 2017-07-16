@@ -109,7 +109,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 crcea_int
 crcea_setup(crcea_context *cc, crcea_int crc)
 {
-#define CRCEA_SETUP(T, P) return P ## _setup(cc, crc)
+#define CRCEA_SETUP(T, P) return P ## _setup(cc->model, crc)
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_SETUP);
 
@@ -129,7 +129,7 @@ crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 crcea_int
 crcea_finish(crcea_context *cc, crcea_int state)
 {
-#define CRCEA_FINISH(T, P) return P ## _finish(cc, state)
+#define CRCEA_FINISH(T, P) return P ## _finish(cc->model, state)
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_FINISH);
 
