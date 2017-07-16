@@ -419,20 +419,20 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     }
 }
 
-#define CRCEA_SETUP_POLYNOMIAL(POLY, BS)  ((POLY) << (CRCEA_BITSIZE - (BS)))
-#define CRCEA_SHIFT_INPUT(B)              ((CRCEA_TYPE)(uint8_t)(B) << (CRCEA_BITSIZE - 8))
-#define CRCEA_SLICE(ST, N, L)             ((CRCEA_BITSIZE < 16 && (L) > 8) ? \
-                                              (CRCEA_RSH((ST) << 8, (CRCEA_BITSIZE + 8) - ((N) + (L))) & CRCEA_BITMASK(L)) : \
-                                              (CRCEA_RSH(ST, CRCEA_BITSIZE - ((N) + (L))) & CRCEA_BITMASK(L)))
-#define CRCEA_SLICE8(X, N, L)            (CRCEA_RSH(X, 8 - ((N) + (L))) & CRCEA_BITMASK(L))
-#define CRCEA_LOAD16(P)                   (((uint16_t)*((uint8_t *)P + 0) << 8) | ((uint16_t)*((uint8_t *)P + 1) << 0))
-#define CRCEA_INDEX16(A)                  ((uint16_t)(uint16_t)(A))
-#define CRCEA_SETUP_POLYNOMIAL_R(POLY, BS)    (CRCEA_BITREFLECT(POLY) >> (CRCEA_BITSIZE - (BS)))
-#define CRCEA_SHIFT_INPUT_R(B)            ((CRCEA_TYPE)(uint8_t)(B))
-#define CRCEA_SLICE_R(ST, N, L)          (CRCEA_RSH(ST, N) & CRCEA_BITMASK(L))
-#define CRCEA_SLICE8_R(X, N, L)          (CRCEA_RSH(X, N) & CRCEA_BITMASK(L))
-#define CRCEA_LOAD16_R(P)                 (((uint16_t)*((uint8_t *)P + 0) << 0) | ((uint16_t)*((uint8_t *)P + 1) << 8))
-#define CRCEA_INDEX16_R(A)                ((uint16_t)(uint16_t)(A) << 8)
+#define CRCEA_SETUP_POLYNOMIAL(POLY, BS)    ((POLY) << (CRCEA_BITSIZE - (BS)))
+#define CRCEA_SHIFT_INPUT(B)                ((CRCEA_TYPE)(uint8_t)(B) << (CRCEA_BITSIZE - 8))
+#define CRCEA_SLICE(ST, N, L)               ((CRCEA_BITSIZE < 16 && (L) > 8) ? \
+                                                (CRCEA_RSH((ST) << 8, (CRCEA_BITSIZE + 8) - ((N) + (L))) & CRCEA_BITMASK(L)) : \
+                                                (CRCEA_RSH(ST, CRCEA_BITSIZE - ((N) + (L))) & CRCEA_BITMASK(L)))
+#define CRCEA_SLICE8(X, N, L)               (CRCEA_RSH(X, 8 - ((N) + (L))) & CRCEA_BITMASK(L))
+#define CRCEA_LOAD16(P)                     (((uint16_t)*((uint8_t *)P + 0) << 8) | ((uint16_t)*((uint8_t *)P + 1) << 0))
+#define CRCEA_INDEX16(A)                    ((uint16_t)(uint16_t)(A))
+#define CRCEA_SETUP_POLYNOMIAL_R(POLY, BS)  (CRCEA_BITREFLECT(POLY) >> (CRCEA_BITSIZE - (BS)))
+#define CRCEA_SHIFT_INPUT_R(B)              ((CRCEA_TYPE)(uint8_t)(B))
+#define CRCEA_SLICE_R(ST, N, L)             (CRCEA_RSH(ST, N) & CRCEA_BITMASK(L))
+#define CRCEA_SLICE8_R(X, N, L)             (CRCEA_RSH(X, N) & CRCEA_BITMASK(L))
+#define CRCEA_LOAD16_R(P)                   (((uint16_t)*((uint8_t *)P + 0) << 0) | ((uint16_t)*((uint8_t *)P + 1) << 8))
+#define CRCEA_INDEX16_R(A)                  ((uint16_t)(uint16_t)(A) << 8)
 
 
 #define CRCEA_UPDATE_CORE(P, PP, SLICESIZE, MAINCODE, SUBCODE)                \
