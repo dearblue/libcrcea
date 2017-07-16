@@ -270,155 +270,6 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
     return state & CRCEA_BITMASK(model->bitsize);
 }
 
-CRCEA_VISIBILITY CRCEA_INLINE size_t
-CRCEA_TABLESIZE(int algo)
-{
-    switch (algo) {
-    case CRCEA_BY_SOLO:
-        return sizeof(CRCEA_TYPE[2]);
-    case CRCEA_BY1_SOLO:
-    case CRCEA_BY2_SOLO:
-    case CRCEA_BY4_SOLO:
-    case CRCEA_BY8_SOLO:
-    case CRCEA_BY16_SOLO:
-    case CRCEA_BY32_SOLO:
-        return sizeof(CRCEA_TYPE[8 * (1 << (algo & 0xff) >> 1)][2]);
-    case CRCEA_BY_DUO:
-        return sizeof(CRCEA_TYPE[4]);
-    case CRCEA_BY1_DUO:
-    case CRCEA_BY2_DUO:
-    case CRCEA_BY4_DUO:
-    case CRCEA_BY8_DUO:
-    case CRCEA_BY16_DUO:
-    case CRCEA_BY32_DUO:
-        return sizeof(CRCEA_TYPE[4 * (1 << (algo & 0xff) >> 1)][4]);
-    case CRCEA_BY_QUARTET:
-        return sizeof(CRCEA_TYPE[16]);
-    case CRCEA_BY1_QUARTET:
-    case CRCEA_BY2_QUARTET:
-    case CRCEA_BY4_QUARTET:
-    case CRCEA_BY8_QUARTET:
-    case CRCEA_BY16_QUARTET:
-    case CRCEA_BY32_QUARTET:
-        return sizeof(CRCEA_TYPE[2 * (1 << (algo & 0xff) >> 1)][16]);
-    case CRCEA_BY1_OCTET:
-    case CRCEA_BY2_OCTET:
-    case CRCEA_BY4_OCTET:
-    case CRCEA_BY8_OCTET:
-    case CRCEA_BY16_OCTET:
-    case CRCEA_BY32_OCTET:
-        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 1)][256]);
-    case CRCEA_BY2_SEXDECTET:
-    case CRCEA_BY4_SEXDECTET:
-    case CRCEA_BY8_SEXDECTET:
-    case CRCEA_BY16_SEXDECTET:
-    case CRCEA_BY32_SEXDECTET:
-        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 2)][65536]);
-    default:
-        return 0;
-    }
-}
-
-CRCEA_VISIBILITY CRCEA_INLINE void
-CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
-{
-    int times, slice, bits;
-    switch (algorithm) {
-    case CRCEA_BY_SOLO:
-    case CRCEA_BY1_SOLO:
-    case CRCEA_BY2_SOLO:
-    case CRCEA_BY4_SOLO:
-    case CRCEA_BY8_SOLO:
-    case CRCEA_BY16_SOLO:
-    case CRCEA_BY32_SOLO:
-        slice = 8 * (1 << (algorithm & 0xff) >> 1);
-        bits = 1;
-        break;
-    case CRCEA_BY_DUO:
-    case CRCEA_BY1_DUO:
-    case CRCEA_BY2_DUO:
-    case CRCEA_BY4_DUO:
-    case CRCEA_BY8_DUO:
-    case CRCEA_BY16_DUO:
-    case CRCEA_BY32_DUO:
-        slice = 4 * (1 << (algorithm & 0xff) >> 1);
-        bits = 2;
-        break;
-    case CRCEA_BY_QUARTET:
-    case CRCEA_BY1_QUARTET:
-    case CRCEA_BY2_QUARTET:
-    case CRCEA_BY4_QUARTET:
-    case CRCEA_BY8_QUARTET:
-    case CRCEA_BY16_QUARTET:
-    case CRCEA_BY32_QUARTET:
-        slice = 2 * (1 << (algorithm & 0xff) >> 1);
-        bits = 4;
-        break;
-    case CRCEA_BY1_OCTET:
-    case CRCEA_BY2_OCTET:
-    case CRCEA_BY4_OCTET:
-    case CRCEA_BY8_OCTET:
-    case CRCEA_BY16_OCTET:
-    case CRCEA_BY32_OCTET:
-        slice = (1 << (algorithm & 0xff) >> 1);
-        bits = 8;
-        break;
-    case CRCEA_BY2_SEXDECTET:
-    case CRCEA_BY4_SEXDECTET:
-    case CRCEA_BY8_SEXDECTET:
-    case CRCEA_BY16_SEXDECTET:
-    case CRCEA_BY32_SEXDECTET:
-        slice = (1 << (algorithm & 0xff) >> 2);
-        bits = 16;
-        break;
-    default:
-        return;
-    }
-
-    times = 1 << bits;
-
-    CRCEA_TYPE *t = table;
-    const CRCEA_TYPE *tt = t;
-    if (model->reflect_input) {
-        int s, b, i;
-        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(model->polynomial << (CRCEA_BITSIZE - model->bitsize));
-
-        for (b = 0; b < times; b ++, t ++) {
-            CRCEA_TYPE r = b;
-            for (i = bits; i > 0; i --) {
-                r = (r >> 1) ^ (polynomial & -(r & 1));
-            }
-            *t = r;
-        }
-
-        const int bitmask = ~(~0 << bits);
-        for (s = 1; s < slice; s ++) {
-            const CRCEA_TYPE *q = t - times;
-            for (b = 0; b < times; b ++, t ++, q ++) {
-                *t = tt[*q & bitmask] ^ (*q >> bits);
-            }
-        }
-    } else {
-        int s, b, i;
-        CRCEA_TYPE polynomial = model->polynomial << (CRCEA_BITSIZE - model->bitsize);
-
-        for (b = 0; b < times; b ++) {
-            CRCEA_TYPE r = (CRCEA_TYPE)b << (CRCEA_BITSIZE - bits);
-            for (i = bits; i > 0; i --) {
-                r = (r << 1) ^ (polynomial & -(r >> (CRCEA_BITSIZE - 1)));
-            }
-            *t ++ = r;
-        }
-
-        for (s = 1; s < slice; s ++) {
-            const CRCEA_TYPE *q = t - times;
-            for (b = 0; b < times; b ++, t ++, q ++) {
-                *t = tt[*q >> (CRCEA_BITSIZE - bits)] ^ (*q << bits);
-            }
-        }
-    }
-}
-
 #define CRCEA_SETUP_POLYNOMIAL(POLY, BS)    ((POLY) << (CRCEA_BITSIZE - (BS)))
 #define CRCEA_INPUT(B)                      ((CRCEA_TYPE)(uint8_t)(B) << (CRCEA_BITSIZE - 8))
 #define CRCEA_SLICE(ST, N, L)               ((CRCEA_BITSIZE < 16 && (L) > 8) ? \
@@ -2523,6 +2374,155 @@ CRCEA_UPDATE_BY32_SEXDECTET(const crcea_model *model, const char *p, const char 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_SEXDECTET_DECL);
 
     return state;
+}
+
+CRCEA_VISIBILITY CRCEA_INLINE size_t
+CRCEA_TABLESIZE(int algo)
+{
+    switch (algo) {
+    case CRCEA_BY_SOLO:
+        return sizeof(CRCEA_TYPE[2]);
+    case CRCEA_BY1_SOLO:
+    case CRCEA_BY2_SOLO:
+    case CRCEA_BY4_SOLO:
+    case CRCEA_BY8_SOLO:
+    case CRCEA_BY16_SOLO:
+    case CRCEA_BY32_SOLO:
+        return sizeof(CRCEA_TYPE[8 * (1 << (algo & 0xff) >> 1)][2]);
+    case CRCEA_BY_DUO:
+        return sizeof(CRCEA_TYPE[4]);
+    case CRCEA_BY1_DUO:
+    case CRCEA_BY2_DUO:
+    case CRCEA_BY4_DUO:
+    case CRCEA_BY8_DUO:
+    case CRCEA_BY16_DUO:
+    case CRCEA_BY32_DUO:
+        return sizeof(CRCEA_TYPE[4 * (1 << (algo & 0xff) >> 1)][4]);
+    case CRCEA_BY_QUARTET:
+        return sizeof(CRCEA_TYPE[16]);
+    case CRCEA_BY1_QUARTET:
+    case CRCEA_BY2_QUARTET:
+    case CRCEA_BY4_QUARTET:
+    case CRCEA_BY8_QUARTET:
+    case CRCEA_BY16_QUARTET:
+    case CRCEA_BY32_QUARTET:
+        return sizeof(CRCEA_TYPE[2 * (1 << (algo & 0xff) >> 1)][16]);
+    case CRCEA_BY1_OCTET:
+    case CRCEA_BY2_OCTET:
+    case CRCEA_BY4_OCTET:
+    case CRCEA_BY8_OCTET:
+    case CRCEA_BY16_OCTET:
+    case CRCEA_BY32_OCTET:
+        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 1)][256]);
+    case CRCEA_BY2_SEXDECTET:
+    case CRCEA_BY4_SEXDECTET:
+    case CRCEA_BY8_SEXDECTET:
+    case CRCEA_BY16_SEXDECTET:
+    case CRCEA_BY32_SEXDECTET:
+        return sizeof(CRCEA_TYPE[1 * (1 << (algo & 0xff) >> 2)][65536]);
+    default:
+        return 0;
+    }
+}
+
+CRCEA_VISIBILITY CRCEA_INLINE void
+CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
+{
+    int times, slice, bits;
+    switch (algorithm) {
+    case CRCEA_BY_SOLO:
+    case CRCEA_BY1_SOLO:
+    case CRCEA_BY2_SOLO:
+    case CRCEA_BY4_SOLO:
+    case CRCEA_BY8_SOLO:
+    case CRCEA_BY16_SOLO:
+    case CRCEA_BY32_SOLO:
+        slice = 8 * (1 << (algorithm & 0xff) >> 1);
+        bits = 1;
+        break;
+    case CRCEA_BY_DUO:
+    case CRCEA_BY1_DUO:
+    case CRCEA_BY2_DUO:
+    case CRCEA_BY4_DUO:
+    case CRCEA_BY8_DUO:
+    case CRCEA_BY16_DUO:
+    case CRCEA_BY32_DUO:
+        slice = 4 * (1 << (algorithm & 0xff) >> 1);
+        bits = 2;
+        break;
+    case CRCEA_BY_QUARTET:
+    case CRCEA_BY1_QUARTET:
+    case CRCEA_BY2_QUARTET:
+    case CRCEA_BY4_QUARTET:
+    case CRCEA_BY8_QUARTET:
+    case CRCEA_BY16_QUARTET:
+    case CRCEA_BY32_QUARTET:
+        slice = 2 * (1 << (algorithm & 0xff) >> 1);
+        bits = 4;
+        break;
+    case CRCEA_BY1_OCTET:
+    case CRCEA_BY2_OCTET:
+    case CRCEA_BY4_OCTET:
+    case CRCEA_BY8_OCTET:
+    case CRCEA_BY16_OCTET:
+    case CRCEA_BY32_OCTET:
+        slice = (1 << (algorithm & 0xff) >> 1);
+        bits = 8;
+        break;
+    case CRCEA_BY2_SEXDECTET:
+    case CRCEA_BY4_SEXDECTET:
+    case CRCEA_BY8_SEXDECTET:
+    case CRCEA_BY16_SEXDECTET:
+    case CRCEA_BY32_SEXDECTET:
+        slice = (1 << (algorithm & 0xff) >> 2);
+        bits = 16;
+        break;
+    default:
+        return;
+    }
+
+    times = 1 << bits;
+
+    CRCEA_TYPE *t = table;
+    const CRCEA_TYPE *tt = t;
+    if (model->reflect_input) {
+        int s, b, i;
+        CRCEA_TYPE polynomial = CRCEA_BITREFLECT(model->polynomial << (CRCEA_BITSIZE - model->bitsize));
+
+        for (b = 0; b < times; b ++, t ++) {
+            CRCEA_TYPE r = b;
+            for (i = bits; i > 0; i --) {
+                r = (r >> 1) ^ (polynomial & -(r & 1));
+            }
+            *t = r;
+        }
+
+        const int bitmask = ~(~0 << bits);
+        for (s = 1; s < slice; s ++) {
+            const CRCEA_TYPE *q = t - times;
+            for (b = 0; b < times; b ++, t ++, q ++) {
+                *t = tt[*q & bitmask] ^ (*q >> bits);
+            }
+        }
+    } else {
+        int s, b, i;
+        CRCEA_TYPE polynomial = model->polynomial << (CRCEA_BITSIZE - model->bitsize);
+
+        for (b = 0; b < times; b ++) {
+            CRCEA_TYPE r = (CRCEA_TYPE)b << (CRCEA_BITSIZE - bits);
+            for (i = bits; i > 0; i --) {
+                r = (r << 1) ^ (polynomial & -(r >> (CRCEA_BITSIZE - 1)));
+            }
+            *t ++ = r;
+        }
+
+        for (s = 1; s < slice; s ++) {
+            const CRCEA_TYPE *q = t - times;
+            for (b = 0; b < times; b ++, t ++, q ++) {
+                *t = tt[*q >> (CRCEA_BITSIZE - bits)] ^ (*q << bits);
+            }
+        }
+    }
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE int
