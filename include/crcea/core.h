@@ -131,7 +131,7 @@
 #   error Please definision both CRCEA_PREFIX and CRCEA_TYPE macros in before include this file.
 #endif
 
-#include "../crcea.h"
+#include "defs.h"
 
 #ifndef CHAR_BIT
 #   include <limits.h>
