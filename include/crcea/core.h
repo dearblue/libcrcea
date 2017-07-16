@@ -421,14 +421,14 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 
 #define CRCEA_SETUP_POLYNOMIAL(POLY, BS)  ((POLY) << (CRCEA_BITSIZE - (BS)))
 #define CRCEA_SHIFT_INPUT(B)              ((CRCEA_TYPE)(uint8_t)(B) << (CRCEA_BITSIZE - 8))
-#define CRCEA_POPBIT(ST, N, L)            (CRCEA_RSH(ST, CRCEA_BITSIZE - ((N) + (L))) & CRCEA_BITMASK(L))
-#define CRCEA_POPBIT8(X, N, L)            (CRCEA_RSH(X, 8 - ((N) + (L))) & CRCEA_BITMASK(L))
+#define CRCEA_SLICE(ST, N, L)            (CRCEA_RSH(ST, CRCEA_BITSIZE - ((N) + (L))) & CRCEA_BITMASK(L))
+#define CRCEA_SLICE8(X, N, L)            (CRCEA_RSH(X, 8 - ((N) + (L))) & CRCEA_BITMASK(L))
 #define CRCEA_LOAD16(P)                   (((uint16_t)*((uint8_t *)P + 0) << 8) | ((uint16_t)*((uint8_t *)P + 1) << 0))
 #define CRCEA_INDEX16(A)                  ((uint16_t)(uint16_t)(A))
 #define CRCEA_SETUP_POLYNOMIAL_R(POLY, BS)    (CRCEA_BITREFLECT(POLY) >> (CRCEA_BITSIZE - (BS)))
 #define CRCEA_SHIFT_INPUT_R(B)            ((CRCEA_TYPE)(uint8_t)(B))
-#define CRCEA_POPBIT_R(ST, N, L)          (CRCEA_RSH(ST, N) & CRCEA_BITMASK(L))
-#define CRCEA_POPBIT8_R(X, N, L)          (CRCEA_RSH(X, N) & CRCEA_BITMASK(L))
+#define CRCEA_SLICE_R(ST, N, L)          (CRCEA_RSH(ST, N) & CRCEA_BITMASK(L))
+#define CRCEA_SLICE8_R(X, N, L)          (CRCEA_RSH(X, N) & CRCEA_BITMASK(L))
 #define CRCEA_LOAD16_R(P)                 (((uint16_t)*((uint8_t *)P + 0) << 0) | ((uint16_t)*((uint8_t *)P + 1) << 8))
 #define CRCEA_INDEX16_R(A)                ((uint16_t)(uint16_t)(A) << 8)
 
@@ -458,9 +458,9 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 #define CRCEA_UPDATE_DECL(MODEL, STATE, F)                                       \
     do {                                                                    \
         if ((MODEL)->reflect_input) {                                          \
-            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_POPBIT_R, CRCEA_POPBIT8_R, CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
+            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_SHIFT_INPUT_R, CRCEA_RSH, CRCEA_SLICE_R, CRCEA_SLICE8_R, CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
         } else {                                                            \
-            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_POPBIT, CRCEA_POPBIT8, CRCEA_LOAD16, CRCEA_INDEX16);  \
+            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_SHIFT_INPUT, CRCEA_LSH, CRCEA_SLICE, CRCEA_SLICE8, CRCEA_LOAD16, CRCEA_INDEX16);  \
         }                                                                   \
     } while (0)                                                             \
 
@@ -468,13 +468,13 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
 {
-#define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16)     \
+#define CRCEA_BITBYBIT_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16)     \
     CRCEA_TYPE poly = SETUP_POLYNOMIAL(model->polynomial, model->bitsize);          \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         int i;                                                              \
         state ^= SHIFT_INPUT(*p);                                           \
         for (i = 8; i > 0; i --) {                                          \
-            char head = POPBIT(state, 0, 1);                                \
+            char head = SLICE(state, 0, 1);                                \
             state = SHIFT(state, 1);                                        \
             if (head) { state ^= poly; }                                    \
         }                                                                   \
@@ -492,27 +492,27 @@ CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, C
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT_FAST(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
 {
-#define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BITBYBIT_FAST_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     const CRCEA_TYPE g0 = SETUP_POLYNOMIAL(model->polynomial, model->bitsize),      \
-                   g1 = SHIFT(g0, 1) ^ (g0 & -POPBIT(g0, 0, 1)),            \
-                   g2 = SHIFT(g1, 1) ^ (g0 & -POPBIT(g1, 0, 1)),            \
-                   g3 = SHIFT(g2, 1) ^ (g0 & -POPBIT(g2, 0, 1)),            \
-                   g4 = SHIFT(g3, 1) ^ (g0 & -POPBIT(g3, 0, 1)),            \
-                   g5 = SHIFT(g4, 1) ^ (g0 & -POPBIT(g4, 0, 1)),            \
-                   g6 = SHIFT(g5, 1) ^ (g0 & -POPBIT(g5, 0, 1)),            \
-                   g7 = SHIFT(g6, 1) ^ (g0 & -POPBIT(g6, 0, 1));            \
+                   g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1)),            \
+                   g2 = SHIFT(g1, 1) ^ (g0 & -SLICE(g1, 0, 1)),            \
+                   g3 = SHIFT(g2, 1) ^ (g0 & -SLICE(g2, 0, 1)),            \
+                   g4 = SHIFT(g3, 1) ^ (g0 & -SLICE(g3, 0, 1)),            \
+                   g5 = SHIFT(g4, 1) ^ (g0 & -SLICE(g4, 0, 1)),            \
+                   g6 = SHIFT(g5, 1) ^ (g0 & -SLICE(g5, 0, 1)),            \
+                   g7 = SHIFT(g6, 1) ^ (g0 & -SLICE(g6, 0, 1));            \
                                                                             \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
         state = SHIFT(state, 8) ^                                           \
-                (g7 & -POPBIT(state, 0, 1)) ^                               \
-                (g6 & -POPBIT(state, 1, 1)) ^                               \
-                (g5 & -POPBIT(state, 2, 1)) ^                               \
-                (g4 & -POPBIT(state, 3, 1)) ^                               \
-                (g3 & -POPBIT(state, 4, 1)) ^                               \
-                (g2 & -POPBIT(state, 5, 1)) ^                               \
-                (g1 & -POPBIT(state, 6, 1)) ^                               \
-                (g0 & -POPBIT(state, 7, 1));                                \
+                (g7 & -SLICE(state, 0, 1)) ^                               \
+                (g6 & -SLICE(state, 1, 1)) ^                               \
+                (g5 & -SLICE(state, 2, 1)) ^                               \
+                (g4 & -SLICE(state, 3, 1)) ^                               \
+                (g3 & -SLICE(state, 4, 1)) ^                               \
+                (g2 & -SLICE(state, 5, 1)) ^                               \
+                (g1 & -SLICE(state, 6, 1)) ^                               \
+                (g0 & -SLICE(state, 7, 1));                                \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BITBYBIT_FAST_DECL);
@@ -528,13 +528,13 @@ CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRC
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
-#define CRCEA_BY_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        state = SHIFT(state, 2) ^ t[POPBIT(state, 0, 2)];                   \
-        state = SHIFT(state, 2) ^ t[POPBIT(state, 0, 2)];                   \
-        state = SHIFT(state, 2) ^ t[POPBIT(state, 0, 2)];                   \
-        state = SHIFT(state, 2) ^ t[POPBIT(state, 0, 2)];                   \
+        state = SHIFT(state, 2) ^ t[SLICE(state, 0, 2)];                   \
+        state = SHIFT(state, 2) ^ t[SLICE(state, 0, 2)];                   \
+        state = SHIFT(state, 2) ^ t[SLICE(state, 0, 2)];                   \
+        state = SHIFT(state, 2) ^ t[SLICE(state, 0, 2)];                   \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY_DUO_DECL);
@@ -550,15 +550,15 @@ CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CR
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY1_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY1_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_DUO_DECL);
@@ -574,27 +574,27 @@ CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CR
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY2_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY2_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ POPBIT(state, 0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ POPBIT(state, 8, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ SLICE(state, 0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ SLICE(state, 8, 8); \
         state = SHIFT(state, 16) ^ \
-                t[7][POPBIT8(n0, 0, 2)] ^ \
-                t[6][POPBIT8(n0, 2, 2)] ^ \
-                t[5][POPBIT8(n0, 4, 2)] ^ \
-                t[4][POPBIT8(n0, 6, 2)] ^ \
-                t[3][POPBIT8(n1, 0, 2)] ^ \
-                t[2][POPBIT8(n1, 2, 2)] ^ \
-                t[1][POPBIT8(n1, 4, 2)] ^ \
-                t[0][POPBIT8(n1, 6, 2)]; \
+                t[7][SLICE8(n0, 0, 2)] ^ \
+                t[6][SLICE8(n0, 2, 2)] ^ \
+                t[5][SLICE8(n0, 4, 2)] ^ \
+                t[4][SLICE8(n0, 6, 2)] ^ \
+                t[3][SLICE8(n1, 0, 2)] ^ \
+                t[2][SLICE8(n1, 2, 2)] ^ \
+                t[1][SLICE8(n1, 4, 2)] ^ \
+                t[0][SLICE8(n1, 6, 2)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_DUO_DECL);
@@ -610,37 +610,37 @@ CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CR
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY4_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY4_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ POPBIT(state,  0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ POPBIT(state,  8, 8); \
-        const uint8_t n2 = (uint8_t)p[2] ^ POPBIT(state, 16, 8); \
-        const uint8_t n3 = (uint8_t)p[3] ^ POPBIT(state, 24, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ SLICE(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ SLICE(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ SLICE(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ SLICE(state, 24, 8); \
         state = SHIFT(state, 32) ^ \
-                t[15][POPBIT8(n0, 0, 2)] ^ \
-                t[14][POPBIT8(n0, 2, 2)] ^ \
-                t[13][POPBIT8(n0, 4, 2)] ^ \
-                t[12][POPBIT8(n0, 6, 2)] ^ \
-                t[11][POPBIT8(n1, 0, 2)] ^ \
-                t[10][POPBIT8(n1, 2, 2)] ^ \
-                t[ 9][POPBIT8(n1, 4, 2)] ^ \
-                t[ 8][POPBIT8(n1, 6, 2)] ^ \
-                t[ 7][POPBIT8(n2, 0, 2)] ^ \
-                t[ 6][POPBIT8(n2, 2, 2)] ^ \
-                t[ 5][POPBIT8(n2, 4, 2)] ^ \
-                t[ 4][POPBIT8(n2, 6, 2)] ^ \
-                t[ 3][POPBIT8(n3, 0, 2)] ^ \
-                t[ 2][POPBIT8(n3, 2, 2)] ^ \
-                t[ 1][POPBIT8(n3, 4, 2)] ^ \
-                t[ 0][POPBIT8(n3, 6, 2)]; \
+                t[15][SLICE8(n0, 0, 2)] ^ \
+                t[14][SLICE8(n0, 2, 2)] ^ \
+                t[13][SLICE8(n0, 4, 2)] ^ \
+                t[12][SLICE8(n0, 6, 2)] ^ \
+                t[11][SLICE8(n1, 0, 2)] ^ \
+                t[10][SLICE8(n1, 2, 2)] ^ \
+                t[ 9][SLICE8(n1, 4, 2)] ^ \
+                t[ 8][SLICE8(n1, 6, 2)] ^ \
+                t[ 7][SLICE8(n2, 0, 2)] ^ \
+                t[ 6][SLICE8(n2, 2, 2)] ^ \
+                t[ 5][SLICE8(n2, 4, 2)] ^ \
+                t[ 4][SLICE8(n2, 6, 2)] ^ \
+                t[ 3][SLICE8(n3, 0, 2)] ^ \
+                t[ 2][SLICE8(n3, 2, 2)] ^ \
+                t[ 1][SLICE8(n3, 4, 2)] ^ \
+                t[ 0][SLICE8(n3, 6, 2)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_DUO_DECL);
@@ -656,57 +656,57 @@ CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CR
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY8_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY8_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ POPBIT(state,  0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ POPBIT(state,  8, 8); \
-        const uint8_t n2 = (uint8_t)p[2] ^ POPBIT(state, 16, 8); \
-        const uint8_t n3 = (uint8_t)p[3] ^ POPBIT(state, 24, 8); \
-        const uint8_t n4 = (uint8_t)p[4] ^ POPBIT(state, 32, 8); \
-        const uint8_t n5 = (uint8_t)p[5] ^ POPBIT(state, 40, 8); \
-        const uint8_t n6 = (uint8_t)p[6] ^ POPBIT(state, 48, 8); \
-        const uint8_t n7 = (uint8_t)p[7] ^ POPBIT(state, 56, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ SLICE(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ SLICE(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ SLICE(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ SLICE(state, 24, 8); \
+        const uint8_t n4 = (uint8_t)p[4] ^ SLICE(state, 32, 8); \
+        const uint8_t n5 = (uint8_t)p[5] ^ SLICE(state, 40, 8); \
+        const uint8_t n6 = (uint8_t)p[6] ^ SLICE(state, 48, 8); \
+        const uint8_t n7 = (uint8_t)p[7] ^ SLICE(state, 56, 8); \
         state = SHIFT(state, 64) ^ \
-                t[31][POPBIT8(n0, 0, 2)] ^ \
-                t[30][POPBIT8(n0, 2, 2)] ^ \
-                t[29][POPBIT8(n0, 4, 2)] ^ \
-                t[28][POPBIT8(n0, 6, 2)] ^ \
-                t[27][POPBIT8(n1, 0, 2)] ^ \
-                t[26][POPBIT8(n1, 2, 2)] ^ \
-                t[25][POPBIT8(n1, 4, 2)] ^ \
-                t[24][POPBIT8(n1, 6, 2)] ^ \
-                t[23][POPBIT8(n2, 0, 2)] ^ \
-                t[22][POPBIT8(n2, 2, 2)] ^ \
-                t[21][POPBIT8(n2, 4, 2)] ^ \
-                t[20][POPBIT8(n2, 6, 2)] ^ \
-                t[19][POPBIT8(n3, 0, 2)] ^ \
-                t[18][POPBIT8(n3, 2, 2)] ^ \
-                t[17][POPBIT8(n3, 4, 2)] ^ \
-                t[16][POPBIT8(n3, 6, 2)] ^ \
-                t[15][POPBIT8(n4, 0, 2)] ^ \
-                t[14][POPBIT8(n4, 2, 2)] ^ \
-                t[13][POPBIT8(n4, 4, 2)] ^ \
-                t[12][POPBIT8(n4, 6, 2)] ^ \
-                t[11][POPBIT8(n5, 0, 2)] ^ \
-                t[10][POPBIT8(n5, 2, 2)] ^ \
-                t[ 9][POPBIT8(n5, 4, 2)] ^ \
-                t[ 8][POPBIT8(n5, 6, 2)] ^ \
-                t[ 7][POPBIT8(n6, 0, 2)] ^ \
-                t[ 6][POPBIT8(n6, 2, 2)] ^ \
-                t[ 5][POPBIT8(n6, 4, 2)] ^ \
-                t[ 4][POPBIT8(n6, 6, 2)] ^ \
-                t[ 3][POPBIT8(n7, 0, 2)] ^ \
-                t[ 2][POPBIT8(n7, 2, 2)] ^ \
-                t[ 1][POPBIT8(n7, 4, 2)] ^ \
-                t[ 0][POPBIT8(n7, 6, 2)]; \
+                t[31][SLICE8(n0, 0, 2)] ^ \
+                t[30][SLICE8(n0, 2, 2)] ^ \
+                t[29][SLICE8(n0, 4, 2)] ^ \
+                t[28][SLICE8(n0, 6, 2)] ^ \
+                t[27][SLICE8(n1, 0, 2)] ^ \
+                t[26][SLICE8(n1, 2, 2)] ^ \
+                t[25][SLICE8(n1, 4, 2)] ^ \
+                t[24][SLICE8(n1, 6, 2)] ^ \
+                t[23][SLICE8(n2, 0, 2)] ^ \
+                t[22][SLICE8(n2, 2, 2)] ^ \
+                t[21][SLICE8(n2, 4, 2)] ^ \
+                t[20][SLICE8(n2, 6, 2)] ^ \
+                t[19][SLICE8(n3, 0, 2)] ^ \
+                t[18][SLICE8(n3, 2, 2)] ^ \
+                t[17][SLICE8(n3, 4, 2)] ^ \
+                t[16][SLICE8(n3, 6, 2)] ^ \
+                t[15][SLICE8(n4, 0, 2)] ^ \
+                t[14][SLICE8(n4, 2, 2)] ^ \
+                t[13][SLICE8(n4, 4, 2)] ^ \
+                t[12][SLICE8(n4, 6, 2)] ^ \
+                t[11][SLICE8(n5, 0, 2)] ^ \
+                t[10][SLICE8(n5, 2, 2)] ^ \
+                t[ 9][SLICE8(n5, 4, 2)] ^ \
+                t[ 8][SLICE8(n5, 6, 2)] ^ \
+                t[ 7][SLICE8(n6, 0, 2)] ^ \
+                t[ 6][SLICE8(n6, 2, 2)] ^ \
+                t[ 5][SLICE8(n6, 4, 2)] ^ \
+                t[ 4][SLICE8(n6, 6, 2)] ^ \
+                t[ 3][SLICE8(n7, 0, 2)] ^ \
+                t[ 2][SLICE8(n7, 2, 2)] ^ \
+                t[ 1][SLICE8(n7, 4, 2)] ^ \
+                t[ 0][SLICE8(n7, 6, 2)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_DUO_DECL);
@@ -722,97 +722,97 @@ CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, C
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY16_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY16_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
-        const uint8_t n0  = (uint8_t)p[ 0] ^ POPBIT(state,   0, 8); \
-        const uint8_t n1  = (uint8_t)p[ 1] ^ POPBIT(state,   8, 8); \
-        const uint8_t n2  = (uint8_t)p[ 2] ^ POPBIT(state,  16, 8); \
-        const uint8_t n3  = (uint8_t)p[ 3] ^ POPBIT(state,  24, 8); \
-        const uint8_t n4  = (uint8_t)p[ 4] ^ POPBIT(state,  32, 8); \
-        const uint8_t n5  = (uint8_t)p[ 5] ^ POPBIT(state,  40, 8); \
-        const uint8_t n6  = (uint8_t)p[ 6] ^ POPBIT(state,  48, 8); \
-        const uint8_t n7  = (uint8_t)p[ 7] ^ POPBIT(state,  56, 8); \
-        const uint8_t n8  = (uint8_t)p[ 8] ^ POPBIT(state,  64, 8); \
-        const uint8_t n9  = (uint8_t)p[ 9] ^ POPBIT(state,  72, 8); \
-        const uint8_t n10 = (uint8_t)p[10] ^ POPBIT(state,  80, 8); \
-        const uint8_t n11 = (uint8_t)p[11] ^ POPBIT(state,  88, 8); \
-        const uint8_t n12 = (uint8_t)p[12] ^ POPBIT(state,  96, 8); \
-        const uint8_t n13 = (uint8_t)p[13] ^ POPBIT(state, 104, 8); \
-        const uint8_t n14 = (uint8_t)p[14] ^ POPBIT(state, 112, 8); \
-        const uint8_t n15 = (uint8_t)p[15] ^ POPBIT(state, 120, 8); \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ SLICE(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ SLICE(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ SLICE(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ SLICE(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ SLICE(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ SLICE(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ SLICE(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ SLICE(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ SLICE(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ SLICE(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ SLICE(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ SLICE(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ SLICE(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ SLICE(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ SLICE(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ SLICE(state, 120, 8); \
         state = SHIFT(state, 128) ^ \
-                t[63][POPBIT8(n0,  0, 2)] ^ \
-                t[62][POPBIT8(n0,  2, 2)] ^ \
-                t[61][POPBIT8(n0,  4, 2)] ^ \
-                t[60][POPBIT8(n0,  6, 2)] ^ \
-                t[59][POPBIT8(n1,  0, 2)] ^ \
-                t[58][POPBIT8(n1,  2, 2)] ^ \
-                t[57][POPBIT8(n1,  4, 2)] ^ \
-                t[56][POPBIT8(n1,  6, 2)] ^ \
-                t[55][POPBIT8(n2,  0, 2)] ^ \
-                t[54][POPBIT8(n2,  2, 2)] ^ \
-                t[53][POPBIT8(n2,  4, 2)] ^ \
-                t[52][POPBIT8(n2,  6, 2)] ^ \
-                t[51][POPBIT8(n3,  0, 2)] ^ \
-                t[50][POPBIT8(n3,  2, 2)] ^ \
-                t[49][POPBIT8(n3,  4, 2)] ^ \
-                t[48][POPBIT8(n3,  6, 2)] ^ \
-                t[47][POPBIT8(n4,  0, 2)] ^ \
-                t[46][POPBIT8(n4,  2, 2)] ^ \
-                t[45][POPBIT8(n4,  4, 2)] ^ \
-                t[44][POPBIT8(n4,  6, 2)] ^ \
-                t[43][POPBIT8(n5,  0, 2)] ^ \
-                t[42][POPBIT8(n5,  2, 2)] ^ \
-                t[41][POPBIT8(n5,  4, 2)] ^ \
-                t[40][POPBIT8(n5,  6, 2)] ^ \
-                t[39][POPBIT8(n6,  0, 2)] ^ \
-                t[38][POPBIT8(n6,  2, 2)] ^ \
-                t[37][POPBIT8(n6,  4, 2)] ^ \
-                t[36][POPBIT8(n6,  6, 2)] ^ \
-                t[35][POPBIT8(n7,  0, 2)] ^ \
-                t[34][POPBIT8(n7,  2, 2)] ^ \
-                t[33][POPBIT8(n7,  4, 2)] ^ \
-                t[32][POPBIT8(n7,  6, 2)] ^ \
-                t[31][POPBIT8(n8,  0, 2)] ^ \
-                t[30][POPBIT8(n8,  2, 2)] ^ \
-                t[29][POPBIT8(n8,  4, 2)] ^ \
-                t[28][POPBIT8(n8,  6, 2)] ^ \
-                t[27][POPBIT8(n9,  0, 2)] ^ \
-                t[26][POPBIT8(n9,  2, 2)] ^ \
-                t[25][POPBIT8(n9,  4, 2)] ^ \
-                t[24][POPBIT8(n9,  6, 2)] ^ \
-                t[23][POPBIT8(n10, 0, 2)] ^ \
-                t[22][POPBIT8(n10, 2, 2)] ^ \
-                t[21][POPBIT8(n10, 4, 2)] ^ \
-                t[20][POPBIT8(n10, 6, 2)] ^ \
-                t[19][POPBIT8(n11, 0, 2)] ^ \
-                t[18][POPBIT8(n11, 2, 2)] ^ \
-                t[17][POPBIT8(n11, 4, 2)] ^ \
-                t[16][POPBIT8(n11, 6, 2)] ^ \
-                t[15][POPBIT8(n12, 0, 2)] ^ \
-                t[14][POPBIT8(n12, 2, 2)] ^ \
-                t[13][POPBIT8(n12, 4, 2)] ^ \
-                t[12][POPBIT8(n12, 6, 2)] ^ \
-                t[11][POPBIT8(n13, 0, 2)] ^ \
-                t[10][POPBIT8(n13, 2, 2)] ^ \
-                t[ 9][POPBIT8(n13, 4, 2)] ^ \
-                t[ 8][POPBIT8(n13, 6, 2)] ^ \
-                t[ 7][POPBIT8(n14, 0, 2)] ^ \
-                t[ 6][POPBIT8(n14, 2, 2)] ^ \
-                t[ 5][POPBIT8(n14, 4, 2)] ^ \
-                t[ 4][POPBIT8(n14, 6, 2)] ^ \
-                t[ 3][POPBIT8(n15, 0, 2)] ^ \
-                t[ 2][POPBIT8(n15, 2, 2)] ^ \
-                t[ 1][POPBIT8(n15, 4, 2)] ^ \
-                t[ 0][POPBIT8(n15, 6, 2)]; \
+                t[63][SLICE8(n0,  0, 2)] ^ \
+                t[62][SLICE8(n0,  2, 2)] ^ \
+                t[61][SLICE8(n0,  4, 2)] ^ \
+                t[60][SLICE8(n0,  6, 2)] ^ \
+                t[59][SLICE8(n1,  0, 2)] ^ \
+                t[58][SLICE8(n1,  2, 2)] ^ \
+                t[57][SLICE8(n1,  4, 2)] ^ \
+                t[56][SLICE8(n1,  6, 2)] ^ \
+                t[55][SLICE8(n2,  0, 2)] ^ \
+                t[54][SLICE8(n2,  2, 2)] ^ \
+                t[53][SLICE8(n2,  4, 2)] ^ \
+                t[52][SLICE8(n2,  6, 2)] ^ \
+                t[51][SLICE8(n3,  0, 2)] ^ \
+                t[50][SLICE8(n3,  2, 2)] ^ \
+                t[49][SLICE8(n3,  4, 2)] ^ \
+                t[48][SLICE8(n3,  6, 2)] ^ \
+                t[47][SLICE8(n4,  0, 2)] ^ \
+                t[46][SLICE8(n4,  2, 2)] ^ \
+                t[45][SLICE8(n4,  4, 2)] ^ \
+                t[44][SLICE8(n4,  6, 2)] ^ \
+                t[43][SLICE8(n5,  0, 2)] ^ \
+                t[42][SLICE8(n5,  2, 2)] ^ \
+                t[41][SLICE8(n5,  4, 2)] ^ \
+                t[40][SLICE8(n5,  6, 2)] ^ \
+                t[39][SLICE8(n6,  0, 2)] ^ \
+                t[38][SLICE8(n6,  2, 2)] ^ \
+                t[37][SLICE8(n6,  4, 2)] ^ \
+                t[36][SLICE8(n6,  6, 2)] ^ \
+                t[35][SLICE8(n7,  0, 2)] ^ \
+                t[34][SLICE8(n7,  2, 2)] ^ \
+                t[33][SLICE8(n7,  4, 2)] ^ \
+                t[32][SLICE8(n7,  6, 2)] ^ \
+                t[31][SLICE8(n8,  0, 2)] ^ \
+                t[30][SLICE8(n8,  2, 2)] ^ \
+                t[29][SLICE8(n8,  4, 2)] ^ \
+                t[28][SLICE8(n8,  6, 2)] ^ \
+                t[27][SLICE8(n9,  0, 2)] ^ \
+                t[26][SLICE8(n9,  2, 2)] ^ \
+                t[25][SLICE8(n9,  4, 2)] ^ \
+                t[24][SLICE8(n9,  6, 2)] ^ \
+                t[23][SLICE8(n10, 0, 2)] ^ \
+                t[22][SLICE8(n10, 2, 2)] ^ \
+                t[21][SLICE8(n10, 4, 2)] ^ \
+                t[20][SLICE8(n10, 6, 2)] ^ \
+                t[19][SLICE8(n11, 0, 2)] ^ \
+                t[18][SLICE8(n11, 2, 2)] ^ \
+                t[17][SLICE8(n11, 4, 2)] ^ \
+                t[16][SLICE8(n11, 6, 2)] ^ \
+                t[15][SLICE8(n12, 0, 2)] ^ \
+                t[14][SLICE8(n12, 2, 2)] ^ \
+                t[13][SLICE8(n12, 4, 2)] ^ \
+                t[12][SLICE8(n12, 6, 2)] ^ \
+                t[11][SLICE8(n13, 0, 2)] ^ \
+                t[10][SLICE8(n13, 2, 2)] ^ \
+                t[ 9][SLICE8(n13, 4, 2)] ^ \
+                t[ 8][SLICE8(n13, 6, 2)] ^ \
+                t[ 7][SLICE8(n14, 0, 2)] ^ \
+                t[ 6][SLICE8(n14, 2, 2)] ^ \
+                t[ 5][SLICE8(n14, 4, 2)] ^ \
+                t[ 4][SLICE8(n14, 6, 2)] ^ \
+                t[ 3][SLICE8(n15, 0, 2)] ^ \
+                t[ 2][SLICE8(n15, 2, 2)] ^ \
+                t[ 1][SLICE8(n15, 4, 2)] ^ \
+                t[ 0][SLICE8(n15, 6, 2)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_DUO_DECL);
@@ -828,177 +828,177 @@ CRCEA_UPDATE_BY32_DUO(const crcea_model *model, const char *p, const char *pp, C
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
-#define CRCEA_BY32_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY32_DUO_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
-        const uint8_t n0  = (uint8_t)p[ 0] ^ POPBIT(state,   0, 8); \
-        const uint8_t n1  = (uint8_t)p[ 1] ^ POPBIT(state,   8, 8); \
-        const uint8_t n2  = (uint8_t)p[ 2] ^ POPBIT(state,  16, 8); \
-        const uint8_t n3  = (uint8_t)p[ 3] ^ POPBIT(state,  24, 8); \
-        const uint8_t n4  = (uint8_t)p[ 4] ^ POPBIT(state,  32, 8); \
-        const uint8_t n5  = (uint8_t)p[ 5] ^ POPBIT(state,  40, 8); \
-        const uint8_t n6  = (uint8_t)p[ 6] ^ POPBIT(state,  48, 8); \
-        const uint8_t n7  = (uint8_t)p[ 7] ^ POPBIT(state,  56, 8); \
-        const uint8_t n8  = (uint8_t)p[ 8] ^ POPBIT(state,  64, 8); \
-        const uint8_t n9  = (uint8_t)p[ 9] ^ POPBIT(state,  72, 8); \
-        const uint8_t n10 = (uint8_t)p[10] ^ POPBIT(state,  80, 8); \
-        const uint8_t n11 = (uint8_t)p[11] ^ POPBIT(state,  88, 8); \
-        const uint8_t n12 = (uint8_t)p[12] ^ POPBIT(state,  96, 8); \
-        const uint8_t n13 = (uint8_t)p[13] ^ POPBIT(state, 104, 8); \
-        const uint8_t n14 = (uint8_t)p[14] ^ POPBIT(state, 112, 8); \
-        const uint8_t n15 = (uint8_t)p[15] ^ POPBIT(state, 120, 8); \
-        const uint8_t n16 = (uint8_t)p[16] ^ POPBIT(state, 128, 8); \
-        const uint8_t n17 = (uint8_t)p[17] ^ POPBIT(state, 136, 8); \
-        const uint8_t n18 = (uint8_t)p[18] ^ POPBIT(state, 144, 8); \
-        const uint8_t n19 = (uint8_t)p[19] ^ POPBIT(state, 152, 8); \
-        const uint8_t n20 = (uint8_t)p[20] ^ POPBIT(state, 160, 8); \
-        const uint8_t n21 = (uint8_t)p[21] ^ POPBIT(state, 168, 8); \
-        const uint8_t n22 = (uint8_t)p[22] ^ POPBIT(state, 176, 8); \
-        const uint8_t n23 = (uint8_t)p[23] ^ POPBIT(state, 184, 8); \
-        const uint8_t n24 = (uint8_t)p[24] ^ POPBIT(state, 192, 8); \
-        const uint8_t n25 = (uint8_t)p[25] ^ POPBIT(state, 200, 8); \
-        const uint8_t n26 = (uint8_t)p[26] ^ POPBIT(state, 208, 8); \
-        const uint8_t n27 = (uint8_t)p[27] ^ POPBIT(state, 216, 8); \
-        const uint8_t n28 = (uint8_t)p[28] ^ POPBIT(state, 224, 8); \
-        const uint8_t n29 = (uint8_t)p[29] ^ POPBIT(state, 232, 8); \
-        const uint8_t n30 = (uint8_t)p[30] ^ POPBIT(state, 240, 8); \
-        const uint8_t n31 = (uint8_t)p[31] ^ POPBIT(state, 248, 8); \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ SLICE(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ SLICE(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ SLICE(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ SLICE(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ SLICE(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ SLICE(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ SLICE(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ SLICE(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ SLICE(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ SLICE(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ SLICE(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ SLICE(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ SLICE(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ SLICE(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ SLICE(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ SLICE(state, 120, 8); \
+        const uint8_t n16 = (uint8_t)p[16] ^ SLICE(state, 128, 8); \
+        const uint8_t n17 = (uint8_t)p[17] ^ SLICE(state, 136, 8); \
+        const uint8_t n18 = (uint8_t)p[18] ^ SLICE(state, 144, 8); \
+        const uint8_t n19 = (uint8_t)p[19] ^ SLICE(state, 152, 8); \
+        const uint8_t n20 = (uint8_t)p[20] ^ SLICE(state, 160, 8); \
+        const uint8_t n21 = (uint8_t)p[21] ^ SLICE(state, 168, 8); \
+        const uint8_t n22 = (uint8_t)p[22] ^ SLICE(state, 176, 8); \
+        const uint8_t n23 = (uint8_t)p[23] ^ SLICE(state, 184, 8); \
+        const uint8_t n24 = (uint8_t)p[24] ^ SLICE(state, 192, 8); \
+        const uint8_t n25 = (uint8_t)p[25] ^ SLICE(state, 200, 8); \
+        const uint8_t n26 = (uint8_t)p[26] ^ SLICE(state, 208, 8); \
+        const uint8_t n27 = (uint8_t)p[27] ^ SLICE(state, 216, 8); \
+        const uint8_t n28 = (uint8_t)p[28] ^ SLICE(state, 224, 8); \
+        const uint8_t n29 = (uint8_t)p[29] ^ SLICE(state, 232, 8); \
+        const uint8_t n30 = (uint8_t)p[30] ^ SLICE(state, 240, 8); \
+        const uint8_t n31 = (uint8_t)p[31] ^ SLICE(state, 248, 8); \
         state = SHIFT(state, 256) ^ \
-                t[127][POPBIT8(n0,  0, 2)] ^ \
-                t[126][POPBIT8(n0,  2, 2)] ^ \
-                t[125][POPBIT8(n0,  4, 2)] ^ \
-                t[124][POPBIT8(n0,  6, 2)] ^ \
-                t[123][POPBIT8(n1,  0, 2)] ^ \
-                t[122][POPBIT8(n1,  2, 2)] ^ \
-                t[121][POPBIT8(n1,  4, 2)] ^ \
-                t[120][POPBIT8(n1,  6, 2)] ^ \
-                t[119][POPBIT8(n2,  0, 2)] ^ \
-                t[118][POPBIT8(n2,  2, 2)] ^ \
-                t[117][POPBIT8(n2,  4, 2)] ^ \
-                t[116][POPBIT8(n2,  6, 2)] ^ \
-                t[115][POPBIT8(n3,  0, 2)] ^ \
-                t[114][POPBIT8(n3,  2, 2)] ^ \
-                t[113][POPBIT8(n3,  4, 2)] ^ \
-                t[112][POPBIT8(n3,  6, 2)] ^ \
-                t[111][POPBIT8(n4,  0, 2)] ^ \
-                t[110][POPBIT8(n4,  2, 2)] ^ \
-                t[109][POPBIT8(n4,  4, 2)] ^ \
-                t[108][POPBIT8(n4,  6, 2)] ^ \
-                t[107][POPBIT8(n5,  0, 2)] ^ \
-                t[106][POPBIT8(n5,  2, 2)] ^ \
-                t[105][POPBIT8(n5,  4, 2)] ^ \
-                t[104][POPBIT8(n5,  6, 2)] ^ \
-                t[103][POPBIT8(n6,  0, 2)] ^ \
-                t[102][POPBIT8(n6,  2, 2)] ^ \
-                t[101][POPBIT8(n6,  4, 2)] ^ \
-                t[100][POPBIT8(n6,  6, 2)] ^ \
-                t[ 99][POPBIT8(n7,  0, 2)] ^ \
-                t[ 98][POPBIT8(n7,  2, 2)] ^ \
-                t[ 97][POPBIT8(n7,  4, 2)] ^ \
-                t[ 96][POPBIT8(n7,  6, 2)] ^ \
-                t[ 95][POPBIT8(n8,  0, 2)] ^ \
-                t[ 94][POPBIT8(n8,  2, 2)] ^ \
-                t[ 93][POPBIT8(n8,  4, 2)] ^ \
-                t[ 92][POPBIT8(n8,  6, 2)] ^ \
-                t[ 91][POPBIT8(n9,  0, 2)] ^ \
-                t[ 90][POPBIT8(n9,  2, 2)] ^ \
-                t[ 89][POPBIT8(n9,  4, 2)] ^ \
-                t[ 88][POPBIT8(n9,  6, 2)] ^ \
-                t[ 87][POPBIT8(n10, 0, 2)] ^ \
-                t[ 86][POPBIT8(n10, 2, 2)] ^ \
-                t[ 85][POPBIT8(n10, 4, 2)] ^ \
-                t[ 84][POPBIT8(n10, 6, 2)] ^ \
-                t[ 83][POPBIT8(n11, 0, 2)] ^ \
-                t[ 82][POPBIT8(n11, 2, 2)] ^ \
-                t[ 81][POPBIT8(n11, 4, 2)] ^ \
-                t[ 80][POPBIT8(n11, 6, 2)] ^ \
-                t[ 79][POPBIT8(n12, 0, 2)] ^ \
-                t[ 78][POPBIT8(n12, 2, 2)] ^ \
-                t[ 77][POPBIT8(n12, 4, 2)] ^ \
-                t[ 76][POPBIT8(n12, 6, 2)] ^ \
-                t[ 75][POPBIT8(n13, 0, 2)] ^ \
-                t[ 74][POPBIT8(n13, 2, 2)] ^ \
-                t[ 73][POPBIT8(n13, 4, 2)] ^ \
-                t[ 72][POPBIT8(n13, 6, 2)] ^ \
-                t[ 71][POPBIT8(n14, 0, 2)] ^ \
-                t[ 70][POPBIT8(n14, 2, 2)] ^ \
-                t[ 69][POPBIT8(n14, 4, 2)] ^ \
-                t[ 68][POPBIT8(n14, 6, 2)] ^ \
-                t[ 67][POPBIT8(n15, 0, 2)] ^ \
-                t[ 66][POPBIT8(n15, 2, 2)] ^ \
-                t[ 65][POPBIT8(n15, 4, 2)] ^ \
-                t[ 64][POPBIT8(n15, 6, 2)] ^ \
-                t[ 63][POPBIT8(n16, 0, 2)] ^ \
-                t[ 62][POPBIT8(n16, 2, 2)] ^ \
-                t[ 61][POPBIT8(n16, 4, 2)] ^ \
-                t[ 60][POPBIT8(n16, 6, 2)] ^ \
-                t[ 59][POPBIT8(n17, 0, 2)] ^ \
-                t[ 58][POPBIT8(n17, 2, 2)] ^ \
-                t[ 57][POPBIT8(n17, 4, 2)] ^ \
-                t[ 56][POPBIT8(n17, 6, 2)] ^ \
-                t[ 55][POPBIT8(n18, 0, 2)] ^ \
-                t[ 54][POPBIT8(n18, 2, 2)] ^ \
-                t[ 53][POPBIT8(n18, 4, 2)] ^ \
-                t[ 52][POPBIT8(n18, 6, 2)] ^ \
-                t[ 51][POPBIT8(n19, 0, 2)] ^ \
-                t[ 50][POPBIT8(n19, 2, 2)] ^ \
-                t[ 49][POPBIT8(n19, 4, 2)] ^ \
-                t[ 48][POPBIT8(n19, 6, 2)] ^ \
-                t[ 47][POPBIT8(n20, 0, 2)] ^ \
-                t[ 46][POPBIT8(n20, 2, 2)] ^ \
-                t[ 45][POPBIT8(n20, 4, 2)] ^ \
-                t[ 44][POPBIT8(n20, 6, 2)] ^ \
-                t[ 43][POPBIT8(n21, 0, 2)] ^ \
-                t[ 42][POPBIT8(n21, 2, 2)] ^ \
-                t[ 41][POPBIT8(n21, 4, 2)] ^ \
-                t[ 40][POPBIT8(n21, 6, 2)] ^ \
-                t[ 39][POPBIT8(n22, 0, 2)] ^ \
-                t[ 38][POPBIT8(n22, 2, 2)] ^ \
-                t[ 37][POPBIT8(n22, 4, 2)] ^ \
-                t[ 36][POPBIT8(n22, 6, 2)] ^ \
-                t[ 35][POPBIT8(n23, 0, 2)] ^ \
-                t[ 34][POPBIT8(n23, 2, 2)] ^ \
-                t[ 33][POPBIT8(n23, 4, 2)] ^ \
-                t[ 32][POPBIT8(n23, 6, 2)] ^ \
-                t[ 31][POPBIT8(n24, 0, 2)] ^ \
-                t[ 30][POPBIT8(n24, 2, 2)] ^ \
-                t[ 29][POPBIT8(n24, 4, 2)] ^ \
-                t[ 28][POPBIT8(n24, 6, 2)] ^ \
-                t[ 27][POPBIT8(n25, 0, 2)] ^ \
-                t[ 26][POPBIT8(n25, 2, 2)] ^ \
-                t[ 25][POPBIT8(n25, 4, 2)] ^ \
-                t[ 24][POPBIT8(n25, 6, 2)] ^ \
-                t[ 23][POPBIT8(n26, 0, 2)] ^ \
-                t[ 22][POPBIT8(n26, 2, 2)] ^ \
-                t[ 21][POPBIT8(n26, 4, 2)] ^ \
-                t[ 20][POPBIT8(n26, 6, 2)] ^ \
-                t[ 19][POPBIT8(n27, 0, 2)] ^ \
-                t[ 18][POPBIT8(n27, 2, 2)] ^ \
-                t[ 17][POPBIT8(n27, 4, 2)] ^ \
-                t[ 16][POPBIT8(n27, 6, 2)] ^ \
-                t[ 15][POPBIT8(n28, 0, 2)] ^ \
-                t[ 14][POPBIT8(n28, 2, 2)] ^ \
-                t[ 13][POPBIT8(n28, 4, 2)] ^ \
-                t[ 12][POPBIT8(n28, 6, 2)] ^ \
-                t[ 11][POPBIT8(n29, 0, 2)] ^ \
-                t[ 10][POPBIT8(n29, 2, 2)] ^ \
-                t[  9][POPBIT8(n29, 4, 2)] ^ \
-                t[  8][POPBIT8(n29, 6, 2)] ^ \
-                t[  7][POPBIT8(n30, 0, 2)] ^ \
-                t[  6][POPBIT8(n30, 2, 2)] ^ \
-                t[  5][POPBIT8(n30, 4, 2)] ^ \
-                t[  4][POPBIT8(n30, 6, 2)] ^ \
-                t[  3][POPBIT8(n31, 0, 2)] ^ \
-                t[  2][POPBIT8(n31, 2, 2)] ^ \
-                t[  1][POPBIT8(n31, 4, 2)] ^ \
-                t[  0][POPBIT8(n31, 6, 2)]; \
+                t[127][SLICE8(n0,  0, 2)] ^ \
+                t[126][SLICE8(n0,  2, 2)] ^ \
+                t[125][SLICE8(n0,  4, 2)] ^ \
+                t[124][SLICE8(n0,  6, 2)] ^ \
+                t[123][SLICE8(n1,  0, 2)] ^ \
+                t[122][SLICE8(n1,  2, 2)] ^ \
+                t[121][SLICE8(n1,  4, 2)] ^ \
+                t[120][SLICE8(n1,  6, 2)] ^ \
+                t[119][SLICE8(n2,  0, 2)] ^ \
+                t[118][SLICE8(n2,  2, 2)] ^ \
+                t[117][SLICE8(n2,  4, 2)] ^ \
+                t[116][SLICE8(n2,  6, 2)] ^ \
+                t[115][SLICE8(n3,  0, 2)] ^ \
+                t[114][SLICE8(n3,  2, 2)] ^ \
+                t[113][SLICE8(n3,  4, 2)] ^ \
+                t[112][SLICE8(n3,  6, 2)] ^ \
+                t[111][SLICE8(n4,  0, 2)] ^ \
+                t[110][SLICE8(n4,  2, 2)] ^ \
+                t[109][SLICE8(n4,  4, 2)] ^ \
+                t[108][SLICE8(n4,  6, 2)] ^ \
+                t[107][SLICE8(n5,  0, 2)] ^ \
+                t[106][SLICE8(n5,  2, 2)] ^ \
+                t[105][SLICE8(n5,  4, 2)] ^ \
+                t[104][SLICE8(n5,  6, 2)] ^ \
+                t[103][SLICE8(n6,  0, 2)] ^ \
+                t[102][SLICE8(n6,  2, 2)] ^ \
+                t[101][SLICE8(n6,  4, 2)] ^ \
+                t[100][SLICE8(n6,  6, 2)] ^ \
+                t[ 99][SLICE8(n7,  0, 2)] ^ \
+                t[ 98][SLICE8(n7,  2, 2)] ^ \
+                t[ 97][SLICE8(n7,  4, 2)] ^ \
+                t[ 96][SLICE8(n7,  6, 2)] ^ \
+                t[ 95][SLICE8(n8,  0, 2)] ^ \
+                t[ 94][SLICE8(n8,  2, 2)] ^ \
+                t[ 93][SLICE8(n8,  4, 2)] ^ \
+                t[ 92][SLICE8(n8,  6, 2)] ^ \
+                t[ 91][SLICE8(n9,  0, 2)] ^ \
+                t[ 90][SLICE8(n9,  2, 2)] ^ \
+                t[ 89][SLICE8(n9,  4, 2)] ^ \
+                t[ 88][SLICE8(n9,  6, 2)] ^ \
+                t[ 87][SLICE8(n10, 0, 2)] ^ \
+                t[ 86][SLICE8(n10, 2, 2)] ^ \
+                t[ 85][SLICE8(n10, 4, 2)] ^ \
+                t[ 84][SLICE8(n10, 6, 2)] ^ \
+                t[ 83][SLICE8(n11, 0, 2)] ^ \
+                t[ 82][SLICE8(n11, 2, 2)] ^ \
+                t[ 81][SLICE8(n11, 4, 2)] ^ \
+                t[ 80][SLICE8(n11, 6, 2)] ^ \
+                t[ 79][SLICE8(n12, 0, 2)] ^ \
+                t[ 78][SLICE8(n12, 2, 2)] ^ \
+                t[ 77][SLICE8(n12, 4, 2)] ^ \
+                t[ 76][SLICE8(n12, 6, 2)] ^ \
+                t[ 75][SLICE8(n13, 0, 2)] ^ \
+                t[ 74][SLICE8(n13, 2, 2)] ^ \
+                t[ 73][SLICE8(n13, 4, 2)] ^ \
+                t[ 72][SLICE8(n13, 6, 2)] ^ \
+                t[ 71][SLICE8(n14, 0, 2)] ^ \
+                t[ 70][SLICE8(n14, 2, 2)] ^ \
+                t[ 69][SLICE8(n14, 4, 2)] ^ \
+                t[ 68][SLICE8(n14, 6, 2)] ^ \
+                t[ 67][SLICE8(n15, 0, 2)] ^ \
+                t[ 66][SLICE8(n15, 2, 2)] ^ \
+                t[ 65][SLICE8(n15, 4, 2)] ^ \
+                t[ 64][SLICE8(n15, 6, 2)] ^ \
+                t[ 63][SLICE8(n16, 0, 2)] ^ \
+                t[ 62][SLICE8(n16, 2, 2)] ^ \
+                t[ 61][SLICE8(n16, 4, 2)] ^ \
+                t[ 60][SLICE8(n16, 6, 2)] ^ \
+                t[ 59][SLICE8(n17, 0, 2)] ^ \
+                t[ 58][SLICE8(n17, 2, 2)] ^ \
+                t[ 57][SLICE8(n17, 4, 2)] ^ \
+                t[ 56][SLICE8(n17, 6, 2)] ^ \
+                t[ 55][SLICE8(n18, 0, 2)] ^ \
+                t[ 54][SLICE8(n18, 2, 2)] ^ \
+                t[ 53][SLICE8(n18, 4, 2)] ^ \
+                t[ 52][SLICE8(n18, 6, 2)] ^ \
+                t[ 51][SLICE8(n19, 0, 2)] ^ \
+                t[ 50][SLICE8(n19, 2, 2)] ^ \
+                t[ 49][SLICE8(n19, 4, 2)] ^ \
+                t[ 48][SLICE8(n19, 6, 2)] ^ \
+                t[ 47][SLICE8(n20, 0, 2)] ^ \
+                t[ 46][SLICE8(n20, 2, 2)] ^ \
+                t[ 45][SLICE8(n20, 4, 2)] ^ \
+                t[ 44][SLICE8(n20, 6, 2)] ^ \
+                t[ 43][SLICE8(n21, 0, 2)] ^ \
+                t[ 42][SLICE8(n21, 2, 2)] ^ \
+                t[ 41][SLICE8(n21, 4, 2)] ^ \
+                t[ 40][SLICE8(n21, 6, 2)] ^ \
+                t[ 39][SLICE8(n22, 0, 2)] ^ \
+                t[ 38][SLICE8(n22, 2, 2)] ^ \
+                t[ 37][SLICE8(n22, 4, 2)] ^ \
+                t[ 36][SLICE8(n22, 6, 2)] ^ \
+                t[ 35][SLICE8(n23, 0, 2)] ^ \
+                t[ 34][SLICE8(n23, 2, 2)] ^ \
+                t[ 33][SLICE8(n23, 4, 2)] ^ \
+                t[ 32][SLICE8(n23, 6, 2)] ^ \
+                t[ 31][SLICE8(n24, 0, 2)] ^ \
+                t[ 30][SLICE8(n24, 2, 2)] ^ \
+                t[ 29][SLICE8(n24, 4, 2)] ^ \
+                t[ 28][SLICE8(n24, 6, 2)] ^ \
+                t[ 27][SLICE8(n25, 0, 2)] ^ \
+                t[ 26][SLICE8(n25, 2, 2)] ^ \
+                t[ 25][SLICE8(n25, 4, 2)] ^ \
+                t[ 24][SLICE8(n25, 6, 2)] ^ \
+                t[ 23][SLICE8(n26, 0, 2)] ^ \
+                t[ 22][SLICE8(n26, 2, 2)] ^ \
+                t[ 21][SLICE8(n26, 4, 2)] ^ \
+                t[ 20][SLICE8(n26, 6, 2)] ^ \
+                t[ 19][SLICE8(n27, 0, 2)] ^ \
+                t[ 18][SLICE8(n27, 2, 2)] ^ \
+                t[ 17][SLICE8(n27, 4, 2)] ^ \
+                t[ 16][SLICE8(n27, 6, 2)] ^ \
+                t[ 15][SLICE8(n28, 0, 2)] ^ \
+                t[ 14][SLICE8(n28, 2, 2)] ^ \
+                t[ 13][SLICE8(n28, 4, 2)] ^ \
+                t[ 12][SLICE8(n28, 6, 2)] ^ \
+                t[ 11][SLICE8(n29, 0, 2)] ^ \
+                t[ 10][SLICE8(n29, 2, 2)] ^ \
+                t[  9][SLICE8(n29, 4, 2)] ^ \
+                t[  8][SLICE8(n29, 6, 2)] ^ \
+                t[  7][SLICE8(n30, 0, 2)] ^ \
+                t[  6][SLICE8(n30, 2, 2)] ^ \
+                t[  5][SLICE8(n30, 4, 2)] ^ \
+                t[  4][SLICE8(n30, 6, 2)] ^ \
+                t[  3][SLICE8(n31, 0, 2)] ^ \
+                t[  2][SLICE8(n31, 2, 2)] ^ \
+                t[  1][SLICE8(n31, 4, 2)] ^ \
+                t[  0][SLICE8(n31, 6, 2)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[3][POPBIT8(n, 0, 2)] ^ \
-                t[2][POPBIT8(n, 2, 2)] ^ \
-                t[1][POPBIT8(n, 4, 2)] ^ \
-                t[0][POPBIT8(n, 6, 2)];                   \
+                t[3][SLICE8(n, 0, 2)] ^ \
+                t[2][SLICE8(n, 2, 2)] ^ \
+                t[1][SLICE8(n, 4, 2)] ^ \
+                t[0][SLICE8(n, 6, 2)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_DUO_DECL);
@@ -1014,11 +1014,11 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp,
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
-#define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
-        state = SHIFT(state, 4) ^ t[POPBIT(state, 0, 4)];                   \
+        state = SHIFT(state, 4) ^ t[SLICE(state, 0, 4)];                   \
+        state = SHIFT(state, 4) ^ t[SLICE(state, 0, 4)];                   \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY_QUARTET_DECL);
@@ -1034,13 +1034,13 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY1_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY1_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_QUARTET_DECL);
@@ -1056,21 +1056,21 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY2_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY2_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ POPBIT(state, 0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ POPBIT(state, 8, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ SLICE(state, 0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ SLICE(state, 8, 8); \
         state = SHIFT(state, 16) ^ \
-                t[3][POPBIT8(n0, 0, 4)] ^ \
-                t[2][POPBIT8(n0, 4, 4)] ^ \
-                t[1][POPBIT8(n1, 0, 4)] ^ \
-                t[0][POPBIT8(n1, 4, 4)]; \
+                t[3][SLICE8(n0, 0, 4)] ^ \
+                t[2][SLICE8(n0, 4, 4)] ^ \
+                t[1][SLICE8(n1, 0, 4)] ^ \
+                t[0][SLICE8(n1, 4, 4)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_QUARTET_DECL);
@@ -1086,27 +1086,27 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY4_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY4_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)POPBIT(state,  0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)POPBIT(state,  8, 8); \
-        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)POPBIT(state, 16, 8); \
-        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)POPBIT(state, 24, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)SLICE(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)SLICE(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)SLICE(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)SLICE(state, 24, 8); \
         state = SHIFT(state, 32) ^ \
-                t[7][POPBIT8(n0, 0, 4)] ^ \
-                t[6][POPBIT8(n0, 4, 4)] ^ \
-                t[5][POPBIT8(n1, 0, 4)] ^ \
-                t[4][POPBIT8(n1, 4, 4)] ^ \
-                t[3][POPBIT8(n2, 0, 4)] ^ \
-                t[2][POPBIT8(n2, 4, 4)] ^ \
-                t[1][POPBIT8(n3, 0, 4)] ^ \
-                t[0][POPBIT8(n3, 4, 4)]; \
+                t[7][SLICE8(n0, 0, 4)] ^ \
+                t[6][SLICE8(n0, 4, 4)] ^ \
+                t[5][SLICE8(n1, 0, 4)] ^ \
+                t[4][SLICE8(n1, 4, 4)] ^ \
+                t[3][SLICE8(n2, 0, 4)] ^ \
+                t[2][SLICE8(n2, 4, 4)] ^ \
+                t[1][SLICE8(n3, 0, 4)] ^ \
+                t[0][SLICE8(n3, 4, 4)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_QUARTET_DECL);
@@ -1122,39 +1122,39 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY8_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY8_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
-        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)POPBIT(state,  0, 8); \
-        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)POPBIT(state,  8, 8); \
-        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)POPBIT(state, 16, 8); \
-        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)POPBIT(state, 24, 8); \
-        const uint8_t n4 = (uint8_t)p[4] ^ (uint8_t)POPBIT(state, 32, 8); \
-        const uint8_t n5 = (uint8_t)p[5] ^ (uint8_t)POPBIT(state, 40, 8); \
-        const uint8_t n6 = (uint8_t)p[6] ^ (uint8_t)POPBIT(state, 48, 8); \
-        const uint8_t n7 = (uint8_t)p[7] ^ (uint8_t)POPBIT(state, 56, 8); \
+        const uint8_t n0 = (uint8_t)p[0] ^ (uint8_t)SLICE(state,  0, 8); \
+        const uint8_t n1 = (uint8_t)p[1] ^ (uint8_t)SLICE(state,  8, 8); \
+        const uint8_t n2 = (uint8_t)p[2] ^ (uint8_t)SLICE(state, 16, 8); \
+        const uint8_t n3 = (uint8_t)p[3] ^ (uint8_t)SLICE(state, 24, 8); \
+        const uint8_t n4 = (uint8_t)p[4] ^ (uint8_t)SLICE(state, 32, 8); \
+        const uint8_t n5 = (uint8_t)p[5] ^ (uint8_t)SLICE(state, 40, 8); \
+        const uint8_t n6 = (uint8_t)p[6] ^ (uint8_t)SLICE(state, 48, 8); \
+        const uint8_t n7 = (uint8_t)p[7] ^ (uint8_t)SLICE(state, 56, 8); \
         state = SHIFT(state, 64) ^ \
-                t[15][POPBIT8(n0, 0, 4)] ^ \
-                t[14][POPBIT8(n0, 4, 4)] ^ \
-                t[13][POPBIT8(n1, 0, 4)] ^ \
-                t[12][POPBIT8(n1, 4, 4)] ^ \
-                t[11][POPBIT8(n2, 0, 4)] ^ \
-                t[10][POPBIT8(n2, 4, 4)] ^ \
-                t[ 9][POPBIT8(n3, 0, 4)] ^ \
-                t[ 8][POPBIT8(n3, 4, 4)] ^ \
-                t[ 7][POPBIT8(n4, 0, 4)] ^ \
-                t[ 6][POPBIT8(n4, 4, 4)] ^ \
-                t[ 5][POPBIT8(n5, 0, 4)] ^ \
-                t[ 4][POPBIT8(n5, 4, 4)] ^ \
-                t[ 3][POPBIT8(n6, 0, 4)] ^ \
-                t[ 2][POPBIT8(n6, 4, 4)] ^ \
-                t[ 1][POPBIT8(n7, 0, 4)] ^ \
-                t[ 0][POPBIT8(n7, 4, 4)]; \
+                t[15][SLICE8(n0, 0, 4)] ^ \
+                t[14][SLICE8(n0, 4, 4)] ^ \
+                t[13][SLICE8(n1, 0, 4)] ^ \
+                t[12][SLICE8(n1, 4, 4)] ^ \
+                t[11][SLICE8(n2, 0, 4)] ^ \
+                t[10][SLICE8(n2, 4, 4)] ^ \
+                t[ 9][SLICE8(n3, 0, 4)] ^ \
+                t[ 8][SLICE8(n3, 4, 4)] ^ \
+                t[ 7][SLICE8(n4, 0, 4)] ^ \
+                t[ 6][SLICE8(n4, 4, 4)] ^ \
+                t[ 5][SLICE8(n5, 0, 4)] ^ \
+                t[ 4][SLICE8(n5, 4, 4)] ^ \
+                t[ 3][SLICE8(n6, 0, 4)] ^ \
+                t[ 2][SLICE8(n6, 4, 4)] ^ \
+                t[ 1][SLICE8(n7, 0, 4)] ^ \
+                t[ 0][SLICE8(n7, 4, 4)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_QUARTET_DECL);
@@ -1170,63 +1170,63 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *p
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY16_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY16_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
-        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)POPBIT(state,   0, 8); \
-        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)POPBIT(state,   8, 8); \
-        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)POPBIT(state,  16, 8); \
-        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)POPBIT(state,  24, 8); \
-        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)POPBIT(state,  32, 8); \
-        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)POPBIT(state,  40, 8); \
-        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)POPBIT(state,  48, 8); \
-        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)POPBIT(state,  56, 8); \
-        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)POPBIT(state,  64, 8); \
-        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)POPBIT(state,  72, 8); \
-        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)POPBIT(state,  80, 8); \
-        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)POPBIT(state,  88, 8); \
-        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)POPBIT(state,  96, 8); \
-        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)POPBIT(state, 104, 8); \
-        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)POPBIT(state, 112, 8); \
-        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)POPBIT(state, 120, 8); \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)SLICE(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)SLICE(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)SLICE(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)SLICE(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)SLICE(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)SLICE(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)SLICE(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)SLICE(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)SLICE(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)SLICE(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)SLICE(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)SLICE(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)SLICE(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)SLICE(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)SLICE(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)SLICE(state, 120, 8); \
         state = SHIFT(state, 128) ^ \
-                t[31][POPBIT8(n0,  0, 4)] ^ \
-                t[30][POPBIT8(n0,  4, 4)] ^ \
-                t[29][POPBIT8(n1,  0, 4)] ^ \
-                t[28][POPBIT8(n1,  4, 4)] ^ \
-                t[27][POPBIT8(n2,  0, 4)] ^ \
-                t[26][POPBIT8(n2,  4, 4)] ^ \
-                t[25][POPBIT8(n3,  0, 4)] ^ \
-                t[24][POPBIT8(n3,  4, 4)] ^ \
-                t[23][POPBIT8(n4,  0, 4)] ^ \
-                t[22][POPBIT8(n4,  4, 4)] ^ \
-                t[21][POPBIT8(n5,  0, 4)] ^ \
-                t[20][POPBIT8(n5,  4, 4)] ^ \
-                t[19][POPBIT8(n6,  0, 4)] ^ \
-                t[18][POPBIT8(n6,  4, 4)] ^ \
-                t[17][POPBIT8(n7,  0, 4)] ^ \
-                t[16][POPBIT8(n7,  4, 4)] ^ \
-                t[15][POPBIT8(n8,  0, 4)] ^ \
-                t[14][POPBIT8(n8,  4, 4)] ^ \
-                t[13][POPBIT8(n9,  0, 4)] ^ \
-                t[12][POPBIT8(n9,  4, 4)] ^ \
-                t[11][POPBIT8(n10, 0, 4)] ^ \
-                t[10][POPBIT8(n10, 4, 4)] ^ \
-                t[ 9][POPBIT8(n11, 0, 4)] ^ \
-                t[ 8][POPBIT8(n11, 4, 4)] ^ \
-                t[ 7][POPBIT8(n12, 0, 4)] ^ \
-                t[ 6][POPBIT8(n12, 4, 4)] ^ \
-                t[ 5][POPBIT8(n13, 0, 4)] ^ \
-                t[ 4][POPBIT8(n13, 4, 4)] ^ \
-                t[ 3][POPBIT8(n14, 0, 4)] ^ \
-                t[ 2][POPBIT8(n14, 4, 4)] ^ \
-                t[ 1][POPBIT8(n15, 0, 4)] ^ \
-                t[ 0][POPBIT8(n15, 4, 4)]; \
+                t[31][SLICE8(n0,  0, 4)] ^ \
+                t[30][SLICE8(n0,  4, 4)] ^ \
+                t[29][SLICE8(n1,  0, 4)] ^ \
+                t[28][SLICE8(n1,  4, 4)] ^ \
+                t[27][SLICE8(n2,  0, 4)] ^ \
+                t[26][SLICE8(n2,  4, 4)] ^ \
+                t[25][SLICE8(n3,  0, 4)] ^ \
+                t[24][SLICE8(n3,  4, 4)] ^ \
+                t[23][SLICE8(n4,  0, 4)] ^ \
+                t[22][SLICE8(n4,  4, 4)] ^ \
+                t[21][SLICE8(n5,  0, 4)] ^ \
+                t[20][SLICE8(n5,  4, 4)] ^ \
+                t[19][SLICE8(n6,  0, 4)] ^ \
+                t[18][SLICE8(n6,  4, 4)] ^ \
+                t[17][SLICE8(n7,  0, 4)] ^ \
+                t[16][SLICE8(n7,  4, 4)] ^ \
+                t[15][SLICE8(n8,  0, 4)] ^ \
+                t[14][SLICE8(n8,  4, 4)] ^ \
+                t[13][SLICE8(n9,  0, 4)] ^ \
+                t[12][SLICE8(n9,  4, 4)] ^ \
+                t[11][SLICE8(n10, 0, 4)] ^ \
+                t[10][SLICE8(n10, 4, 4)] ^ \
+                t[ 9][SLICE8(n11, 0, 4)] ^ \
+                t[ 8][SLICE8(n11, 4, 4)] ^ \
+                t[ 7][SLICE8(n12, 0, 4)] ^ \
+                t[ 6][SLICE8(n12, 4, 4)] ^ \
+                t[ 5][SLICE8(n13, 0, 4)] ^ \
+                t[ 4][SLICE8(n13, 4, 4)] ^ \
+                t[ 3][SLICE8(n14, 0, 4)] ^ \
+                t[ 2][SLICE8(n14, 4, 4)] ^ \
+                t[ 1][SLICE8(n15, 0, 4)] ^ \
+                t[ 0][SLICE8(n15, 4, 4)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_QUARTET_DECL);
@@ -1242,111 +1242,111 @@ CRCEA_UPDATE_BY32_QUARTET(const crcea_model *model, const char *p, const char *p
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
-#define CRCEA_BY32_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY32_QUARTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
-        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)POPBIT(state,   0, 8); \
-        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)POPBIT(state,   8, 8); \
-        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)POPBIT(state,  16, 8); \
-        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)POPBIT(state,  24, 8); \
-        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)POPBIT(state,  32, 8); \
-        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)POPBIT(state,  40, 8); \
-        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)POPBIT(state,  48, 8); \
-        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)POPBIT(state,  56, 8); \
-        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)POPBIT(state,  64, 8); \
-        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)POPBIT(state,  72, 8); \
-        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)POPBIT(state,  80, 8); \
-        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)POPBIT(state,  88, 8); \
-        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)POPBIT(state,  96, 8); \
-        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)POPBIT(state, 104, 8); \
-        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)POPBIT(state, 112, 8); \
-        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)POPBIT(state, 120, 8); \
-        const uint8_t n16 = (uint8_t)p[16] ^ (uint8_t)POPBIT(state, 128, 8); \
-        const uint8_t n17 = (uint8_t)p[17] ^ (uint8_t)POPBIT(state, 136, 8); \
-        const uint8_t n18 = (uint8_t)p[18] ^ (uint8_t)POPBIT(state, 144, 8); \
-        const uint8_t n19 = (uint8_t)p[19] ^ (uint8_t)POPBIT(state, 152, 8); \
-        const uint8_t n20 = (uint8_t)p[20] ^ (uint8_t)POPBIT(state, 160, 8); \
-        const uint8_t n21 = (uint8_t)p[21] ^ (uint8_t)POPBIT(state, 168, 8); \
-        const uint8_t n22 = (uint8_t)p[22] ^ (uint8_t)POPBIT(state, 176, 8); \
-        const uint8_t n23 = (uint8_t)p[23] ^ (uint8_t)POPBIT(state, 184, 8); \
-        const uint8_t n24 = (uint8_t)p[24] ^ (uint8_t)POPBIT(state, 192, 8); \
-        const uint8_t n25 = (uint8_t)p[25] ^ (uint8_t)POPBIT(state, 200, 8); \
-        const uint8_t n26 = (uint8_t)p[26] ^ (uint8_t)POPBIT(state, 208, 8); \
-        const uint8_t n27 = (uint8_t)p[27] ^ (uint8_t)POPBIT(state, 216, 8); \
-        const uint8_t n28 = (uint8_t)p[28] ^ (uint8_t)POPBIT(state, 224, 8); \
-        const uint8_t n29 = (uint8_t)p[29] ^ (uint8_t)POPBIT(state, 232, 8); \
-        const uint8_t n30 = (uint8_t)p[30] ^ (uint8_t)POPBIT(state, 240, 8); \
-        const uint8_t n31 = (uint8_t)p[31] ^ (uint8_t)POPBIT(state, 248, 8); \
+        const uint8_t n0  = (uint8_t)p[ 0] ^ (uint8_t)SLICE(state,   0, 8); \
+        const uint8_t n1  = (uint8_t)p[ 1] ^ (uint8_t)SLICE(state,   8, 8); \
+        const uint8_t n2  = (uint8_t)p[ 2] ^ (uint8_t)SLICE(state,  16, 8); \
+        const uint8_t n3  = (uint8_t)p[ 3] ^ (uint8_t)SLICE(state,  24, 8); \
+        const uint8_t n4  = (uint8_t)p[ 4] ^ (uint8_t)SLICE(state,  32, 8); \
+        const uint8_t n5  = (uint8_t)p[ 5] ^ (uint8_t)SLICE(state,  40, 8); \
+        const uint8_t n6  = (uint8_t)p[ 6] ^ (uint8_t)SLICE(state,  48, 8); \
+        const uint8_t n7  = (uint8_t)p[ 7] ^ (uint8_t)SLICE(state,  56, 8); \
+        const uint8_t n8  = (uint8_t)p[ 8] ^ (uint8_t)SLICE(state,  64, 8); \
+        const uint8_t n9  = (uint8_t)p[ 9] ^ (uint8_t)SLICE(state,  72, 8); \
+        const uint8_t n10 = (uint8_t)p[10] ^ (uint8_t)SLICE(state,  80, 8); \
+        const uint8_t n11 = (uint8_t)p[11] ^ (uint8_t)SLICE(state,  88, 8); \
+        const uint8_t n12 = (uint8_t)p[12] ^ (uint8_t)SLICE(state,  96, 8); \
+        const uint8_t n13 = (uint8_t)p[13] ^ (uint8_t)SLICE(state, 104, 8); \
+        const uint8_t n14 = (uint8_t)p[14] ^ (uint8_t)SLICE(state, 112, 8); \
+        const uint8_t n15 = (uint8_t)p[15] ^ (uint8_t)SLICE(state, 120, 8); \
+        const uint8_t n16 = (uint8_t)p[16] ^ (uint8_t)SLICE(state, 128, 8); \
+        const uint8_t n17 = (uint8_t)p[17] ^ (uint8_t)SLICE(state, 136, 8); \
+        const uint8_t n18 = (uint8_t)p[18] ^ (uint8_t)SLICE(state, 144, 8); \
+        const uint8_t n19 = (uint8_t)p[19] ^ (uint8_t)SLICE(state, 152, 8); \
+        const uint8_t n20 = (uint8_t)p[20] ^ (uint8_t)SLICE(state, 160, 8); \
+        const uint8_t n21 = (uint8_t)p[21] ^ (uint8_t)SLICE(state, 168, 8); \
+        const uint8_t n22 = (uint8_t)p[22] ^ (uint8_t)SLICE(state, 176, 8); \
+        const uint8_t n23 = (uint8_t)p[23] ^ (uint8_t)SLICE(state, 184, 8); \
+        const uint8_t n24 = (uint8_t)p[24] ^ (uint8_t)SLICE(state, 192, 8); \
+        const uint8_t n25 = (uint8_t)p[25] ^ (uint8_t)SLICE(state, 200, 8); \
+        const uint8_t n26 = (uint8_t)p[26] ^ (uint8_t)SLICE(state, 208, 8); \
+        const uint8_t n27 = (uint8_t)p[27] ^ (uint8_t)SLICE(state, 216, 8); \
+        const uint8_t n28 = (uint8_t)p[28] ^ (uint8_t)SLICE(state, 224, 8); \
+        const uint8_t n29 = (uint8_t)p[29] ^ (uint8_t)SLICE(state, 232, 8); \
+        const uint8_t n30 = (uint8_t)p[30] ^ (uint8_t)SLICE(state, 240, 8); \
+        const uint8_t n31 = (uint8_t)p[31] ^ (uint8_t)SLICE(state, 248, 8); \
         state = SHIFT(state, 256) ^ \
-                t[63][POPBIT8(n0,  0, 4)] ^ \
-                t[62][POPBIT8(n0,  4, 4)] ^ \
-                t[61][POPBIT8(n1,  0, 4)] ^ \
-                t[60][POPBIT8(n1,  4, 4)] ^ \
-                t[59][POPBIT8(n2,  0, 4)] ^ \
-                t[58][POPBIT8(n2,  4, 4)] ^ \
-                t[57][POPBIT8(n3,  0, 4)] ^ \
-                t[56][POPBIT8(n3,  4, 4)] ^ \
-                t[55][POPBIT8(n4,  0, 4)] ^ \
-                t[54][POPBIT8(n4,  4, 4)] ^ \
-                t[53][POPBIT8(n5,  0, 4)] ^ \
-                t[52][POPBIT8(n5,  4, 4)] ^ \
-                t[51][POPBIT8(n6,  0, 4)] ^ \
-                t[50][POPBIT8(n6,  4, 4)] ^ \
-                t[49][POPBIT8(n7,  0, 4)] ^ \
-                t[48][POPBIT8(n7,  4, 4)] ^ \
-                t[47][POPBIT8(n8,  0, 4)] ^ \
-                t[46][POPBIT8(n8,  4, 4)] ^ \
-                t[45][POPBIT8(n9,  0, 4)] ^ \
-                t[44][POPBIT8(n9,  4, 4)] ^ \
-                t[43][POPBIT8(n10, 0, 4)] ^ \
-                t[42][POPBIT8(n10, 4, 4)] ^ \
-                t[41][POPBIT8(n11, 0, 4)] ^ \
-                t[40][POPBIT8(n11, 4, 4)] ^ \
-                t[39][POPBIT8(n12, 0, 4)] ^ \
-                t[38][POPBIT8(n12, 4, 4)] ^ \
-                t[37][POPBIT8(n13, 0, 4)] ^ \
-                t[36][POPBIT8(n13, 4, 4)] ^ \
-                t[35][POPBIT8(n14, 0, 4)] ^ \
-                t[34][POPBIT8(n14, 4, 4)] ^ \
-                t[33][POPBIT8(n15, 0, 4)] ^ \
-                t[32][POPBIT8(n15, 4, 4)] ^ \
-                t[31][POPBIT8(n16, 0, 4)] ^ \
-                t[30][POPBIT8(n16, 4, 4)] ^ \
-                t[29][POPBIT8(n17, 0, 4)] ^ \
-                t[28][POPBIT8(n17, 4, 4)] ^ \
-                t[27][POPBIT8(n18, 0, 4)] ^ \
-                t[26][POPBIT8(n18, 4, 4)] ^ \
-                t[25][POPBIT8(n19, 0, 4)] ^ \
-                t[24][POPBIT8(n19, 4, 4)] ^ \
-                t[23][POPBIT8(n20, 0, 4)] ^ \
-                t[22][POPBIT8(n20, 4, 4)] ^ \
-                t[21][POPBIT8(n21, 0, 4)] ^ \
-                t[20][POPBIT8(n21, 4, 4)] ^ \
-                t[19][POPBIT8(n22, 0, 4)] ^ \
-                t[18][POPBIT8(n22, 4, 4)] ^ \
-                t[17][POPBIT8(n23, 0, 4)] ^ \
-                t[16][POPBIT8(n23, 4, 4)] ^ \
-                t[15][POPBIT8(n24, 0, 4)] ^ \
-                t[14][POPBIT8(n24, 4, 4)] ^ \
-                t[13][POPBIT8(n25, 0, 4)] ^ \
-                t[12][POPBIT8(n25, 4, 4)] ^ \
-                t[11][POPBIT8(n26, 0, 4)] ^ \
-                t[10][POPBIT8(n26, 4, 4)] ^ \
-                t[ 9][POPBIT8(n27, 0, 4)] ^ \
-                t[ 8][POPBIT8(n27, 4, 4)] ^ \
-                t[ 7][POPBIT8(n28, 0, 4)] ^ \
-                t[ 6][POPBIT8(n28, 4, 4)] ^ \
-                t[ 5][POPBIT8(n29, 0, 4)] ^ \
-                t[ 4][POPBIT8(n29, 4, 4)] ^ \
-                t[ 3][POPBIT8(n30, 0, 4)] ^ \
-                t[ 2][POPBIT8(n30, 4, 4)] ^ \
-                t[ 1][POPBIT8(n31, 0, 4)] ^ \
-                t[ 0][POPBIT8(n31, 4, 4)]; \
+                t[63][SLICE8(n0,  0, 4)] ^ \
+                t[62][SLICE8(n0,  4, 4)] ^ \
+                t[61][SLICE8(n1,  0, 4)] ^ \
+                t[60][SLICE8(n1,  4, 4)] ^ \
+                t[59][SLICE8(n2,  0, 4)] ^ \
+                t[58][SLICE8(n2,  4, 4)] ^ \
+                t[57][SLICE8(n3,  0, 4)] ^ \
+                t[56][SLICE8(n3,  4, 4)] ^ \
+                t[55][SLICE8(n4,  0, 4)] ^ \
+                t[54][SLICE8(n4,  4, 4)] ^ \
+                t[53][SLICE8(n5,  0, 4)] ^ \
+                t[52][SLICE8(n5,  4, 4)] ^ \
+                t[51][SLICE8(n6,  0, 4)] ^ \
+                t[50][SLICE8(n6,  4, 4)] ^ \
+                t[49][SLICE8(n7,  0, 4)] ^ \
+                t[48][SLICE8(n7,  4, 4)] ^ \
+                t[47][SLICE8(n8,  0, 4)] ^ \
+                t[46][SLICE8(n8,  4, 4)] ^ \
+                t[45][SLICE8(n9,  0, 4)] ^ \
+                t[44][SLICE8(n9,  4, 4)] ^ \
+                t[43][SLICE8(n10, 0, 4)] ^ \
+                t[42][SLICE8(n10, 4, 4)] ^ \
+                t[41][SLICE8(n11, 0, 4)] ^ \
+                t[40][SLICE8(n11, 4, 4)] ^ \
+                t[39][SLICE8(n12, 0, 4)] ^ \
+                t[38][SLICE8(n12, 4, 4)] ^ \
+                t[37][SLICE8(n13, 0, 4)] ^ \
+                t[36][SLICE8(n13, 4, 4)] ^ \
+                t[35][SLICE8(n14, 0, 4)] ^ \
+                t[34][SLICE8(n14, 4, 4)] ^ \
+                t[33][SLICE8(n15, 0, 4)] ^ \
+                t[32][SLICE8(n15, 4, 4)] ^ \
+                t[31][SLICE8(n16, 0, 4)] ^ \
+                t[30][SLICE8(n16, 4, 4)] ^ \
+                t[29][SLICE8(n17, 0, 4)] ^ \
+                t[28][SLICE8(n17, 4, 4)] ^ \
+                t[27][SLICE8(n18, 0, 4)] ^ \
+                t[26][SLICE8(n18, 4, 4)] ^ \
+                t[25][SLICE8(n19, 0, 4)] ^ \
+                t[24][SLICE8(n19, 4, 4)] ^ \
+                t[23][SLICE8(n20, 0, 4)] ^ \
+                t[22][SLICE8(n20, 4, 4)] ^ \
+                t[21][SLICE8(n21, 0, 4)] ^ \
+                t[20][SLICE8(n21, 4, 4)] ^ \
+                t[19][SLICE8(n22, 0, 4)] ^ \
+                t[18][SLICE8(n22, 4, 4)] ^ \
+                t[17][SLICE8(n23, 0, 4)] ^ \
+                t[16][SLICE8(n23, 4, 4)] ^ \
+                t[15][SLICE8(n24, 0, 4)] ^ \
+                t[14][SLICE8(n24, 4, 4)] ^ \
+                t[13][SLICE8(n25, 0, 4)] ^ \
+                t[12][SLICE8(n25, 4, 4)] ^ \
+                t[11][SLICE8(n26, 0, 4)] ^ \
+                t[10][SLICE8(n26, 4, 4)] ^ \
+                t[ 9][SLICE8(n27, 0, 4)] ^ \
+                t[ 8][SLICE8(n27, 4, 4)] ^ \
+                t[ 7][SLICE8(n28, 0, 4)] ^ \
+                t[ 6][SLICE8(n28, 4, 4)] ^ \
+                t[ 5][SLICE8(n29, 0, 4)] ^ \
+                t[ 4][SLICE8(n29, 4, 4)] ^ \
+                t[ 3][SLICE8(n30, 0, 4)] ^ \
+                t[ 2][SLICE8(n30, 4, 4)] ^ \
+                t[ 1][SLICE8(n31, 0, 4)] ^ \
+                t[ 0][SLICE8(n31, 4, 4)]; \
     }, {                                             \
         state ^= SHIFT_INPUT(*p);                                           \
-        const uint8_t n = POPBIT(state, 0, 8); \
+        const uint8_t n = SLICE(state, 0, 8); \
         state = SHIFT(state, 8) ^ \
-                t[1][POPBIT8(n, 0, 4)] ^ \
-                t[0][POPBIT8(n, 4, 4)];                   \
+                t[1][SLICE8(n, 0, 4)] ^ \
+                t[0][SLICE8(n, 4, 4)];                   \
     });                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_QUARTET_DECL);
@@ -1362,9 +1362,9 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, 
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
-#define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY1_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 1, {                                             \
-        state = SHIFT(state, 8) ^ t[(uint8_t)*p ^ POPBIT(state, 0, 8)];     \
+        state = SHIFT(state, 8) ^ t[(uint8_t)*p ^ SLICE(state, 0, 8)];     \
     }, );                                                                   \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY1_OCTET_DECL);
@@ -1380,13 +1380,13 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, 
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
-#define CRCEA_BY2_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY2_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
         state = SHIFT(state, 16) ^                                          \
-                t[1][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
-                t[0][(uint8_t)p[1] ^ POPBIT(state,  8, 8)];                 \
+                t[1][(uint8_t)p[0] ^ SLICE(state,  0, 8)] ^                \
+                t[0][(uint8_t)p[1] ^ SLICE(state,  8, 8)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
+        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ SLICE(state, 0, 8)];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_OCTET_DECL);
@@ -1402,15 +1402,15 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, 
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
-#define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY4_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
         state = SHIFT(state, 32) ^                                          \
-                t[3][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
-                t[2][(uint8_t)p[1] ^ POPBIT(state,  8, 8)] ^                \
-                t[1][(uint8_t)p[2] ^ POPBIT(state, 16, 8)] ^                \
-                t[0][(uint8_t)p[3] ^ POPBIT(state, 24, 8)];                 \
+                t[3][(uint8_t)p[0] ^ SLICE(state,  0, 8)] ^                \
+                t[2][(uint8_t)p[1] ^ SLICE(state,  8, 8)] ^                \
+                t[1][(uint8_t)p[2] ^ SLICE(state, 16, 8)] ^                \
+                t[0][(uint8_t)p[3] ^ SLICE(state, 24, 8)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
+        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ SLICE(state, 0, 8)];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_OCTET_DECL);
@@ -1426,19 +1426,19 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
-#define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY8_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
         state = SHIFT(state, 64) ^                                          \
-                t[7][(uint8_t)p[0] ^ POPBIT(state,  0, 8)] ^                \
-                t[6][(uint8_t)p[1] ^ POPBIT(state,  8, 8)] ^                \
-                t[5][(uint8_t)p[2] ^ POPBIT(state, 16, 8)] ^                \
-                t[4][(uint8_t)p[3] ^ POPBIT(state, 24, 8)] ^                \
-                t[3][(uint8_t)p[4] ^ POPBIT(state, 32, 8)] ^                \
-                t[2][(uint8_t)p[5] ^ POPBIT(state, 40, 8)] ^                \
-                t[1][(uint8_t)p[6] ^ POPBIT(state, 48, 8)] ^                \
-                t[0][(uint8_t)p[7] ^ POPBIT(state, 56, 8)];                 \
+                t[7][(uint8_t)p[0] ^ SLICE(state,  0, 8)] ^                \
+                t[6][(uint8_t)p[1] ^ SLICE(state,  8, 8)] ^                \
+                t[5][(uint8_t)p[2] ^ SLICE(state, 16, 8)] ^                \
+                t[4][(uint8_t)p[3] ^ SLICE(state, 24, 8)] ^                \
+                t[3][(uint8_t)p[4] ^ SLICE(state, 32, 8)] ^                \
+                t[2][(uint8_t)p[5] ^ SLICE(state, 40, 8)] ^                \
+                t[1][(uint8_t)p[6] ^ SLICE(state, 48, 8)] ^                \
+                t[0][(uint8_t)p[7] ^ SLICE(state, 56, 8)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
+        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ SLICE(state, 0, 8)];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_OCTET_DECL);
@@ -1454,27 +1454,27 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
-#define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY16_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                            \
         state = SHIFT(state, 128) ^                                         \
-                t[15][(uint8_t)p[ 0] ^ POPBIT(state,   0, 8)] ^             \
-                t[14][(uint8_t)p[ 1] ^ POPBIT(state,   8, 8)] ^             \
-                t[13][(uint8_t)p[ 2] ^ POPBIT(state,  16, 8)] ^             \
-                t[12][(uint8_t)p[ 3] ^ POPBIT(state,  24, 8)] ^             \
-                t[11][(uint8_t)p[ 4] ^ POPBIT(state,  32, 8)] ^             \
-                t[10][(uint8_t)p[ 5] ^ POPBIT(state,  40, 8)] ^             \
-                t[ 9][(uint8_t)p[ 6] ^ POPBIT(state,  48, 8)] ^             \
-                t[ 8][(uint8_t)p[ 7] ^ POPBIT(state,  56, 8)] ^             \
-                t[ 7][(uint8_t)p[ 8] ^ POPBIT(state,  64, 8)] ^             \
-                t[ 6][(uint8_t)p[ 9] ^ POPBIT(state,  72, 8)] ^             \
-                t[ 5][(uint8_t)p[10] ^ POPBIT(state,  80, 8)] ^             \
-                t[ 4][(uint8_t)p[11] ^ POPBIT(state,  88, 8)] ^             \
-                t[ 3][(uint8_t)p[12] ^ POPBIT(state,  96, 8)] ^             \
-                t[ 2][(uint8_t)p[13] ^ POPBIT(state, 104, 8)] ^             \
-                t[ 1][(uint8_t)p[14] ^ POPBIT(state, 112, 8)] ^             \
-                t[ 0][(uint8_t)p[15] ^ POPBIT(state, 120, 8)];              \
+                t[15][(uint8_t)p[ 0] ^ SLICE(state,   0, 8)] ^             \
+                t[14][(uint8_t)p[ 1] ^ SLICE(state,   8, 8)] ^             \
+                t[13][(uint8_t)p[ 2] ^ SLICE(state,  16, 8)] ^             \
+                t[12][(uint8_t)p[ 3] ^ SLICE(state,  24, 8)] ^             \
+                t[11][(uint8_t)p[ 4] ^ SLICE(state,  32, 8)] ^             \
+                t[10][(uint8_t)p[ 5] ^ SLICE(state,  40, 8)] ^             \
+                t[ 9][(uint8_t)p[ 6] ^ SLICE(state,  48, 8)] ^             \
+                t[ 8][(uint8_t)p[ 7] ^ SLICE(state,  56, 8)] ^             \
+                t[ 7][(uint8_t)p[ 8] ^ SLICE(state,  64, 8)] ^             \
+                t[ 6][(uint8_t)p[ 9] ^ SLICE(state,  72, 8)] ^             \
+                t[ 5][(uint8_t)p[10] ^ SLICE(state,  80, 8)] ^             \
+                t[ 4][(uint8_t)p[11] ^ SLICE(state,  88, 8)] ^             \
+                t[ 3][(uint8_t)p[12] ^ SLICE(state,  96, 8)] ^             \
+                t[ 2][(uint8_t)p[13] ^ SLICE(state, 104, 8)] ^             \
+                t[ 1][(uint8_t)p[14] ^ SLICE(state, 112, 8)] ^             \
+                t[ 0][(uint8_t)p[15] ^ SLICE(state, 120, 8)];              \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
+        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ SLICE(state, 0, 8)];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_OCTET_DECL);
@@ -1490,43 +1490,43 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
-#define CRCEA_BY32_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY32_OCTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                            \
         state = SHIFT(state, 256) ^                                         \
-                t[31][(uint8_t)p[ 0] ^ POPBIT(state,   0, 8)] ^             \
-                t[30][(uint8_t)p[ 1] ^ POPBIT(state,   8, 8)] ^             \
-                t[29][(uint8_t)p[ 2] ^ POPBIT(state,  16, 8)] ^             \
-                t[28][(uint8_t)p[ 3] ^ POPBIT(state,  24, 8)] ^             \
-                t[27][(uint8_t)p[ 4] ^ POPBIT(state,  32, 8)] ^             \
-                t[26][(uint8_t)p[ 5] ^ POPBIT(state,  40, 8)] ^             \
-                t[25][(uint8_t)p[ 6] ^ POPBIT(state,  48, 8)] ^             \
-                t[24][(uint8_t)p[ 7] ^ POPBIT(state,  56, 8)] ^             \
-                t[23][(uint8_t)p[ 8] ^ POPBIT(state,  64, 8)] ^             \
-                t[22][(uint8_t)p[ 9] ^ POPBIT(state,  72, 8)] ^             \
-                t[21][(uint8_t)p[10] ^ POPBIT(state,  80, 8)] ^             \
-                t[20][(uint8_t)p[11] ^ POPBIT(state,  88, 8)] ^             \
-                t[19][(uint8_t)p[12] ^ POPBIT(state,  96, 8)] ^             \
-                t[18][(uint8_t)p[13] ^ POPBIT(state, 104, 8)] ^             \
-                t[17][(uint8_t)p[14] ^ POPBIT(state, 112, 8)] ^             \
-                t[16][(uint8_t)p[15] ^ POPBIT(state, 120, 8)] ^             \
-                t[15][(uint8_t)p[16] ^ POPBIT(state, 128, 8)] ^             \
-                t[14][(uint8_t)p[17] ^ POPBIT(state, 136, 8)] ^             \
-                t[13][(uint8_t)p[18] ^ POPBIT(state, 144, 8)] ^             \
-                t[12][(uint8_t)p[19] ^ POPBIT(state, 152, 8)] ^             \
-                t[11][(uint8_t)p[20] ^ POPBIT(state, 160, 8)] ^             \
-                t[10][(uint8_t)p[21] ^ POPBIT(state, 168, 8)] ^             \
-                t[ 9][(uint8_t)p[22] ^ POPBIT(state, 176, 8)] ^             \
-                t[ 8][(uint8_t)p[23] ^ POPBIT(state, 184, 8)] ^             \
-                t[ 7][(uint8_t)p[24] ^ POPBIT(state, 192, 8)] ^             \
-                t[ 6][(uint8_t)p[25] ^ POPBIT(state, 200, 8)] ^             \
-                t[ 5][(uint8_t)p[26] ^ POPBIT(state, 208, 8)] ^             \
-                t[ 4][(uint8_t)p[27] ^ POPBIT(state, 216, 8)] ^             \
-                t[ 3][(uint8_t)p[28] ^ POPBIT(state, 224, 8)] ^             \
-                t[ 2][(uint8_t)p[29] ^ POPBIT(state, 232, 8)] ^             \
-                t[ 1][(uint8_t)p[30] ^ POPBIT(state, 240, 8)] ^             \
-                t[ 0][(uint8_t)p[31] ^ POPBIT(state, 248, 8)];              \
+                t[31][(uint8_t)p[ 0] ^ SLICE(state,   0, 8)] ^             \
+                t[30][(uint8_t)p[ 1] ^ SLICE(state,   8, 8)] ^             \
+                t[29][(uint8_t)p[ 2] ^ SLICE(state,  16, 8)] ^             \
+                t[28][(uint8_t)p[ 3] ^ SLICE(state,  24, 8)] ^             \
+                t[27][(uint8_t)p[ 4] ^ SLICE(state,  32, 8)] ^             \
+                t[26][(uint8_t)p[ 5] ^ SLICE(state,  40, 8)] ^             \
+                t[25][(uint8_t)p[ 6] ^ SLICE(state,  48, 8)] ^             \
+                t[24][(uint8_t)p[ 7] ^ SLICE(state,  56, 8)] ^             \
+                t[23][(uint8_t)p[ 8] ^ SLICE(state,  64, 8)] ^             \
+                t[22][(uint8_t)p[ 9] ^ SLICE(state,  72, 8)] ^             \
+                t[21][(uint8_t)p[10] ^ SLICE(state,  80, 8)] ^             \
+                t[20][(uint8_t)p[11] ^ SLICE(state,  88, 8)] ^             \
+                t[19][(uint8_t)p[12] ^ SLICE(state,  96, 8)] ^             \
+                t[18][(uint8_t)p[13] ^ SLICE(state, 104, 8)] ^             \
+                t[17][(uint8_t)p[14] ^ SLICE(state, 112, 8)] ^             \
+                t[16][(uint8_t)p[15] ^ SLICE(state, 120, 8)] ^             \
+                t[15][(uint8_t)p[16] ^ SLICE(state, 128, 8)] ^             \
+                t[14][(uint8_t)p[17] ^ SLICE(state, 136, 8)] ^             \
+                t[13][(uint8_t)p[18] ^ SLICE(state, 144, 8)] ^             \
+                t[12][(uint8_t)p[19] ^ SLICE(state, 152, 8)] ^             \
+                t[11][(uint8_t)p[20] ^ SLICE(state, 160, 8)] ^             \
+                t[10][(uint8_t)p[21] ^ SLICE(state, 168, 8)] ^             \
+                t[ 9][(uint8_t)p[22] ^ SLICE(state, 176, 8)] ^             \
+                t[ 8][(uint8_t)p[23] ^ SLICE(state, 184, 8)] ^             \
+                t[ 7][(uint8_t)p[24] ^ SLICE(state, 192, 8)] ^             \
+                t[ 6][(uint8_t)p[25] ^ SLICE(state, 200, 8)] ^             \
+                t[ 5][(uint8_t)p[26] ^ SLICE(state, 208, 8)] ^             \
+                t[ 4][(uint8_t)p[27] ^ SLICE(state, 216, 8)] ^             \
+                t[ 3][(uint8_t)p[28] ^ SLICE(state, 224, 8)] ^             \
+                t[ 2][(uint8_t)p[29] ^ SLICE(state, 232, 8)] ^             \
+                t[ 1][(uint8_t)p[30] ^ SLICE(state, 240, 8)] ^             \
+                t[ 0][(uint8_t)p[31] ^ SLICE(state, 248, 8)];              \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ POPBIT(state, 0, 8)];  \
+        state = SHIFT(state, 8) ^ t[0][(uint8_t)*p ^ SLICE(state, 0, 8)];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_OCTET_DECL);
@@ -1542,13 +1542,13 @@ CRCEA_UPDATE_BY2_SEXDECTET(const crcea_model *model, const char *p, const char *
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
-#define CRCEA_BY2_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY2_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 2, {                                             \
         const uint16_t n = LOAD16(p); \
         state = SHIFT(state, 16) ^                                          \
-                t[n ^ POPBIT(state,  0, 16)];                 \
+                t[n ^ SLICE(state,  0, 16)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+        state = SHIFT(state, 8) ^ t[INDEX16((uint8_t)*p ^ SLICE(state, 0, 8))];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY2_SEXDECTET_DECL);
@@ -1564,15 +1564,15 @@ CRCEA_UPDATE_BY4_SEXDECTET(const crcea_model *model, const char *p, const char *
 {
     const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
 
-#define CRCEA_BY4_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY4_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 4, {                                             \
         const uint16_t n0 = LOAD16(p + 0); \
         const uint16_t n1 = LOAD16(p + 2); \
         state = SHIFT(state, 32) ^                                          \
-                t[1][n0 ^ POPBIT(state,  0, 16)] ^                                          \
-                t[0][n1 ^ POPBIT(state, 16, 16)];                 \
+                t[1][n0 ^ SLICE(state,  0, 16)] ^                                          \
+                t[0][n1 ^ SLICE(state, 16, 16)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ SLICE(state, 0, 8))];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY4_SEXDECTET_DECL);
@@ -1588,19 +1588,19 @@ CRCEA_UPDATE_BY8_SEXDECTET(const crcea_model *model, const char *p, const char *
 {
     const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
 
-#define CRCEA_BY8_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY8_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 8, {                                             \
         const uint16_t n0 = LOAD16(p + 0); \
         const uint16_t n1 = LOAD16(p + 2); \
         const uint16_t n2 = LOAD16(p + 4); \
         const uint16_t n3 = LOAD16(p + 6); \
         state = SHIFT(state, 64) ^                                          \
-                t[3][n0 ^ POPBIT(state,  0, 16)] ^                                          \
-                t[2][n1 ^ POPBIT(state, 16, 16)] ^                                          \
-                t[1][n2 ^ POPBIT(state, 32, 16)] ^                                          \
-                t[0][n3 ^ POPBIT(state, 48, 16)];                 \
+                t[3][n0 ^ SLICE(state,  0, 16)] ^                                          \
+                t[2][n1 ^ SLICE(state, 16, 16)] ^                                          \
+                t[1][n2 ^ SLICE(state, 32, 16)] ^                                          \
+                t[0][n3 ^ SLICE(state, 48, 16)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ SLICE(state, 0, 8))];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY8_SEXDECTET_DECL);
@@ -1616,7 +1616,7 @@ CRCEA_UPDATE_BY16_SEXDECTET(const crcea_model *model, const char *p, const char 
 {
     const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
 
-#define CRCEA_BY16_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY16_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 16, {                                             \
         const uint16_t n0 = LOAD16(p +  0); \
         const uint16_t n1 = LOAD16(p +  2); \
@@ -1627,16 +1627,16 @@ CRCEA_UPDATE_BY16_SEXDECTET(const crcea_model *model, const char *p, const char 
         const uint16_t n6 = LOAD16(p + 12); \
         const uint16_t n7 = LOAD16(p + 14); \
         state = SHIFT(state, 128) ^                                          \
-                t[7][n0 ^ POPBIT(state,   0, 16)] ^                                          \
-                t[6][n1 ^ POPBIT(state,  16, 16)] ^                                          \
-                t[5][n2 ^ POPBIT(state,  32, 16)] ^                                          \
-                t[4][n3 ^ POPBIT(state,  48, 16)] ^                                          \
-                t[3][n4 ^ POPBIT(state,  64, 16)] ^                                          \
-                t[2][n5 ^ POPBIT(state,  80, 16)] ^                                          \
-                t[1][n6 ^ POPBIT(state,  96, 16)] ^                                          \
-                t[0][n7 ^ POPBIT(state, 112, 16)];                 \
+                t[7][n0 ^ SLICE(state,   0, 16)] ^                                          \
+                t[6][n1 ^ SLICE(state,  16, 16)] ^                                          \
+                t[5][n2 ^ SLICE(state,  32, 16)] ^                                          \
+                t[4][n3 ^ SLICE(state,  48, 16)] ^                                          \
+                t[3][n4 ^ SLICE(state,  64, 16)] ^                                          \
+                t[2][n5 ^ SLICE(state,  80, 16)] ^                                          \
+                t[1][n6 ^ SLICE(state,  96, 16)] ^                                          \
+                t[0][n7 ^ SLICE(state, 112, 16)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ SLICE(state, 0, 8))];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY16_SEXDECTET_DECL);
@@ -1652,7 +1652,7 @@ CRCEA_UPDATE_BY32_SEXDECTET(const crcea_model *model, const char *p, const char 
 {
     const CRCEA_TYPE (*t)[65536] = (const CRCEA_TYPE (*)[65536])table;
 
-#define CRCEA_BY32_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, POPBIT, POPBIT8, LOAD16, INDEX16) \
+#define CRCEA_BY32_SEXDECTET_DECL(SETUP_POLYNOMIAL, SHIFT_INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
     CRCEA_UPDATE_CORE(p, pp, 32, {                                             \
         const uint16_t n0  = LOAD16(p +  0); \
         const uint16_t n1  = LOAD16(p +  2); \
@@ -1671,24 +1671,24 @@ CRCEA_UPDATE_BY32_SEXDECTET(const crcea_model *model, const char *p, const char 
         const uint16_t n14 = LOAD16(p + 28); \
         const uint16_t n15 = LOAD16(p + 30); \
         state = SHIFT(state, 256) ^                                          \
-                t[15][n0  ^ POPBIT(state,   0, 16)] ^                                          \
-                t[14][n1  ^ POPBIT(state,  16, 16)] ^                                          \
-                t[13][n2  ^ POPBIT(state,  32, 16)] ^                                          \
-                t[12][n3  ^ POPBIT(state,  48, 16)] ^                                          \
-                t[11][n4  ^ POPBIT(state,  64, 16)] ^                                          \
-                t[10][n5  ^ POPBIT(state,  80, 16)] ^                                          \
-                t[ 9][n6  ^ POPBIT(state,  96, 16)] ^                                          \
-                t[ 8][n7  ^ POPBIT(state, 112, 16)] ^                                          \
-                t[ 7][n8  ^ POPBIT(state, 128, 16)] ^                                          \
-                t[ 6][n9  ^ POPBIT(state, 144, 16)] ^                                          \
-                t[ 5][n10 ^ POPBIT(state, 160, 16)] ^                                          \
-                t[ 4][n11 ^ POPBIT(state, 176, 16)] ^                                          \
-                t[ 3][n12 ^ POPBIT(state, 192, 16)] ^                                          \
-                t[ 2][n13 ^ POPBIT(state, 208, 16)] ^                                          \
-                t[ 1][n14 ^ POPBIT(state, 224, 16)] ^                                          \
-                t[ 0][n15 ^ POPBIT(state, 240, 16)];                 \
+                t[15][n0  ^ SLICE(state,   0, 16)] ^                                          \
+                t[14][n1  ^ SLICE(state,  16, 16)] ^                                          \
+                t[13][n2  ^ SLICE(state,  32, 16)] ^                                          \
+                t[12][n3  ^ SLICE(state,  48, 16)] ^                                          \
+                t[11][n4  ^ SLICE(state,  64, 16)] ^                                          \
+                t[10][n5  ^ SLICE(state,  80, 16)] ^                                          \
+                t[ 9][n6  ^ SLICE(state,  96, 16)] ^                                          \
+                t[ 8][n7  ^ SLICE(state, 112, 16)] ^                                          \
+                t[ 7][n8  ^ SLICE(state, 128, 16)] ^                                          \
+                t[ 6][n9  ^ SLICE(state, 144, 16)] ^                                          \
+                t[ 5][n10 ^ SLICE(state, 160, 16)] ^                                          \
+                t[ 4][n11 ^ SLICE(state, 176, 16)] ^                                          \
+                t[ 3][n12 ^ SLICE(state, 192, 16)] ^                                          \
+                t[ 2][n13 ^ SLICE(state, 208, 16)] ^                                          \
+                t[ 1][n14 ^ SLICE(state, 224, 16)] ^                                          \
+                t[ 0][n15 ^ SLICE(state, 240, 16)];                 \
     }, {                                                                    \
-        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ POPBIT(state, 0, 8))];  \
+        state = SHIFT(state, 8) ^ t[0][INDEX16((uint8_t)*p ^ SLICE(state, 0, 8))];  \
     });                                                                     \
 
     CRCEA_UPDATE_DECL(model, state, CRCEA_BY32_SEXDECTET_DECL);
@@ -1848,15 +1848,15 @@ CRCEA_END_C_DECL
 #undef CRCEA_SETUP_POLYNOMIAL
 #undef CRCEA_SHIFT_INPUT
 #undef CRCEA_SHIFT
-#undef CRCEA_POPBIT
-#undef CRCEA_POPBIT8
+#undef CRCEA_SLICE
+#undef CRCEA_SLICE8
 #undef CRCEA_LOAD16
 #undef CRCEA_INDEX16
 #undef CRCEA_SETUP_POLYNOMIAL_R
 #undef CRCEA_SHIFT_INPUT_R
 #undef CRCEA_SHIFT_R
-#undef CRCEA_POPBIT_R
-#undef CRCEA_POPBIT8_R
+#undef CRCEA_SLICE_R
+#undef CRCEA_SLICE8_R
 #undef CRCEA_LOAD16_R
 #undef CRCEA_INDEX16_R
 #undef CRCEA_UPDATE_CORE
