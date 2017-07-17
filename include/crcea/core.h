@@ -2546,12 +2546,15 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
 #ifdef CRCEA_DEFAULT_MALLOC
             alloc = CRCEA_DEFAULT_MALLOC;
 #else
-            return CRCEA_BITBYBIT_FAST;
+            return CRCEA_BITBYBIT;
 #endif
         }
 
         if (alloc) {
             void *bufp = alloc(cc, CRCEA_TABLESIZE(algo));
+            if (!bufp) {
+                return CRCEA_BITBYBIT;
+            }
             CRCEA_BUILD_TABLE(cc->model, cc->algorithm, bufp);
             cc->table = bufp;
         }
