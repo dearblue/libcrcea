@@ -143,7 +143,7 @@
 #endif
 
 #ifndef CRCEA_INLINE
-#   define CRCEA_INLINE
+#   define CRCEA_INLINE inline
 #endif
 
 #ifndef CRCEA_NO_MALLOC
