@@ -385,6 +385,8 @@ CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, C
     return state;
 }
 
+#ifdef CRCEA_ENABLE_BITBYBIT_FAST
+
 /*
  * reference:
  * * http://www.hackersdelight.org/hdcodetxt/crc.c.txt#crc32h
@@ -431,6 +433,10 @@ CRCEA_UPDATE_BITBYBIT_FAST(const crcea_model *model, const char *p, const char *
     return state;
 }
 
+#endif /* CRCEA_ENABLE_BITBYBIT_FAST */
+
+#ifdef CRCEA_ENABLE_BY_SOLO
+
 /*
  * Slicing by Single Solo
  */
@@ -466,6 +472,10 @@ CRCEA_UPDATE_BY_SOLO(const crcea_model *model, const char *p, const char *pp, CR
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY_SOLO */
+
+#ifdef CRCEA_ENABLE_BY1_SOLO
 
 /*
  * Slicing by Octuple Solo
@@ -506,6 +516,10 @@ CRCEA_UPDATE_BY1_SOLO(const crcea_model *model, const char *p, const char *pp, C
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY1_SOLO */
+
+#ifdef CRCEA_ENABLE_BY2_SOLO
 
 /*
  * Slicing by Sexdecuple Solo
@@ -554,6 +568,10 @@ CRCEA_UPDATE_BY2_SOLO(const crcea_model *model, const char *p, const char *pp, C
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY2_SOLO */
+
+#ifdef CRCEA_ENABLE_BY4_SOLO
 
 /*
  * Slicing by Duotriguple Solo
@@ -620,6 +638,10 @@ CRCEA_UPDATE_BY4_SOLO(const crcea_model *model, const char *p, const char *pp, C
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY4_SOLO */
+
+#ifdef CRCEA_ENABLE_BY8_SOLO
 
 /*
  * Slicing by Quattuorsexaguple Solo
@@ -722,6 +744,10 @@ CRCEA_UPDATE_BY8_SOLO(const crcea_model *model, const char *p, const char *pp, C
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY8_SOLO */
+
+#ifdef CRCEA_ENABLE_BY16_SOLO
 
 /*
  * Slicing by Octovigcentuple Solo
@@ -896,6 +922,10 @@ CRCEA_UPDATE_BY16_SOLO(const crcea_model *model, const char *p, const char *pp, 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY16_SOLO */
+
+#ifdef CRCEA_ENABLE_BY32_SOLO
 
 /*
  * Slicing by Sexquinquagducentuple Solo
@@ -1215,6 +1245,10 @@ CRCEA_UPDATE_BY32_SOLO(const crcea_model *model, const char *p, const char *pp, 
     return state;
 }
 
+#endif /* CRCEA_ENABLE_BY32_SOLO */
+
+#ifdef CRCEA_ENABLE_BY_DUO
+
 /*
  * Slicing by Single Duo
  */
@@ -1242,6 +1276,10 @@ CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRC
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY_DUO */
+
+#ifdef CRCEA_ENABLE_BY1_DUO
 
 /*
  * Slicing by Quadruple Duo
@@ -1274,6 +1312,10 @@ CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CR
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY1_DUO */
+
+#ifdef CRCEA_ENABLE_BY2_DUO
 
 /*
  * Slicing by Octuple Duo
@@ -1310,6 +1352,10 @@ CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CR
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY2_DUO */
+
+#ifdef CRCEA_ENABLE_BY4_DUO
 
 /*
  * Slicing by Sexdecuple Duo
@@ -1356,6 +1402,10 @@ CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CR
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY4_DUO */
+
+#ifdef CRCEA_ENABLE_BY8_DUO
 
 /*
  * Slicing by Duotriguple Duo
@@ -1422,6 +1472,10 @@ CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CR
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY8_DUO */
+
+#ifdef CRCEA_ENABLE_BY16_DUO
 
 /*
  * Slicing by Quattuorsexaguple Duo
@@ -1528,6 +1582,10 @@ CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, C
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY16_DUO */
+
+#ifdef CRCEA_ENABLE_BY32_DUO
 
 /*
  * Slicing by Octovigcentuple Duo
@@ -1715,6 +1773,10 @@ CRCEA_UPDATE_BY32_DUO(const crcea_model *model, const char *p, const char *pp, C
     return state;
 }
 
+#endif /* CRCEA_ENABLE_BY32_DUO */
+
+#ifdef CRCEA_ENABLE_BY_QUARTET
+
 /*
  * Slicing by Single Quartet
  */
@@ -1738,6 +1800,10 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp,
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY1_QUARTET
 
 /*
  * Slicing by Double Quartet
@@ -1766,6 +1832,10 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY1_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY2_QUARTET
 
 /*
  * Slicing by Quadruple Quartet
@@ -1796,6 +1866,10 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY2_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY4_QUARTET
 
 /*
  * Slicing by Octuple Quartet
@@ -1832,6 +1906,10 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY4_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY8_QUARTET
 
 /*
  * Slicing by Sexdecuple Quartet
@@ -1880,6 +1958,10 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY8_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY16_QUARTET
 
 /*
  * Slicing by Duotriguple Quartet
@@ -1952,6 +2034,10 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *p
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY16_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY32_QUARTET
 
 /*
  * Slicing by Quattuorsexaguple Quartet
@@ -2073,6 +2159,10 @@ CRCEA_UPDATE_BY32_QUARTET(const crcea_model *model, const char *p, const char *p
     return state;
 }
 
+#endif /* CRCEA_ENABLE_BY32_QUARTET */
+
+#ifdef CRCEA_ENABLE_BY1_OCTET
+
 /*
  * Slicing by Single Octet
  */
@@ -2092,6 +2182,10 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY1_OCTET */
+
+#ifdef CRCEA_ENABLE_BY2_OCTET
 
 /*
  * Slicing by Double Octet
@@ -2114,6 +2208,10 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY2_OCTET */
+
+#ifdef CRCEA_ENABLE_BY4_OCTET
 
 /*
  * Slicing by Quadruple Octet
@@ -2138,6 +2236,10 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY4_OCTET */
+
+#ifdef CRCEA_ENABLE_BY8_OCTET
 
 /*
  * Slicing by Quadruple Octet
@@ -2166,6 +2268,10 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY8_OCTET */
+
+#ifdef CRCEA_ENABLE_BY16_OCTET
 
 /*
  * Slicing by Sexdecuple Octet
@@ -2202,6 +2308,10 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY16_OCTET */
+
+#ifdef CRCEA_ENABLE_BY32_OCTET
 
 /*
  * Slicing by Slicing by Duotriguple Octet
@@ -2255,6 +2365,10 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
     return state;
 }
 
+#endif /* CRCEA_ENABLE_BY32_OCTET */
+
+#ifdef CRCEA_ENABLE_BY2_SEXDECTET
+
 /*
  * Slicing by Single Sexdectet
  */
@@ -2276,6 +2390,10 @@ CRCEA_UPDATE_BY2_SEXDECTET(const crcea_model *model, const char *p, const char *
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY2_SEXDECTET */
+
+#ifdef CRCEA_ENABLE_BY4_SEXDECTET
 
 /*
  * Slicing by Double Sexdectet
@@ -2300,6 +2418,10 @@ CRCEA_UPDATE_BY4_SEXDECTET(const crcea_model *model, const char *p, const char *
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY4_SEXDECTET */
+
+#ifdef CRCEA_ENABLE_BY8_SEXDECTET
 
 /*
  * Slicing by Quadruple Sexdectet
@@ -2328,6 +2450,10 @@ CRCEA_UPDATE_BY8_SEXDECTET(const crcea_model *model, const char *p, const char *
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY8_SEXDECTET */
+
+#ifdef CRCEA_ENABLE_BY16_SEXDECTET
 
 /*
  * Slicing by Octuple Sexdectet
@@ -2364,6 +2490,10 @@ CRCEA_UPDATE_BY16_SEXDECTET(const crcea_model *model, const char *p, const char 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY16_SEXDECTET */
+
+#ifdef CRCEA_ENABLE_BY32_SEXDECTET
 
 /*
  * Slicing by Sexdecuple Sexdectet
@@ -2416,6 +2546,8 @@ CRCEA_UPDATE_BY32_SEXDECTET(const crcea_model *model, const char *p, const char 
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_BY32_SEXDECTET */
 
 CRCEA_VISIBILITY CRCEA_INLINE size_t
 CRCEA_TABLESIZE(int algo)
@@ -2583,72 +2715,138 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     switch (algo) {
     case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
+#ifdef CRCEA_ENABLE_BITBYBIT_FAST
     case CRCEA_BITBYBIT_FAST:
         return CRCEA_UPDATE_BITBYBIT_FAST(cc->model, p, pp, state);
+#endif
+#ifdef CRCEA_ENABLE_BY_SOLO
     case CRCEA_BY_SOLO:
         return CRCEA_UPDATE_BY_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY1_SOLO
     case CRCEA_BY1_SOLO:
         return CRCEA_UPDATE_BY1_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY2_SOLO
     case CRCEA_BY2_SOLO:
         return CRCEA_UPDATE_BY2_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY4_SOLO
     case CRCEA_BY4_SOLO:
         return CRCEA_UPDATE_BY4_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY8_SOLO
     case CRCEA_BY8_SOLO:
         return CRCEA_UPDATE_BY8_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY16_SOLO
     case CRCEA_BY16_SOLO:
         return CRCEA_UPDATE_BY16_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY32_SOLO
     case CRCEA_BY32_SOLO:
         return CRCEA_UPDATE_BY32_SOLO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY_DUO
     case CRCEA_BY_DUO:
         return CRCEA_UPDATE_BY_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY1_DUO
     case CRCEA_BY1_DUO:
         return CRCEA_UPDATE_BY1_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY2_DUO
     case CRCEA_BY2_DUO:
         return CRCEA_UPDATE_BY2_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY4_DUO
     case CRCEA_BY4_DUO:
         return CRCEA_UPDATE_BY4_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY8_DUO
     case CRCEA_BY8_DUO:
         return CRCEA_UPDATE_BY8_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY16_DUO
     case CRCEA_BY16_DUO:
         return CRCEA_UPDATE_BY16_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY32_DUO
     case CRCEA_BY32_DUO:
         return CRCEA_UPDATE_BY32_DUO(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY_QUARTET
     case CRCEA_BY_QUARTET:
         return CRCEA_UPDATE_BY_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY1_QUARTET
     case CRCEA_BY1_QUARTET:
         return CRCEA_UPDATE_BY1_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY2_QUARTET
     case CRCEA_BY2_QUARTET:
         return CRCEA_UPDATE_BY2_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY4_QUARTET
     case CRCEA_BY4_QUARTET:
         return CRCEA_UPDATE_BY4_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY8_QUARTET
     case CRCEA_BY8_QUARTET:
         return CRCEA_UPDATE_BY8_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY16_QUARTET
     case CRCEA_BY16_QUARTET:
         return CRCEA_UPDATE_BY16_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY32_QUARTET
     case CRCEA_BY32_QUARTET:
         return CRCEA_UPDATE_BY32_QUARTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY1_OCTET
     case CRCEA_BY1_OCTET:
         return CRCEA_UPDATE_BY1_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY2_OCTET
     case CRCEA_BY2_OCTET:
         return CRCEA_UPDATE_BY2_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY4_OCTET
     case CRCEA_BY4_OCTET:
         return CRCEA_UPDATE_BY4_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY8_OCTET
     case CRCEA_BY8_OCTET:
         return CRCEA_UPDATE_BY8_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY16_OCTET
     case CRCEA_BY16_OCTET:
         return CRCEA_UPDATE_BY16_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY32_OCTET
     case CRCEA_BY32_OCTET:
         return CRCEA_UPDATE_BY32_OCTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY2_SEXDECTET
     case CRCEA_BY2_SEXDECTET:
         return CRCEA_UPDATE_BY2_SEXDECTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY4_SEXDECTET
     case CRCEA_BY4_SEXDECTET:
         return CRCEA_UPDATE_BY4_SEXDECTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY8_SEXDECTET
     case CRCEA_BY8_SEXDECTET:
         return CRCEA_UPDATE_BY8_SEXDECTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY16_SEXDECTET
     case CRCEA_BY16_SEXDECTET:
         return CRCEA_UPDATE_BY16_SEXDECTET(cc->model, p, pp, state, cc->table);
+#endif
+#ifdef CRCEA_ENABLE_BY32_SEXDECTET
     case CRCEA_BY32_SEXDECTET:
         return CRCEA_UPDATE_BY32_SEXDECTET(cc->model, p, pp, state, cc->table);
+#endif
     default:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
     }
