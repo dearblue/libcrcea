@@ -2563,7 +2563,7 @@ CRCEA_PREPARE_TABLE(crcea_context *cc)
         }
 
         if (alloc) {
-            void *bufp = alloc(cc, CRCEA_TABLESIZE(algo));
+            void *bufp = alloc(cc->opaque, CRCEA_TABLESIZE(algo));
             if (!bufp) {
                 return CRCEA_BITBYBIT;
             }

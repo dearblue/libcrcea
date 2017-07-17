@@ -118,8 +118,7 @@ struct crcea_context
     int16_t algorithm;  /*< enum crcea_algorithms */
     const void *table;
     crcea_alloc_f *alloc;
-
-    /** ... user data field ... */
+    void *opaque;       /*< for custom memory allocator */
 };
 
 
