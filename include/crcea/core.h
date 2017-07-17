@@ -321,9 +321,13 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 #define CRCEA_UPDATE_DECL(MODEL, STATE, F)                                       \
     do {                                                                    \
         if ((MODEL)->reflect_input) {                                          \
-            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUT_R, CRCEA_RSH, CRCEA_SLICE_R, CRCEA_SLICE8_R, CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
+            F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUT_R, CRCEA_RSH, \
+                    CRCEA_SLICE_R, CRCEA_SLICE8_R, \
+                    CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
         } else {                                                            \
-            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_INPUT, CRCEA_LSH, CRCEA_SLICE, CRCEA_SLICE8, CRCEA_LOAD16, CRCEA_INDEX16);  \
+            F(CRCEA_SETUP_POLYNOMIAL, CRCEA_INPUT, CRCEA_LSH, \
+                    CRCEA_SLICE, CRCEA_SLICE8, \
+                    CRCEA_LOAD16, CRCEA_INDEX16);  \
         }                                                                   \
     } while (0)                                                             \
 
@@ -331,15 +335,23 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
     do {                                                                    \
         if (BITS > 8 && CRCEA_BITSIZE < 16) { \
             if ((MODEL)->reflect_input) {                                          \
-                F(uint16_t, CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH, CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R); \
+                F(uint16_t, CRCEA_SETUP_POLYNOMIAL_R, \
+                        CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH, \
+                        CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R); \
             } else {                                                            \
-                F(uint16_t, CRCEA_SETUP_POLYNOMIALW, CRCEA_INPUT16, CRCEA_LSH16, CRCEA_LSH, CRCEA_SLICE16, CRCEA_SLICE, CRCEA_STORE16);  \
+                F(uint16_t, CRCEA_SETUP_POLYNOMIALW, CRCEA_INPUT16, \
+                        CRCEA_LSH16, CRCEA_LSH, CRCEA_SLICE16, \
+                        CRCEA_SLICE, CRCEA_STORE16);  \
             }                                                                   \
         } else { \
             if ((MODEL)->reflect_input) {                                          \
-                F(CRCEA_TYPE, CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUTW_R, CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R, CRCEA_SLICE_R, CRCEA_STORE_R); \
+                F(CRCEA_TYPE, CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUTW_R, \
+                        CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R, \
+                        CRCEA_SLICE_R, CRCEA_STORE_R); \
             } else {                                                            \
-                F(CRCEA_TYPE, CRCEA_SETUP_POLYNOMIAL, CRCEA_INPUTW, CRCEA_LSH, CRCEA_LSH, CRCEA_SLICE, CRCEA_SLICE, CRCEA_STORE);  \
+                F(CRCEA_TYPE, CRCEA_SETUP_POLYNOMIAL, CRCEA_INPUTW, \
+                        CRCEA_LSH, CRCEA_LSH, CRCEA_SLICE, \
+                        CRCEA_SLICE, CRCEA_STORE);  \
             }                                                                   \
         } \
     } while (0)                                                             \
