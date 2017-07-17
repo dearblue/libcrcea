@@ -2469,7 +2469,7 @@ CRCEA_TABLESIZE(int algo)
 CRCEA_VISIBILITY CRCEA_INLINE void
 CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 {
-    int times, slice, bits;
+    int times, round, bits;
     switch (algorithm) {
     case CRCEA_BY_SOLO:
     case CRCEA_BY1_SOLO:
@@ -2478,7 +2478,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     case CRCEA_BY8_SOLO:
     case CRCEA_BY16_SOLO:
     case CRCEA_BY32_SOLO:
-        slice = 8 * (1 << (algorithm & 0xff) >> 1);
+        round = 8 * (1 << (algorithm & 0xff) >> 1);
         bits = 1;
         break;
     case CRCEA_BY_DUO:
@@ -2488,7 +2488,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     case CRCEA_BY8_DUO:
     case CRCEA_BY16_DUO:
     case CRCEA_BY32_DUO:
-        slice = 4 * (1 << (algorithm & 0xff) >> 1);
+        round = 4 * (1 << (algorithm & 0xff) >> 1);
         bits = 2;
         break;
     case CRCEA_BY_QUARTET:
@@ -2498,7 +2498,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     case CRCEA_BY8_QUARTET:
     case CRCEA_BY16_QUARTET:
     case CRCEA_BY32_QUARTET:
-        slice = 2 * (1 << (algorithm & 0xff) >> 1);
+        round = 2 * (1 << (algorithm & 0xff) >> 1);
         bits = 4;
         break;
     case CRCEA_BY1_OCTET:
@@ -2507,7 +2507,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     case CRCEA_BY8_OCTET:
     case CRCEA_BY16_OCTET:
     case CRCEA_BY32_OCTET:
-        slice = (1 << (algorithm & 0xff) >> 1);
+        round = (1 << (algorithm & 0xff) >> 1);
         bits = 8;
         break;
     case CRCEA_BY2_SEXDECTET:
@@ -2515,7 +2515,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     case CRCEA_BY8_SEXDECTET:
     case CRCEA_BY16_SEXDECTET:
     case CRCEA_BY32_SEXDECTET:
-        slice = (1 << (algorithm & 0xff) >> 2);
+        round = (1 << (algorithm & 0xff) >> 2);
         bits = 16;
         break;
     default:
@@ -2537,7 +2537,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
         *t = STORE(r); \
     } \
     \
-    for (int s = 1; s < slice; s ++) { \
+    for (int s = 1; s < round; s ++) { \
         const CRCEA_TYPE *q = t - times; \
         for (uint32_t b = 0; b < times; b ++, t ++, q ++) { \
             *t = tt[SLICES(*q, 0, bits)] ^ SHIFTS(*q, bits); \
