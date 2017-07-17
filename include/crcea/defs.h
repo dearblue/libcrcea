@@ -105,10 +105,10 @@ typedef uint64_t crcea_int;
 struct crcea_model
 {
     uint32_t bitsize:8;
-    uint32_t reflect_input:1;
-    uint32_t reflect_output:1;
+    uint32_t reflectin:1;
+    uint32_t reflectout:1;
     crcea_int polynomial;
-    crcea_int xor_output;
+    crcea_int xoroutput;
 };
 
 struct crcea_context

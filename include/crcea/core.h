@@ -56,9 +56,9 @@
  *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x04c11db7ul,
- *              .reflect_input = 1,
- *              .reflect_output = 1,
- *              .xor_output = ~0ul,
+ *              .reflectin = 1,
+ *              .reflectout = 1,
+ *              .xoroutput = ~0ul,
  *          };
  *
  *          static crcea_context cc = {
@@ -86,9 +86,9 @@
  *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x1edc6f41ul,
- *              .reflect_input = 1,
- *              .reflect_output = 1,
- *              .xor_output = ~0ul,
+ *              .reflectin = 1,
+ *              .reflectout = 1,
+ *              .xoroutput = ~0ul,
  *          };
  *          static crcea_context cc = {
  *              .model = &model,
@@ -109,9 +109,9 @@
  *          static const crcea_model model = {
  *              .bitsize = 32,
  *              .polynomial = 0x04c11db7ul,
- *              .reflect_input = 0,
- *              .reflect_output = 0,
- *              .xor_output = ~0ul,
+ *              .reflectin = 0,
+ *              .reflectout = 0,
+ *              .xoroutput = ~0ul,
  *          };
  *          static crcea_context cc = {
  *              .model = &model,
@@ -245,12 +245,12 @@ CRCEA_BITREFLECT(CRCEA_TYPE n)
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_SETUP(const crcea_model *model, CRCEA_TYPE crc)
 {
-    CRCEA_TYPE state = (crc ^ model->xor_output) & CRCEA_BITMASK(model->bitsize);
-    if (model->reflect_input ^ model->reflect_output) {
+    CRCEA_TYPE state = (crc ^ model->xoroutput) & CRCEA_BITMASK(model->bitsize);
+    if (model->reflectin ^ model->reflectout) {
         state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - model->bitsize));
     }
 
-    if (!model->reflect_input) {
+    if (!model->reflectin) {
         state <<= (CRCEA_BITSIZE - model->bitsize);
     }
 
@@ -260,15 +260,15 @@ CRCEA_SETUP(const crcea_model *model, CRCEA_TYPE crc)
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 {
-    if (!model->reflect_input) {
+    if (!model->reflectin) {
         state >>= (CRCEA_BITSIZE - model->bitsize);
     }
 
-    if (model->reflect_input ^ model->reflect_output) {
+    if (model->reflectin ^ model->reflectout) {
         state = CRCEA_BITREFLECT(state << (CRCEA_BITSIZE - model->bitsize));
     }
 
-    state ^= model->xor_output;
+    state ^= model->xoroutput;
 
     return state & CRCEA_BITMASK(model->bitsize);
 }
@@ -320,7 +320,7 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 
 #define CRCEA_UPDATE_DECL(MODEL, STATE, F)                                       \
     do {                                                                    \
-        if ((MODEL)->reflect_input) {                                          \
+        if ((MODEL)->reflectin) {                                          \
             F(CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUT_R, CRCEA_RSH, \
                     CRCEA_SLICE_R, CRCEA_SLICE8_R, \
                     CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
@@ -334,7 +334,7 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 #define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F) \
     do {                                                                    \
         if (BITS > 8 && CRCEA_BITSIZE < 16) { \
-            if ((MODEL)->reflect_input) {                                          \
+            if ((MODEL)->reflectin) {                                          \
                 F(uint16_t, CRCEA_SETUP_POLYNOMIAL_R, \
                         CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH, \
                         CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R); \
@@ -344,7 +344,7 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
                         CRCEA_SLICE, CRCEA_STORE16);  \
             }                                                                   \
         } else { \
-            if ((MODEL)->reflect_input) {                                          \
+            if ((MODEL)->reflectin) {                                          \
                 F(CRCEA_TYPE, CRCEA_SETUP_POLYNOMIAL_R, CRCEA_INPUTW_R, \
                         CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R, \
                         CRCEA_SLICE_R, CRCEA_STORE_R); \
