@@ -2715,138 +2715,172 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     switch (algo) {
     case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
+
 #ifdef CRCEA_ENABLE_BITBYBIT_FAST
     case CRCEA_BITBYBIT_FAST:
         return CRCEA_UPDATE_BITBYBIT_FAST(cc->model, p, pp, state);
 #endif
+
 #ifdef CRCEA_ENABLE_BY_SOLO
     case CRCEA_BY_SOLO:
         return CRCEA_UPDATE_BY_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY1_SOLO
     case CRCEA_BY1_SOLO:
         return CRCEA_UPDATE_BY1_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY2_SOLO
     case CRCEA_BY2_SOLO:
         return CRCEA_UPDATE_BY2_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY4_SOLO
     case CRCEA_BY4_SOLO:
         return CRCEA_UPDATE_BY4_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY8_SOLO
     case CRCEA_BY8_SOLO:
         return CRCEA_UPDATE_BY8_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY16_SOLO
     case CRCEA_BY16_SOLO:
         return CRCEA_UPDATE_BY16_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY32_SOLO
     case CRCEA_BY32_SOLO:
         return CRCEA_UPDATE_BY32_SOLO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY_DUO
     case CRCEA_BY_DUO:
         return CRCEA_UPDATE_BY_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY1_DUO
     case CRCEA_BY1_DUO:
         return CRCEA_UPDATE_BY1_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY2_DUO
     case CRCEA_BY2_DUO:
         return CRCEA_UPDATE_BY2_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY4_DUO
     case CRCEA_BY4_DUO:
         return CRCEA_UPDATE_BY4_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY8_DUO
     case CRCEA_BY8_DUO:
         return CRCEA_UPDATE_BY8_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY16_DUO
     case CRCEA_BY16_DUO:
         return CRCEA_UPDATE_BY16_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY32_DUO
     case CRCEA_BY32_DUO:
         return CRCEA_UPDATE_BY32_DUO(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY_QUARTET
     case CRCEA_BY_QUARTET:
         return CRCEA_UPDATE_BY_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY1_QUARTET
     case CRCEA_BY1_QUARTET:
         return CRCEA_UPDATE_BY1_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY2_QUARTET
     case CRCEA_BY2_QUARTET:
         return CRCEA_UPDATE_BY2_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY4_QUARTET
     case CRCEA_BY4_QUARTET:
         return CRCEA_UPDATE_BY4_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY8_QUARTET
     case CRCEA_BY8_QUARTET:
         return CRCEA_UPDATE_BY8_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY16_QUARTET
     case CRCEA_BY16_QUARTET:
         return CRCEA_UPDATE_BY16_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY32_QUARTET
     case CRCEA_BY32_QUARTET:
         return CRCEA_UPDATE_BY32_QUARTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY1_OCTET
     case CRCEA_BY1_OCTET:
         return CRCEA_UPDATE_BY1_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY2_OCTET
     case CRCEA_BY2_OCTET:
         return CRCEA_UPDATE_BY2_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY4_OCTET
     case CRCEA_BY4_OCTET:
         return CRCEA_UPDATE_BY4_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY8_OCTET
     case CRCEA_BY8_OCTET:
         return CRCEA_UPDATE_BY8_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY16_OCTET
     case CRCEA_BY16_OCTET:
         return CRCEA_UPDATE_BY16_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY32_OCTET
     case CRCEA_BY32_OCTET:
         return CRCEA_UPDATE_BY32_OCTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY2_SEXDECTET
     case CRCEA_BY2_SEXDECTET:
         return CRCEA_UPDATE_BY2_SEXDECTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY4_SEXDECTET
     case CRCEA_BY4_SEXDECTET:
         return CRCEA_UPDATE_BY4_SEXDECTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY8_SEXDECTET
     case CRCEA_BY8_SEXDECTET:
         return CRCEA_UPDATE_BY8_SEXDECTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY16_SEXDECTET
     case CRCEA_BY16_SEXDECTET:
         return CRCEA_UPDATE_BY16_SEXDECTET(cc->model, p, pp, state, cc->table);
 #endif
+
 #ifdef CRCEA_ENABLE_BY32_SEXDECTET
     case CRCEA_BY32_SEXDECTET:
         return CRCEA_UPDATE_BY32_SEXDECTET(cc->model, p, pp, state, cc->table);
 #endif
+
     default:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
     }
