@@ -167,6 +167,7 @@
 #define CRCEA_PREPARE_TABLE           CRCEA_TOKEN(_prepare_table)
 #define CRCEA_TABLESIZE               CRCEA_TOKEN(_tablesize)
 #define CRCEA_BUILD_TABLE             CRCEA_TOKEN(_build_table)
+#define CRCEA_UPDATE_REFERENCE        CRCEA_TOKEN(_update_reference)
 #define CRCEA_UPDATE_BITBYBIT         CRCEA_TOKEN(_update_bitbybit)
 #define CRCEA_UPDATE_BITBYBIT_FAST    CRCEA_TOKEN(_update_bitbybit_fast)
 #define CRCEA_UPDATE_BY_SOLO          CRCEA_TOKEN(_update_by_solo)
@@ -356,6 +357,75 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
         } \
     } while (0)                                                             \
 
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE_REFERENCE(const crcea_model *model, const void *ptr, const void *const end, CRCEA_TYPE state)
+{
+    const uint8_t *p = (const uint8_t *)ptr;
+    const uintptr_t pp = (uintptr_t)end;
+
+    if (model->reflectin) {
+        CRCEA_TYPE poly = CRCEA_ADAPT_POLYNOMIAL_R(model->polynomial, model->bitsize);
+        if (model->appendzero) {
+            for (; (uintptr_t)p < pp; p ++) {
+                uint8_t ch = *p;
+                for (int i = 8; i > 0; i --) {
+                    state ^= ch & 1;
+                    int carryover = state & 1;
+                    state >>= 1;
+                    if (carryover) { state ^= poly; }
+                    ch >>= 1;
+                }
+            }
+        } else {
+            int sh = model->bitsize - 1;
+            for (; (uintptr_t)p < pp; p ++) {
+                CRCEA_TYPE ch = *p;
+                for (int i = 8; i > 0; i --) {
+                    int carryover = state & 1;
+                    state >>= 1;
+                    if (carryover) { state ^= poly; }
+                    state ^= (ch & 1) << sh;
+                    ch >>= 1;
+                }
+            }
+        }
+    } else {
+        /*
+         * NOTE: normal-input で model.bitsize と CRCEA_BITSIZE が不一致の場合
+         * NOTE: MSB がビット列の先頭となるように state が左シフトされている。
+         * NOTE: これは多くが定数化となることで、高速化を期待してのこと。
+         */
+
+        CRCEA_TYPE poly = CRCEA_ADAPT_POLYNOMIAL(model->polynomial, model->bitsize);
+
+        if (model->appendzero) {
+            for (; (uintptr_t)p < pp; p ++) {
+                uint8_t ch = *p;
+                for (int i = 8; i > 0; i --) {
+                    state ^= ((CRCEA_TYPE)(ch >> 7) & 1) << (CRCEA_BITSIZE - 1);
+                    int carryover = (state >> (CRCEA_BITSIZE - 1)) & 1;
+                    state <<= 1;
+                    if (carryover) { state ^= poly; }
+                    ch <<= 1;
+                }
+            }
+        } else {
+            int sh = CRCEA_BITSIZE - model->bitsize;
+            for (; (uintptr_t)p < pp; p ++) {
+                uint8_t ch = *p;
+                for (int i = 8; i > 0; i --) {
+                    int carryover = (state >> (CRCEA_BITSIZE - 1)) & 1;
+                    state <<= 1;
+                    if (carryover) { state ^= poly; }
+                    state ^= (CRCEA_TYPE)(ch >> 7) << sh;
+                    ch <<= 1;
+                }
+            }
+        }
+    }
+
+    return state;
+}
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
@@ -2713,6 +2783,9 @@ CRCEA_UPDATE(crcea_context *cc, const char *p, const char *pp, CRCEA_TYPE state)
     int algo = CRCEA_PREPARE_TABLE(cc);
 
     switch (algo) {
+    case CRCEA_REFERENCE:
+        return CRCEA_UPDATE_REFERENCE(cc->model, p, pp, state);
+
     case CRCEA_BITBYBIT:
         return CRCEA_UPDATE_BITBYBIT(cc->model, p, pp, state);
 
@@ -2975,6 +3048,7 @@ CRCEA_END_C_DECL
 #undef CRCEA_UPDATE_BYTE
 #undef CRCEA_UPDATE_END
 #undef CRCEA_UPDATE_DECL
+#undef CRCEA_UPDATE_REFERENCE
 #undef CRCEA_BITBYBIT_DECL
 #undef CRCEA_BITBYBIT_FAST_DECL
 #undef CRCEA_BY_SOLO_DECL

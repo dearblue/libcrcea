@@ -105,6 +105,7 @@ enum crcea_algorithms
 {
     CRCEA_BITBYBIT              = 0,
     CRCEA_BITBYBIT_FAST         = 1,
+    CRCEA_REFERENCE             = 255,
 
     CRCEA_TABLE_ALGORITHM       = 0x0100,
 
@@ -189,6 +190,7 @@ struct crcea_model
     uint32_t bitsize:8;
     uint32_t reflectin:1;
     uint32_t reflectout:1;
+    uint32_t appendzero:1;
     crcea_int polynomial;
     crcea_int xoroutput;
 };
