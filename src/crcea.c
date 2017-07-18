@@ -106,6 +106,48 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 
 #endif /* CRCEA_ONLY_UINT*** */
 
+size_t
+crcea_tablesize(const crcea_context *cc)
+{
+#define CRCEA_TABLE_SIZE_DECL(T, P) return P ## _tablesize(cc->algorithm)
+
+    CRCEA_SWITCH_BY_TYPE(cc, CRCEA_TABLE_SIZE_DECL);
+
+    return ~(size_t)0;
+}
+
+int
+crcea_prepare_table(crcea_context *cc)
+{
+    int algo = cc->algorithm;
+
+    if (!cc->table && algo >= CRCEA_TABLE_ALGORITHM) {
+        crcea_alloc_f *alloc = cc->alloc;
+        if (!alloc) {
+#ifdef CRCEA_DEFAULT_MALLOC
+            alloc = CRCEA_DEFAULT_MALLOC;
+#else
+            return CRCEA_BITBYBIT;
+#endif
+        }
+
+        if (alloc) {
+            void *table = alloc(cc->opaque, crcea_tablesize(cc));
+            if (!table) {
+                return CRCEA_BITBYBIT;
+            }
+
+#define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(cc->model, cc->algorithm, table);
+
+            CRCEA_SWITCH_BY_TYPE(cc, CRCEA_BUILD_TABLE_DECL);
+
+            cc->table = table;
+        }
+    }
+
+    return algo;
+}
+
 crcea_int
 crcea_setup(crcea_context *cc, crcea_int crc)
 {
@@ -119,7 +161,11 @@ crcea_setup(crcea_context *cc, crcea_int crc)
 crcea_int
 crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 {
-#define CRCEA_UPDATE(T, P) return P ## _update(cc, p, pp, state)
+#define CRCEA_UPDATE(T, P) \
+    do { \
+        int algo = crcea_prepare_table(cc); \
+        return P ## _update(cc->model, p, pp, state, cc->algorithm, cc->table); \
+    } while (0); \
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
 
