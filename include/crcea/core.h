@@ -169,6 +169,7 @@
 #define CRCEA_BUILD_TABLE             CRCEA_TOKEN(_build_table)
 #define CRCEA_INPUT_TO_STATE          CRCEA_TOKEN(_input_to_state)
 #define CRCEA_UPDATE_SHIFT            CRCEA_TOKEN(_update_shift)
+#define CRCEA_UPDATE_UNIFIED           CRCEA_TOKEN(_update_unified)
 #define CRCEA_UPDATE_REFERENCE        CRCEA_TOKEN(_update_reference)
 #define CRCEA_UPDATE_BITBYBIT         CRCEA_TOKEN(_update_bitbybit)
 #define CRCEA_UPDATE_BITBYBIT_FAST    CRCEA_TOKEN(_update_bitbybit_fast)
@@ -335,33 +336,7 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
     } while (0)                                                             \
 
 #define CRCEA_UPDATE_DECL(MODEL, IN, END, STATE, F)                                       \
-    do {                                                                    \
-        if (IN >= END) { return STATE; } \
-        \
-        if ((MODEL)->appendzero) { \
             CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, END, STATE, F); \
-        } else { \
-            if (((MODEL)->bitsize + 7) / 8 > (END - IN)) { \
-                if ((MODEL)->bitsize < 8) { \
-                    STATE = CRCEA_UPDATE_SHIFT((MODEL), (MODEL)->bitsize, STATE); \
-                    STATE = CRCEA_INPUT_TO_STATE((MODEL), 0, IN, END, STATE); \
-                    STATE = CRCEA_UPDATE_SHIFT((MODEL), 8 - (MODEL)->bitsize, STATE); \
-                } else { \
-                    STATE = CRCEA_UPDATE_SHIFT((MODEL), (END - IN) * 8, STATE); \
-                    STATE = CRCEA_INPUT_TO_STATE((MODEL), (MODEL)->bitsize - (END - IN) * 8, IN, END, STATE); \
-                } \
-            } else { \
-                const char *stop__ = (const char *)END - ((MODEL)->bitsize + 7) / 8; \
-                \
-                STATE = CRCEA_UPDATE_SHIFT((MODEL), (MODEL)->bitsize, STATE); \
-                CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, stop__, STATE, F); \
-                STATE = CRCEA_INPUT_TO_STATE((MODEL), 0, stop__, END, STATE); \
-                if ((MODEL)->bitsize % 8 > 0) { \
-                    STATE = CRCEA_UPDATE_SHIFT((MODEL), 8 - (MODEL)->bitsize % 8, STATE); \
-                } \
-            } \
-        } \
-    } while (0)                                                             \
 
 #define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F) \
     do {                                                                    \
@@ -2830,8 +2805,8 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     CRCEA_BUILD_TABLE_DEFINE(bits, model, CRCEA_BUILD_TABLE_DECL);
 }
 
-CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, int algo, const void *table)
+static CRCEA_TYPE
+CRCEA_UPDATE_UNIFIED(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, int algo, const void *table)
 {
     switch (algo) {
     case CRCEA_REFERENCE:
@@ -3010,6 +2985,38 @@ CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE
     }
 }
 
+CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
+CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, int algo, const void *table)
+{
+    if (p >= pp) { return state; }
+
+    if (model->appendzero) {
+        return CRCEA_UPDATE_UNIFIED(model, p, pp, state, algo, table);
+    } else {
+        if ((model->bitsize + 7) / 8 > (pp - p)) {
+            if (model->bitsize < 8) {
+                state = CRCEA_UPDATE_SHIFT(model, model->bitsize, state);
+                state = CRCEA_INPUT_TO_STATE(model, 0, p, pp, state);
+                state = CRCEA_UPDATE_SHIFT(model, 8 - model->bitsize, state);
+            } else {
+                state = CRCEA_UPDATE_SHIFT(model, (pp - p) * 8, state);
+                state = CRCEA_INPUT_TO_STATE(model, model->bitsize - (pp - p) * 8, p, pp, state);
+            }
+        } else {
+            const char *stop__ = (const char *)pp - (model->bitsize + 7) / 8;
+
+            state = CRCEA_UPDATE_SHIFT(model, model->bitsize, state);
+            CRCEA_UPDATE_UNIFIED(model, p, stop__, state, algo, table);
+            state = CRCEA_INPUT_TO_STATE(model, 0, stop__, pp, state);
+            if (model->bitsize % 8 > 0) {
+                state = CRCEA_UPDATE_SHIFT(model, 8 - model->bitsize % 8, state);
+            }
+        }
+
+        return state;
+    }
+}
+
 CRCEA_END_C_DECL
 
 
@@ -3103,6 +3110,7 @@ CRCEA_END_C_DECL
 #undef CRCEA_INPUT_TO_STATE
 #undef CRCEA_UPDATE_SHIFT_DECL
 #undef CRCEA_UPDATE_SHIFT
+#undef CRCEA_UPDATE_UNIFIED
 #undef CRCEA_UPDATE_REFERENCE
 #undef CRCEA_BITBYBIT_DECL
 #undef CRCEA_BITBYBIT_FAST_DECL
