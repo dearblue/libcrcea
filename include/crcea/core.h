@@ -2990,6 +2990,10 @@ CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE
 {
     if (p >= pp) { return state; }
 
+    if (algo == CRCEA_REFERENCE) {
+        return CRCEA_UPDATE_REFERENCE(model, p, pp, state);
+    }
+
     if (model->appendzero) {
         return CRCEA_UPDATE_UNIFIED(model, p, pp, state, algo, table);
     } else {
