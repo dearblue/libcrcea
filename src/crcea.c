@@ -164,7 +164,7 @@ crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 #define CRCEA_UPDATE(T, P) \
     do { \
         int algo = crcea_prepare_table(cc); \
-        return P ## _update(cc->model, p, pp, state, cc->algorithm, cc->table); \
+        return P ## _update(cc->model, p, pp, state, algo, cc->table); \
     } while (0); \
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
