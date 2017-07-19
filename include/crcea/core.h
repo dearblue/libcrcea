@@ -3010,7 +3010,7 @@ CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE
             const char *stop__ = (const char *)pp - (model->bitsize + 7) / 8;
 
             state = CRCEA_UPDATE_SHIFT(model, model->bitsize, state);
-            CRCEA_UPDATE_UNIFIED(model, p, stop__, state, algo, table);
+            state = CRCEA_UPDATE_UNIFIED(model, p, stop__, state, algo, table);
             state = CRCEA_INPUT_TO_STATE(model, 0, stop__, pp, state);
             if (model->bitsize % 8 > 0) {
                 state = CRCEA_UPDATE_SHIFT(model, 8 - model->bitsize % 8, state);
