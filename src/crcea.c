@@ -86,23 +86,15 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   endif
 
 #   define CRCEA_SWITCH_BY_TYPE(C, F)         \
-        switch (C->inttype) {               \
-        case CRCEA_INT8:                 \
-            F(uint8_t, crcea8);               \
-            break;                          \
-        case CRCEA_INT16:                \
-            F(uint16_t, crcea16);             \
-            break;                          \
-        case CRCEA_INT32:                \
-            F(uint32_t, crcea32);             \
-            break;                          \
-        case CRCEA_INT64:                \
-            F(uint64_t, crcea64);             \
-            break;                          \
-        CRCEA_HAVE_TYPE_UINT128_T_CASE        \
-        default:                            \
-            break;                          \
-        }                                   \
+        if ((C)->model->bitsize <= 8) { \
+            F(uint8_t, crcea8); \
+        } else if ((C)->model->bitsize <= 16) { \
+            F(uint16_t, crcea16); \
+        } else if ((C)->model->bitsize <= 32) { \
+            F(uint32_t, crcea32); \
+        } else { \
+            F(uint64_t, crcea64); \
+        } \
 
 #endif /* CRCEA_ONLY_UINT*** */
 
