@@ -67,7 +67,7 @@ main(int argc, char *argv[])
                             .alloc = NULL,
                         };
 
-                        uint32_t r = crcea_update(&ref, seq, seq + sizeof(seq), 0);
+                        uint32_t r = crcea(&ref, seq, seq + sizeof(seq), 0);
 
                         FOREACH_LIST(int, algo,
                                      CRCEA_BITBYBIT,
@@ -111,7 +111,7 @@ main(int argc, char *argv[])
                                 .alloc = NULL,
                             };
 
-                            uint32_t s = crcea_update(&bbb, seq, seq + sizeof(seq), 0);
+                            uint32_t s = crcea(&bbb, seq, seq + sizeof(seq), 0);
                             if (r != s) {
                                 bad = 1;
                                 fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%08x, actual 0x%08x (%s)\n",
