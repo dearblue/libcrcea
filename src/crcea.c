@@ -174,6 +174,14 @@ crcea_finish(crcea_context *cc, crcea_int state)
     return ~(crcea_int)0;
 }
 
+crcea_int
+crcea(crcea_context *cc, const void *src, const void *srcend, crcea_int crc)
+{
+    crcea_int s = crcea_setup(cc, crc);
+    s = crcea_update(cc, src, srcend, s);
+    return crcea_finish(cc, s);
+}
+
 #ifndef CRCEA_NO_MALLOC
 static void *
 CRCEA_DEFAULT_MALLOC(void *opaque, size_t size)
