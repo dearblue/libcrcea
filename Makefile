@@ -33,7 +33,7 @@ test/benchmark: test/benchmark.s
 	$(LD) $(LDFLAGS) -o test/benchmark test/benchmark.s
 
 test/basic: test/basic.o lib/libcrcea.a
-	$(LD) $(LCFLAGS) -o test/basic test/basic.o lib/libcrcea.a
+	$(LD) $(LDFLAGS) -o test/basic test/basic.o lib/libcrcea.a
 
 examples/static-crc32c/libcrc32c.a: examples/static-crc32c/crc32c.o
 	$(AR) rc examples/static-crc32c/libcrc32c.a examples/static-crc32c/crc32c.o
