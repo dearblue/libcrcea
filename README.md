@@ -15,7 +15,7 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 | polynomial   | 生成多項式                  | 任意の整数値 | 0x04C11DB7 | 0x1EDC6F41 | 0x04C11DB7    | 0x1021       |
 | reflectin    | 入力ビット方向は逆順か      | 0, 1         | 1          | 1          | 0             | 0            |
 | reflectout   | 出力ビット方向は逆順か      | 0, 1         | 1          | 1          | 0             | 0            |
-| appendzero   | 入力列の後ろに 0 を詰めるか | 0, 1         | 1          | 1          | 1             | 0            |
+| appendzero   | 入力値の後ろに 0 を詰めるか | 0, 1         | 1          | 1          | 1             | 0            |
 | xoroutput    | 出力 XOR ビットマスク       | 任意の整数値 | 0xffffffff | 0xffffffff | 0             | 0            |
 
 ``appendzero=1`` は <https://ja.wikipedia.org/wiki/巡回冗長検査> にある “検査対象のビットストリームに多項式除算を行う前にnビットの0を常に後置する実装” の事です。
@@ -55,10 +55,12 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 今のところ libcrcea.a は CRCEA_ACADEMIC が定義され構築されているため、特定の CRC を計算するためには巨大すぎるという欠点があります。
 
 使い方は
+
  1. crcea_model と crcea_context を用意する
  2. crcea_setup() で CRC 値を内部処理の値に変換する
  3. crcea_update() で任意長の入力値を処理する
  4. crcea_finish() で最終 CRC 値に変換する
+
 というのが一連の流れとなります。
 
 ```c:mycrc32.c
@@ -81,7 +83,7 @@ main(int argc, char *argv[])
     };
 
     static crcea_context crc32_context = {
-        .model = crc32_model,
+        .model = &crc32_model,
         .algorithm = CRCEA_SLICING_BY_4,
         .table = NULL,
         .alloc = NULL,
@@ -128,9 +130,12 @@ struct crcea_context
 #### 関数
 
 ```c:c
+size_t crcea_tablesize(const crcea_context *cc);
+int crcea_prepare_table(crcea_context *cc);
 crcea_int crcea_setup(crcea_context *cc, crcea_int crc);
 crcea_int crcea_update(crcea_context *cc, const void *src, const void *srcend, crcea_int state);
 crcea_int crcea_finish(crcea_context *cc, crcea_int state);
+crcea_int crcea(crcea_context *cc, const void *src, const void *srcend, crcea_int crc);
 ```
 
 ### 低水準 API
