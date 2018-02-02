@@ -13,6 +13,10 @@
  *      Optional.
  */
 
+#ifndef CRCEA_DEFAULT
+#   define CRCEA_ACADEMIC
+#endif
+
 #include "../include/crcea.h"
 
 #if !defined(CRCEA_NO_MALLOC) && !defined(CRCEA_DEFAULT_MALLOC)
