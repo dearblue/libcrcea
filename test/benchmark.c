@@ -45,6 +45,18 @@ printtable(uint32_t *table, int mode)
     }
 }
 
+/*
+ * "xorshift" the psudo random number generator by George Marsaglia
+ */
+uint32_t
+xorshift32(void)
+{
+    static uint32_t x = 2463534242ul;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return x;
+}
 
 #ifdef __unix__
 #   include <sys/types.h>
@@ -78,9 +90,9 @@ main(int argc, char *argv[])
     static uint32_t table_s16[32][65536];
 
     if (1) {
-        FILE *fp = fopen("/dev/random", "rb");
-        fread(src, 1, size, fp);
-        fclose(fp);
+        for (char *p = src; p < srcend; p ++) {
+            *p = xorshift32() >> 16;
+        }
     }
 
 #define SIZE 32
