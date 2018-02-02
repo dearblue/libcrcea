@@ -1,3 +1,10 @@
+/**
+ * @file _by_duo.h
+ * @brief 汎用 CRC 生成器
+ * @author dearblue <dearblue@users.noreply.github.com>
+ * @license Creative Commons Zero License (CC0 / Public Domain)
+ */
+
 #ifdef CRCEA_ENABLE_BY_DUO
 
 /*

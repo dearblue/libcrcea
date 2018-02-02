@@ -22,6 +22,13 @@ CRCEA_UPDATE_BY2_SEXDECTET(const crcea_model *model, const char *p, const char *
     return state;
 }
 
+/**
+ * @file _by_sexdectet.h
+ * @brief 汎用 CRC 生成器
+ * @author dearblue <dearblue@users.noreply.github.com>
+ * @license Creative Commons Zero License (CC0 / Public Domain)
+ */
+
 #endif /* CRCEA_ENABLE_BY2_SEXDECTET */
 
 #ifdef CRCEA_ENABLE_BY4_SEXDECTET

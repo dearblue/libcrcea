@@ -1,3 +1,10 @@
+/**
+ * @file _bitbybit.h
+ * @brief 汎用 CRC 生成器
+ * @author dearblue <dearblue@users.noreply.github.com>
+ * @license Creative Commons Zero License (CC0 / Public Domain)
+ */
+
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_BITBYBIT(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
 {

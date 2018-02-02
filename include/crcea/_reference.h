@@ -1,3 +1,10 @@
+/**
+ * @file _reference.h
+ * @brief 汎用 CRC 生成器
+ * @author dearblue <dearblue@users.noreply.github.com>
+ * @license Creative Commons Zero License (CC0 / Public Domain)
+ */
+
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_REFERENCE(const crcea_model *model, const void *ptr, const void *const end, CRCEA_TYPE state)
 {

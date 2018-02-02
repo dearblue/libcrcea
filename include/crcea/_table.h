@@ -1,3 +1,10 @@
+/**
+ * @file _table.h
+ * @brief 汎用 CRC 生成器
+ * @author dearblue <dearblue@users.noreply.github.com>
+ * @license Creative Commons Zero License (CC0 / Public Domain)
+ */
+
 #define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F) \
     do {                                                                    \
         if (BITS > 8 && CRCEA_BITSIZE < 16) { \
