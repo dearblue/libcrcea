@@ -30,7 +30,7 @@ checkdefs:
 
 
 test/benchmark: test/benchmark.s
-	$(LD) $(LDFLAGS) -o test/benchmark test/benchmark.s
+	$(LD) $(LDFLAGS) -o test/benchmark test/benchmark.s -lz -llzma
 
 test/basic: test/basic.o lib/libcrcea.a
 	$(LD) $(LDFLAGS) -o test/basic test/basic.o lib/libcrcea.a

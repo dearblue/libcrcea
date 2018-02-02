@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <zlib.h>
+#include <lzma.h>
 
 //#include "crcea.h"
 
@@ -117,15 +119,16 @@ main(int argc, char *argv[])
         \
         crc ## SIZE ## _build_table(&model, cc.algorithm, (TABLE));                                    \
         volatile uint32_t s = ~0; /* 最適化によって s が計算されないことを防止する */ \
-        s = crc ## SIZE ## _setup(&model, 0);                                            \
         double t1 = ptime();                                                  \
+        s = crc ## SIZE ## _setup(&model, 0);                                            \
         s = crc ## SIZE ## _update(&model, src, srcend - 1, s, (ALGO), (TABLE));                          \
+        s = crc ## SIZE ## _finish(&model, s);                                                   \
         double t2 = ptime();                                                  \
         double ti = t2 - t1;                                      \
         double rate = (size) / ti / 1024.0 / 1024.0;                                 \
-        s = crc ## SIZE ## _finish(&model, s);                                                   \
         printf("- { throughput: %8.2f MiB / sec., tablesize: %8d, algoright: %s }\n",    \
                rate, (int)crc ## SIZE ## _tablesize(cc.algorithm), #ALGO);            \
+        fflush(stdout); \
     } while (0)                                                                     \
 
 #define MEASURE0(ALGO, TABLE, SIZE) MEASURE00(ALGO, TABLE, SIZE)
@@ -168,6 +171,31 @@ main(int argc, char *argv[])
     MEASURE(CRCEA_BY8_SEXDECTET,   table_s16);
     MEASURE(CRCEA_BY16_SEXDECTET,   table_s16);
     MEASURE(CRCEA_BY32_SEXDECTET,   table_s16);
+
+#define MEASURE_1(LABEL, TABLESIZE, CODE) \
+    do { \
+        volatile uint32_t s; /* 最適化によって s が計算されないことを防止する */ \
+        double t1 = ptime(); \
+        s = (CODE); \
+        double t2 = ptime(); \
+        double ti = t2 - t1; \
+        double rate = (size) / ti / 1024.0 / 1024.0; \
+        printf("- { throughput: %8.2f MiB / sec., tablesize: %8d, algoright: %s }\n", \
+               rate, (int)(TABLESIZE), LABEL); \
+        fflush(stdout); \
+        (void)s; \
+    } while (0) \
+
+    {
+        /* pre-running */
+        volatile uint32_t x;
+        x = crc32(0, (const Bytef *)src, 1001);
+        x = lzma_crc32((const uint8_t *)src, 1001, 0);
+        (void)x;
+    }
+
+    MEASURE_1("zlib crc32", sizeof(uint32_t[4][256]), (uint32_t)crc32(0, (const Bytef *)src, (srcend - 1) - src));
+    MEASURE_1("liblzma crc32", sizeof(uint32_t[8][256]), (uint32_t)lzma_crc32((const uint8_t *)src, (srcend - 1) - src, 0));
 
     return 0;
 }
