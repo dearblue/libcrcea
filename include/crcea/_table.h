@@ -5,29 +5,29 @@
  * @license Creative Commons Zero License (CC0 / Public Domain)
  */
 
-#define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F) \
+#define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F)                            \
     do {                                                                    \
-        if (BITS > 8 && CRCEA_BITSIZE < 16) { \
-            if ((MODEL)->reflectin) {                                          \
-                F(uint16_t, CRCEA_ADAPT_POLYNOMIAL_R, \
-                        CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH, \
-                        CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R); \
-            } else {                                                            \
-                F(uint16_t, CRCEA_ADAPT_POLYNOMIALW, CRCEA_INPUT16, \
-                        CRCEA_LSH16, CRCEA_LSH, CRCEA_SLICE16, \
-                        CRCEA_SLICE, CRCEA_STORE16);  \
-            }                                                                   \
-        } else { \
-            if ((MODEL)->reflectin) {                                          \
-                F(CRCEA_TYPE, CRCEA_ADAPT_POLYNOMIAL_R, CRCEA_INPUTW_R, \
-                        CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R, \
-                        CRCEA_SLICE_R, CRCEA_STORE_R); \
-            } else {                                                            \
-                F(CRCEA_TYPE, CRCEA_ADAPT_POLYNOMIAL, CRCEA_INPUTW, \
-                        CRCEA_LSH, CRCEA_LSH, CRCEA_SLICE, \
-                        CRCEA_SLICE, CRCEA_STORE);  \
-            }                                                                   \
-        } \
+        if (BITS > 8 && CRCEA_BITSIZE < 16) {                               \
+            if ((MODEL)->reflectin) {                                       \
+                F(uint16_t, CRCEA_ADAPT_POLYNOMIAL_R,                       \
+                        CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH,             \
+                        CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R);     \
+            } else {                                                        \
+                F(uint16_t, CRCEA_ADAPT_POLYNOMIALW, CRCEA_INPUT16,         \
+                        CRCEA_LSH16, CRCEA_LSH, CRCEA_SLICE16,              \
+                        CRCEA_SLICE, CRCEA_STORE16);                        \
+            }                                                               \
+        } else {                                                            \
+            if ((MODEL)->reflectin) {                                       \
+                F(CRCEA_TYPE, CRCEA_ADAPT_POLYNOMIAL_R, CRCEA_INPUTW_R,     \
+                        CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R,                \
+                        CRCEA_SLICE_R, CRCEA_STORE_R);                      \
+            } else {                                                        \
+                F(CRCEA_TYPE, CRCEA_ADAPT_POLYNOMIAL, CRCEA_INPUTW,         \
+                        CRCEA_LSH, CRCEA_LSH, CRCEA_SLICE,                  \
+                        CRCEA_SLICE, CRCEA_STORE);                          \
+            }                                                               \
+        }                                                                   \
     } while (0)                                                             \
 
 CRCEA_VISIBILITY CRCEA_INLINE size_t
@@ -141,21 +141,21 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     const CRCEA_TYPE *tt = t;
 
 #define CRCEA_BUILD_TABLE_DECL(TYPE, ADAPT, INPUT, SHIFT, SHIFTS, SLICE, SLICES, STORE) \
-    TYPE poly = ADAPT(model->polynomial, model->bitsize); \
-    for (uint32_t b = 0; b < times; b ++, t ++) { \
-        TYPE r = INPUT(b, bits); \
-        for (int i = bits; i > 0; i --) { \
-            r = SHIFT(r, 1) ^ (poly & -SLICE(r, 0, 1)); \
-        } \
-        *t = STORE(r); \
-    } \
-    \
-    for (int s = 1; s < round; s ++) { \
-        const CRCEA_TYPE *q = t - times; \
-        for (uint32_t b = 0; b < times; b ++, t ++, q ++) { \
-            *t = tt[SLICES(*q, 0, bits)] ^ SHIFTS(*q, bits); \
-        } \
-    } \
+    TYPE poly = ADAPT(model->polynomial, model->bitsize);                   \
+    for (uint32_t b = 0; b < times; b ++, t ++) {                           \
+        TYPE r = INPUT(b, bits);                                            \
+        for (int i = bits; i > 0; i --) {                                   \
+            r = SHIFT(r, 1) ^ (poly & -SLICE(r, 0, 1));                     \
+        }                                                                   \
+        *t = STORE(r);                                                      \
+    }                                                                       \
+                                                                            \
+    for (int s = 1; s < round; s ++) {                                      \
+        const CRCEA_TYPE *q = t - times;                                    \
+        for (uint32_t b = 0; b < times; b ++, t ++, q ++) {                 \
+            *t = tt[SLICES(*q, 0, bits)] ^ SHIFTS(*q, bits);                \
+        }                                                                   \
+    }                                                                       \
 
     CRCEA_BUILD_TABLE_DEFINE(bits, model, CRCEA_BUILD_TABLE_DECL);
 }

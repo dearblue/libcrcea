@@ -26,37 +26,37 @@ static void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #endif
 
-#if defined(CRCEA_ONLY_INT32)
+#if defined(CRCEA_ONLY_INT64)
+#   define CRCEA_PREFIX      crcea64
+#   define CRCEA_TYPE        uint64_t
+#   include "../include/crcea/core.h"
+
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        F(uint64_t, crcea64);                                               \
+
+#elif defined(CRCEA_ONLY_INT32)
 #   define CRCEA_PREFIX      crcea32
 #   define CRCEA_TYPE        uint32_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)     \
-        F(uint32_t, crcea32);             \
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        F(uint32_t, crcea32);                                               \
 
 #elif defined(CRCEA_ONLY_INT16)
 #   define CRCEA_PREFIX      crcea16
 #   define CRCEA_TYPE        uint16_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)     \
-        F(uint16_t, crcea16);             \
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        F(uint16_t, crcea16);                                               \
 
 #elif defined(CRCEA_ONLY_INT8)
 #   define CRCEA_PREFIX      crcea8
 #   define CRCEA_TYPE        uint8_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)     \
-        F(uint8_t, crcea8);               \
-
-#elif defined(CRCEA_ONLY_INT64)
-#   define CRCEA_PREFIX      crcea64
-#   define CRCEA_TYPE        uint64_t
-#   include "../include/crcea/core.h"
-
-#   define CRCEA_SWITCH_BY_TYPE(C, F)     \
-        F(uint64_t, crcea64);             \
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        F(uint8_t, crcea8);                                                 \
 
 #else
 #   define CRCEA_PREFIX      crcea8
@@ -75,30 +75,18 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint64_t
 #   include "../include/crcea/core.h"
 
-#   if 0 && HAVE_TYPE_UINT128_T
-#      define CRCEA_PREFIX  crcea128
-#      define CRCEA_TYPE    uint128_t
-#      include "../include/crcea/core.h"
-
-#      define CRCEA_HAVE_TYPE_UINT128_T_CASE \
-       case CRCEA_INT128:               \
-           F(uint128_t, crcea128);           \
-           break;                          \
-
-#   else
-#      define CRCEA_HAVE_TYPE_UINT128_T_CASE
-#   endif
-
-#   define CRCEA_SWITCH_BY_TYPE(C, F)         \
-        if ((C)->model->bitsize <= 8) { \
-            F(uint8_t, crcea8); \
-        } else if ((C)->model->bitsize <= 16) { \
-            F(uint16_t, crcea16); \
-        } else if ((C)->model->bitsize <= 32) { \
-            F(uint32_t, crcea32); \
-        } else { \
-            F(uint64_t, crcea64); \
-        } \
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        do {                                                                \
+            if ((C)->model->bitsize > 32) {                                 \
+                F(uint64_t, crcea64);                                       \
+            } else if ((C)->model->bitsize > 16) {                          \
+                F(uint32_t, crcea32);                                       \
+            } else if ((C)->model->bitsize > 8) {                           \
+                F(uint16_t, crcea16);                                       \
+            } else {                                                        \
+                F(uint8_t, crcea8);                                         \
+            }                                                               \
+        } while (0)                                                         \
 
 #endif /* CRCEA_ONLY_UINT*** */
 
@@ -157,11 +145,11 @@ crcea_setup(crcea_context *cc, crcea_int crc)
 crcea_int
 crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 {
-#define CRCEA_UPDATE(T, P) \
-    do { \
-        int algo = crcea_prepare_table(cc); \
-        return P ## _update(cc->model, p, pp, state, algo, cc->table); \
-    } while (0); \
+#define CRCEA_UPDATE(T, P)                                                  \
+    do {                                                                    \
+        int algo = crcea_prepare_table(cc);                                 \
+        return P ## _update(cc->model, p, pp, state, algo, cc->table);      \
+    } while (0);                                                            \
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
 

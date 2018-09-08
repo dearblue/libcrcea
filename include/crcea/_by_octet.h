@@ -18,11 +18,11 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, 
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
 #define CRCEA_BY1_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 1);                                             \
+    CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
         state = SHIFT(state, 8) ^ t[(uint8_t)*IN ^ SLICE(state, 0, 8)];     \
     CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[(uint8_t)*IN ^ SLICE(state, 0, 8)];     \
-    CRCEA_UPDATE_END();                                             \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY1_OCTET_DECL);
 
@@ -42,13 +42,13 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, 
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY2_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 2);                                             \
+    CRCEA_UPDATE_STRIPE(IN, END, 2);                                        \
         state = SHIFT(state, 16) ^                                          \
                 t[1][(uint8_t)IN[0] ^ SLICE(state,  0, 8)] ^                \
                 t[0][(uint8_t)IN[1] ^ SLICE(state,  8, 8)];                 \
-    CRCEA_UPDATE_BYTE(IN, END);                                                                    \
+    CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
-    CRCEA_UPDATE_END();                                                                     \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY2_OCTET_DECL);
 
@@ -72,15 +72,15 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, 
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY4_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 4);                                             \
+    CRCEA_UPDATE_STRIPE(IN, END, 4);                                        \
         state = SHIFT(state, 32) ^                                          \
                 t[3][(uint8_t)IN[0] ^ SLICE(state,  0, 8)] ^                \
                 t[2][(uint8_t)IN[1] ^ SLICE(state,  8, 8)] ^                \
                 t[1][(uint8_t)IN[2] ^ SLICE(state, 16, 8)] ^                \
                 t[0][(uint8_t)IN[3] ^ SLICE(state, 24, 8)];                 \
-    CRCEA_UPDATE_BYTE(IN, END);                                                                    \
+    CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
-    CRCEA_UPDATE_END();                                                                     \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY4_OCTET_DECL);
 
@@ -104,7 +104,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY8_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 8);                                             \
+    CRCEA_UPDATE_STRIPE(IN, END, 8);                                        \
         state = SHIFT(state, 64) ^                                          \
                 t[7][(uint8_t)IN[0] ^ SLICE(state,  0, 8)] ^                \
                 t[6][(uint8_t)IN[1] ^ SLICE(state,  8, 8)] ^                \
@@ -114,9 +114,9 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
                 t[2][(uint8_t)IN[5] ^ SLICE(state, 40, 8)] ^                \
                 t[1][(uint8_t)IN[6] ^ SLICE(state, 48, 8)] ^                \
                 t[0][(uint8_t)IN[7] ^ SLICE(state, 56, 8)];                 \
-    CRCEA_UPDATE_BYTE(IN, END);                                                                    \
+    CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
-    CRCEA_UPDATE_END();                                                                     \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY8_OCTET_DECL);
 
@@ -136,7 +136,7 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY16_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 16);                                            \
+    CRCEA_UPDATE_STRIPE(IN, END, 16);                                       \
         state = SHIFT(state, 128) ^                                         \
                 t[15][(uint8_t)IN[ 0] ^ SLICE(state,   0, 8)] ^             \
                 t[14][(uint8_t)IN[ 1] ^ SLICE(state,   8, 8)] ^             \
@@ -154,9 +154,9 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
                 t[ 2][(uint8_t)IN[13] ^ SLICE(state, 104, 8)] ^             \
                 t[ 1][(uint8_t)IN[14] ^ SLICE(state, 112, 8)] ^             \
                 t[ 0][(uint8_t)IN[15] ^ SLICE(state, 120, 8)];              \
-    CRCEA_UPDATE_BYTE(IN, END);                                                                    \
+    CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
-    CRCEA_UPDATE_END();                                                                     \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY16_OCTET_DECL);
 
@@ -176,7 +176,7 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
 #define CRCEA_BY32_OCTET_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_UPDATE_STRIPE(IN, END, 32);                                            \
+    CRCEA_UPDATE_STRIPE(IN, END, 32);                                       \
         state = SHIFT(state, 256) ^                                         \
                 t[31][(uint8_t)IN[ 0] ^ SLICE(state,   0, 8)] ^             \
                 t[30][(uint8_t)IN[ 1] ^ SLICE(state,   8, 8)] ^             \
@@ -210,9 +210,9 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
                 t[ 2][(uint8_t)IN[29] ^ SLICE(state, 232, 8)] ^             \
                 t[ 1][(uint8_t)IN[30] ^ SLICE(state, 240, 8)] ^             \
                 t[ 0][(uint8_t)IN[31] ^ SLICE(state, 248, 8)];              \
-    CRCEA_UPDATE_BYTE(IN, END);                                                                    \
+    CRCEA_UPDATE_BYTE(IN, END);                                             \
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
-    CRCEA_UPDATE_END();                                                                     \
+    CRCEA_UPDATE_END();                                                     \
 
     CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY32_OCTET_DECL);
 

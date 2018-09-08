@@ -128,91 +128,91 @@
  */
 
 #if !defined(CRCEA_PREFIX) || !defined(CRCEA_TYPE)
-#   error Please definision both CRCEA_PREFIX and CRCEA_TYPE macros in before include this file.
+# error Please definision both CRCEA_PREFIX and CRCEA_TYPE macros in before include this file.
 #endif
 
 #include "defs.h"
 
 #ifndef CHAR_BIT
-#   include <limits.h>
+# include <limits.h>
 #endif
 
 
 #ifndef CRCEA_VISIBILITY
-#   define CRCEA_VISIBILITY static
+# define CRCEA_VISIBILITY static
 #endif
 
 #ifndef CRCEA_INLINE
-#   define CRCEA_INLINE inline
+# define CRCEA_INLINE inline
 #endif
 
 #ifndef CRCEA_NO_MALLOC
-#   ifndef CRCEA_MALLOC
-#       include <stdlib.h>
-#       define CRCEA_MALLOC malloc
-#   endif
+# ifndef CRCEA_MALLOC
+#  include <stdlib.h>
+#  define CRCEA_MALLOC malloc
+# endif
 #endif
 
 #ifndef CRCEA_STRIPE_SIZE
-#   define CRCEA_STRIPE_SIZE 1
+# define CRCEA_STRIPE_SIZE 1
 #endif
 
-#define CRCEA_TOKEN__2(PREFIX, NAME)  PREFIX ## NAME
-#define CRCEA_TOKEN__1(PREFIX, NAME)  CRCEA_TOKEN__2(PREFIX, NAME)
-#define CRCEA_TOKEN(NAME)             CRCEA_TOKEN__1(CRCEA_PREFIX, NAME)
-#define CRCEA_BITREFLECT              CRCEA_TOKEN(_bitreflect)
-#define CRCEA_SETUP                   CRCEA_TOKEN(_setup)
-#define CRCEA_FINISH                  CRCEA_TOKEN(_finish)
-#define CRCEA_UPDATE                  CRCEA_TOKEN(_update)
-#define CRCEA_PREPARE_TABLE           CRCEA_TOKEN(_prepare_table)
-#define CRCEA_TABLESIZE               CRCEA_TOKEN(_tablesize)
-#define CRCEA_BUILD_TABLE             CRCEA_TOKEN(_build_table)
-#define CRCEA_INPUT_TO_STATE          CRCEA_TOKEN(_input_to_state)
-#define CRCEA_UPDATE_SHIFT            CRCEA_TOKEN(_update_shift)
-#define CRCEA_UPDATE_UNIFIED           CRCEA_TOKEN(_update_unified)
-#define CRCEA_UPDATE_REFERENCE        CRCEA_TOKEN(_update_reference)
-#define CRCEA_UPDATE_BITBYBIT         CRCEA_TOKEN(_update_bitbybit)
-#define CRCEA_UPDATE_BITBYBIT_FAST    CRCEA_TOKEN(_update_bitbybit_fast)
-#define CRCEA_UPDATE_BY_SOLO          CRCEA_TOKEN(_update_by_solo)
-#define CRCEA_UPDATE_BY1_SOLO         CRCEA_TOKEN(_update_by1_solo)
-#define CRCEA_UPDATE_BY2_SOLO         CRCEA_TOKEN(_update_by2_solo)
-#define CRCEA_UPDATE_BY4_SOLO         CRCEA_TOKEN(_update_by4_solo)
-#define CRCEA_UPDATE_BY8_SOLO         CRCEA_TOKEN(_update_by8_solo)
-#define CRCEA_UPDATE_BY16_SOLO        CRCEA_TOKEN(_update_by16_solo)
-#define CRCEA_UPDATE_BY32_SOLO        CRCEA_TOKEN(_update_by32_solo)
-#define CRCEA_UPDATE_BY_DUO           CRCEA_TOKEN(_update_by_duo)
-#define CRCEA_UPDATE_BY1_DUO          CRCEA_TOKEN(_update_by1_duo)
-#define CRCEA_UPDATE_BY2_DUO          CRCEA_TOKEN(_update_by2_duo)
-#define CRCEA_UPDATE_BY4_DUO          CRCEA_TOKEN(_update_by4_duo)
-#define CRCEA_UPDATE_BY8_DUO          CRCEA_TOKEN(_update_by8_duo)
-#define CRCEA_UPDATE_BY16_DUO         CRCEA_TOKEN(_update_by16_duo)
-#define CRCEA_UPDATE_BY32_DUO         CRCEA_TOKEN(_update_by32_duo)
-#define CRCEA_UPDATE_BY_QUARTET       CRCEA_TOKEN(_update_by_quartet)
-#define CRCEA_UPDATE_BY1_QUARTET      CRCEA_TOKEN(_update_by1_quartet)
-#define CRCEA_UPDATE_BY2_QUARTET      CRCEA_TOKEN(_update_by2_quartet)
-#define CRCEA_UPDATE_BY4_QUARTET      CRCEA_TOKEN(_update_by4_quartet)
-#define CRCEA_UPDATE_BY8_QUARTET      CRCEA_TOKEN(_update_by8_quartet)
-#define CRCEA_UPDATE_BY16_QUARTET     CRCEA_TOKEN(_update_by16_quartet)
-#define CRCEA_UPDATE_BY32_QUARTET     CRCEA_TOKEN(_update_by32_quartet)
-#define CRCEA_UPDATE_BY1_OCTET        CRCEA_TOKEN(_update_by1_octet)
-#define CRCEA_UPDATE_BY2_OCTET        CRCEA_TOKEN(_update_by2_octet)
-#define CRCEA_UPDATE_BY4_OCTET        CRCEA_TOKEN(_update_by4_octet)
-#define CRCEA_UPDATE_BY8_OCTET        CRCEA_TOKEN(_update_by8_octet)
-#define CRCEA_UPDATE_BY16_OCTET       CRCEA_TOKEN(_update_by16_octet)
-#define CRCEA_UPDATE_BY32_OCTET       CRCEA_TOKEN(_update_by32_octet)
-#define CRCEA_UPDATE_BY2_SEXDECTET    CRCEA_TOKEN(_update_by2_sexdectet)
-#define CRCEA_UPDATE_BY4_SEXDECTET    CRCEA_TOKEN(_update_by4_sexdectet)
-#define CRCEA_UPDATE_BY8_SEXDECTET    CRCEA_TOKEN(_update_by8_sexdectet)
-#define CRCEA_UPDATE_BY16_SEXDECTET   CRCEA_TOKEN(_update_by16_sexdectet)
-#define CRCEA_UPDATE_BY32_SEXDECTET   CRCEA_TOKEN(_update_by32_sexdectet)
+#define CRCEA_TOKEN__2(PREFIX, NAME)    PREFIX ## NAME
+#define CRCEA_TOKEN__1(PREFIX, NAME)    CRCEA_TOKEN__2(PREFIX, NAME)
+#define CRCEA_TOKEN(NAME)               CRCEA_TOKEN__1(CRCEA_PREFIX, NAME)
+#define CRCEA_BITREFLECT                CRCEA_TOKEN(_bitreflect)
+#define CRCEA_SETUP                     CRCEA_TOKEN(_setup)
+#define CRCEA_FINISH                    CRCEA_TOKEN(_finish)
+#define CRCEA_UPDATE                    CRCEA_TOKEN(_update)
+#define CRCEA_PREPARE_TABLE             CRCEA_TOKEN(_prepare_table)
+#define CRCEA_TABLESIZE                 CRCEA_TOKEN(_tablesize)
+#define CRCEA_BUILD_TABLE               CRCEA_TOKEN(_build_table)
+#define CRCEA_INPUT_TO_STATE            CRCEA_TOKEN(_input_to_state)
+#define CRCEA_UPDATE_SHIFT              CRCEA_TOKEN(_update_shift)
+#define CRCEA_UPDATE_UNIFIED            CRCEA_TOKEN(_update_unified)
+#define CRCEA_UPDATE_REFERENCE          CRCEA_TOKEN(_update_reference)
+#define CRCEA_UPDATE_BITBYBIT           CRCEA_TOKEN(_update_bitbybit)
+#define CRCEA_UPDATE_BITBYBIT_FAST      CRCEA_TOKEN(_update_bitbybit_fast)
+#define CRCEA_UPDATE_BY_SOLO            CRCEA_TOKEN(_update_by_solo)
+#define CRCEA_UPDATE_BY1_SOLO           CRCEA_TOKEN(_update_by1_solo)
+#define CRCEA_UPDATE_BY2_SOLO           CRCEA_TOKEN(_update_by2_solo)
+#define CRCEA_UPDATE_BY4_SOLO           CRCEA_TOKEN(_update_by4_solo)
+#define CRCEA_UPDATE_BY8_SOLO           CRCEA_TOKEN(_update_by8_solo)
+#define CRCEA_UPDATE_BY16_SOLO          CRCEA_TOKEN(_update_by16_solo)
+#define CRCEA_UPDATE_BY32_SOLO          CRCEA_TOKEN(_update_by32_solo)
+#define CRCEA_UPDATE_BY_DUO             CRCEA_TOKEN(_update_by_duo)
+#define CRCEA_UPDATE_BY1_DUO            CRCEA_TOKEN(_update_by1_duo)
+#define CRCEA_UPDATE_BY2_DUO            CRCEA_TOKEN(_update_by2_duo)
+#define CRCEA_UPDATE_BY4_DUO            CRCEA_TOKEN(_update_by4_duo)
+#define CRCEA_UPDATE_BY8_DUO            CRCEA_TOKEN(_update_by8_duo)
+#define CRCEA_UPDATE_BY16_DUO           CRCEA_TOKEN(_update_by16_duo)
+#define CRCEA_UPDATE_BY32_DUO           CRCEA_TOKEN(_update_by32_duo)
+#define CRCEA_UPDATE_BY_QUARTET         CRCEA_TOKEN(_update_by_quartet)
+#define CRCEA_UPDATE_BY1_QUARTET        CRCEA_TOKEN(_update_by1_quartet)
+#define CRCEA_UPDATE_BY2_QUARTET        CRCEA_TOKEN(_update_by2_quartet)
+#define CRCEA_UPDATE_BY4_QUARTET        CRCEA_TOKEN(_update_by4_quartet)
+#define CRCEA_UPDATE_BY8_QUARTET        CRCEA_TOKEN(_update_by8_quartet)
+#define CRCEA_UPDATE_BY16_QUARTET       CRCEA_TOKEN(_update_by16_quartet)
+#define CRCEA_UPDATE_BY32_QUARTET       CRCEA_TOKEN(_update_by32_quartet)
+#define CRCEA_UPDATE_BY1_OCTET          CRCEA_TOKEN(_update_by1_octet)
+#define CRCEA_UPDATE_BY2_OCTET          CRCEA_TOKEN(_update_by2_octet)
+#define CRCEA_UPDATE_BY4_OCTET          CRCEA_TOKEN(_update_by4_octet)
+#define CRCEA_UPDATE_BY8_OCTET          CRCEA_TOKEN(_update_by8_octet)
+#define CRCEA_UPDATE_BY16_OCTET         CRCEA_TOKEN(_update_by16_octet)
+#define CRCEA_UPDATE_BY32_OCTET         CRCEA_TOKEN(_update_by32_octet)
+#define CRCEA_UPDATE_BY2_SEXDECTET      CRCEA_TOKEN(_update_by2_sexdectet)
+#define CRCEA_UPDATE_BY4_SEXDECTET      CRCEA_TOKEN(_update_by4_sexdectet)
+#define CRCEA_UPDATE_BY8_SEXDECTET      CRCEA_TOKEN(_update_by8_sexdectet)
+#define CRCEA_UPDATE_BY16_SEXDECTET     CRCEA_TOKEN(_update_by16_sexdectet)
+#define CRCEA_UPDATE_BY32_SEXDECTET     CRCEA_TOKEN(_update_by32_sexdectet)
 
-#define CRCEA_BITSIZE         (sizeof(CRCEA_TYPE) * CHAR_BIT)
-#define CRCEA_LSH(N, OFF)     ((OFF) < CRCEA_BITSIZE ? (N) << (OFF) : 0)
-#define CRCEA_RSH(N, OFF)     ((OFF) < CRCEA_BITSIZE ? (N) >> (OFF) : 0)
-#define CRCEA_BITMASK(WID)    (~CRCEA_LSH(~(CRCEA_TYPE)0, WID))
-#define CRCEA_LSH16(N, OFF)     ((OFF) < 16 ? (N) << (OFF) : 0)
-#define CRCEA_RSH16(N, OFF)     ((OFF) < 16 ? (N) >> (OFF) : 0)
-#define CRCEA_BITMASK16(WID)    (~CRCEA_LSH16(~(uint16_t)0, WID))
+#define CRCEA_BITSIZE                   (sizeof(CRCEA_TYPE) * CHAR_BIT)
+#define CRCEA_LSH(N, OFF)               ((OFF) < CRCEA_BITSIZE ? (N) << (OFF) : 0)
+#define CRCEA_RSH(N, OFF)               ((OFF) < CRCEA_BITSIZE ? (N) >> (OFF) : 0)
+#define CRCEA_BITMASK(WID)              (~CRCEA_LSH(~(CRCEA_TYPE)0, WID))
+#define CRCEA_LSH16(N, OFF)             ((OFF) < 16 ? (N) << (OFF) : 0)
+#define CRCEA_RSH16(N, OFF)             ((OFF) < 16 ? (N) >> (OFF) : 0)
+#define CRCEA_BITMASK16(WID)            (~CRCEA_LSH16(~(uint16_t)0, WID))
 
 
 CRCEA_BEGIN_C_DECL
@@ -302,41 +302,41 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
 #define CRCEA_INDEX16_R(A)                  ((uint16_t)(uint16_t)(A) << 8)
 
 
-#define CRCEA_UPDATE_STRIPE(P, PP, SLICESIZE)                \
+#define CRCEA_UPDATE_STRIPE(P, PP, SLICESIZE)                               \
     do {                                                                    \
-        if (SLICESIZE > 1 || CRCEA_STRIPE_SIZE > 1) {                         \
-            const size_t stripesize__ = CRCEA_STRIPE_SIZE * (SLICESIZE);      \
+        if (SLICESIZE > 1 || CRCEA_STRIPE_SIZE > 1) {                       \
+            const size_t stripesize__ = CRCEA_STRIPE_SIZE * (SLICESIZE);    \
             const char *pps__ = P + ((PP - P) & ~(stripesize__ - 1));       \
             while (P < pps__) {                                             \
                 int i__;                                                    \
                 for (i__ = (CRCEA_STRIPE_SIZE); i__ > 0; i__ --, P += (SLICESIZE)) { \
 
-#define CRCEA_UPDATE_BYTE(P, PP) \
+#define CRCEA_UPDATE_BYTE(P, PP)                                            \
                 }                                                           \
             }                                                               \
         }                                                                   \
                                                                             \
         for (; P < PP; P ++) {                                              \
 
-#define CRCEA_UPDATE_END() \
+#define CRCEA_UPDATE_END()                                                  \
         }                                                                   \
     } while (0)                                                             \
 
-#define CRCEA_UPDATE_SIMPLE_DECL(MODEL, IN, END, STATE, F)                                       \
+#define CRCEA_UPDATE_SIMPLE_DECL(MODEL, IN, END, STATE, F)                  \
     do {                                                                    \
-        if ((MODEL)->reflectin) {                                          \
-            F(IN, END, CRCEA_ADAPT_POLYNOMIAL_R, CRCEA_INPUT_R, CRCEA_RSH, \
-                    CRCEA_SLICE_R, CRCEA_SLICE8_R, \
-                    CRCEA_LOAD16_R, CRCEA_INDEX16_R); \
+        if ((MODEL)->reflectin) {                                           \
+            F(IN, END, CRCEA_ADAPT_POLYNOMIAL_R, CRCEA_INPUT_R, CRCEA_RSH,  \
+                    CRCEA_SLICE_R, CRCEA_SLICE8_R,                          \
+                    CRCEA_LOAD16_R, CRCEA_INDEX16_R);                       \
         } else {                                                            \
-            F(IN, END, CRCEA_ADAPT_POLYNOMIAL, CRCEA_INPUT, CRCEA_LSH, \
-                    CRCEA_SLICE, CRCEA_SLICE8, \
-                    CRCEA_LOAD16, CRCEA_INDEX16);  \
+            F(IN, END, CRCEA_ADAPT_POLYNOMIAL, CRCEA_INPUT, CRCEA_LSH,      \
+                    CRCEA_SLICE, CRCEA_SLICE8,                              \
+                    CRCEA_LOAD16, CRCEA_INDEX16);                           \
         }                                                                   \
     } while (0)                                                             \
 
-#define CRCEA_UPDATE_DECL(MODEL, IN, END, STATE, F)                                       \
-            CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, END, STATE, F); \
+#define CRCEA_UPDATE_DECL(MODEL, IN, END, STATE, F)                         \
+            CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, END, STATE, F);           \
 
 #include "_reference.h"
 #include "_bitbybit.h"
@@ -354,12 +354,12 @@ static inline CRCEA_TYPE
 CRCEA_UPDATE_SHIFT(const crcea_model *model, size_t bits, CRCEA_TYPE state)
 {
 #define CRCEA_UPDATE_SHIFT_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize); \
-    for (; bits > 0; bits --) { \
-        int head = SLICE(state, 0, 1); \
-        state = SHIFT(state, 1); \
-        if (head) { state ^= poly; } \
-    } \
+    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize);             \
+    for (; bits > 0; bits --) {                                             \
+        int head = SLICE(state, 0, 1);                                      \
+        state = SHIFT(state, 1);                                            \
+        if (head) { state ^= poly; }                                        \
+    }                                                                       \
 
     CRCEA_UPDATE_SIMPLE_DECL(model, p, pp, state, CRCEA_UPDATE_SHIFT_DECL);
 
