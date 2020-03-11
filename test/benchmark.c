@@ -137,6 +137,7 @@ main(int argc, char *argv[])
     puts("%YAML 1.1\n---");
 
     MEASURE(CRCEA_REFERENCE,       table_s16);
+    MEASURE(CRCEA_FALLBACK, table_s16);
     MEASURE(CRCEA_BITWISE_CONDXOR, table_s16);
     MEASURE(CRCEA_BITWISE_BRANCHASSIGN, table_s16);
     MEASURE(CRCEA_BITWISE_BRANCHMIX, table_s16);

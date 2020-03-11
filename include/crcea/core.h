@@ -346,6 +346,7 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
             CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, END, STATE, F);           \
 
 #include "_reference.h"
+#include "_fallback.h"
 #include "_bitwise.h"
 #include "_bitcombine.h"
 #include "_by_solo.h"
@@ -605,8 +606,9 @@ CRCEA_UPDATE_UNIFIED(const crcea_model *model, const char *p, const char *pp, CR
         return CRCEA_UPDATE_BY32_SEXDECTET(model, p, pp, state, table);
 #endif
 
+    case CRCEA_FALLBACK:
     default:
-        return CRCEA_UPDATE_BITWISE_CONDXOR(model, p, pp, state);
+        return CRCEA_UPDATE_FALLBACK(model, p, pp, state);
     }
 }
 
@@ -666,6 +668,7 @@ CRCEA_END_C_DECL
 #undef CRCEA_PREPARE_TABLE
 #undef CRCEA_TABLESIZE
 #undef CRCEA_BUILD_TABLE
+#undef CRCEA_UPDATE_FALLBACK
 #undef CRCEA_UPDATE_BITWISE_CONDXOR
 #undef CRCEA_UPDATE_BITWISE_BRANCHASSIGN
 #undef CRCEA_UPDATE_BITWISE_BRANCHMIX
@@ -746,6 +749,9 @@ CRCEA_END_C_DECL
 #undef CRCEA_UPDATE_SHIFT
 #undef CRCEA_UPDATE_UNIFIED
 #undef CRCEA_UPDATE_REFERENCE
+#undef CRCEA_FALLBACK_DECL
+#undef CRCEA_GALOIS_DIVISION2_FOWARDED
+#undef CRCEA_GALOIS_DIVISION2_REFLECTED
 #undef CRCEA_BITWISE_CONDXOR_DECL
 #undef CRCEA_BITWISE_BRANCHASSIGN_DECL
 #undef CRCEA_BITWISE_BRANCHMIX_DECL

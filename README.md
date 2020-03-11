@@ -45,11 +45,13 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_QUARTET | 4 ビット単位によるテーブル引きアルゴリズム   |
 | CRCEA_{BY1,BY2,BY4,BY8,BY16,BY32}_OCTET      | 8 ビット単位によるテーブル引きアルゴリズム   |
 | CRCEA_{BY2,BY4,BY8,BY16,BY32}_SEXDECTET      | 16 ビット単位によるテーブル引きアルゴリズム  |
+| CRCEA_FALLBACK                               | 無効なアルゴリズムが指定されたりテーブルの確保が失敗されたりした場合の代替アルゴリズム |
 
   * CRCEA_BY1_OCTET は標準的なテーブルアルゴリズムです。
   * CRCEA_BY{2,4,8,16,32}_\* はインテルが発表した Slicing by 4/8 アルゴリズムを元にした変種です。
   * CRCEA_BY_QUARTET はハーフバイトテーブルアルゴリズムです。
   * CRCEA_BY1_SOLO は CRCEA_ENABLE_BITCOMBINE8 をテーブルに置き換えたアルゴリズムに相当します。
+  * `CRCEA_FALLBACK` の実際のアルゴリズムは `CRCEA_BITWISE_*` か、スタックにテーブルを置く `CRCEA_BY1_DUO` 相当の処理が行われます。
 
 ## HOW TO USAGE
 

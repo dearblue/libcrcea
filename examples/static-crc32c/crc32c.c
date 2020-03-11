@@ -39,6 +39,7 @@ static const uint32_t crc32c_octet_table[4][256];
     }                                                                       \
 
 DEF_TABLELESS(crc32c_reference,             crc32_update_reference)
+DEF_TABLELESS(crc32c_fallback,              crc32_update_fallback)
 DEF_TABLELESS(crc32c_bitwise_condxor,       crc32_update_bitwise_condxor)
 DEF_TABLELESS(crc32c_bitwise_branchassign,  crc32_update_bitwise_branchassign)
 DEF_TABLELESS(crc32c_bitwise_branchmix,     crc32_update_bitwise_branchmix)
