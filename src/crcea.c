@@ -111,14 +111,14 @@ crcea_prepare_table(crcea_context *cc)
 #ifdef CRCEA_DEFAULT_MALLOC
             alloc = CRCEA_DEFAULT_MALLOC;
 #else
-            return CRCEA_BITBYBIT;
+            return CRCEA_BITWISE_CONDXOR;
 #endif
         }
 
         if (alloc) {
             void *table = alloc(cc->opaque, crcea_tablesize(cc));
             if (!table) {
-                return CRCEA_BITBYBIT;
+                return CRCEA_BITWISE_CONDXOR;
             }
 
 #define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(cc->model, cc->algorithm, table);

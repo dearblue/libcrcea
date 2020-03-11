@@ -31,7 +31,10 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 | 定数値                                       | 概要                                         |
 | -------------------------------------------- | -------------------------------------------- |
 | CRCEA_REFERENCE                              | 高速化手法を用いない最も基本的なアルゴリズム |
-| CRCEA_BITBYBIT                               | CRCEA_REFERENCE を改良したアルゴリズム       |
+| CRCEA_BITWISE_CONDXOR                        | ビット単位で計算するアルゴリズム (シフトしてから桁溢れの分岐する) |
+| CRCEA_BITWISE_BRANCHASSIGN                   | ビット単位で計算するアルゴリズム (事前に桁溢れを検出して分岐する) |
+| CRCEA_BITWISE_BRANCHMIX                      | ビット単位で計算するアルゴリズム (シフトと桁溢れの分岐処理を混合する) |
+| CRCEA_BITWISE_BRANCHLESS                     | ビット単位で計算するアルゴリズム (分岐せずに桁溢れの処理を混合する) |
 | CRCEA_BITBYBIT_FAST                          | 1 ビットごとの並列計算が可能なアルゴリズム   |
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_SOLO    | 1 ビット単位によるテーブル引きアルゴリズム   |
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_DUO     | 2 ビット単位によるテーブル引きアルゴリズム   |

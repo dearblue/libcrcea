@@ -70,7 +70,10 @@ main(int argc, char *argv[])
                         uint32_t r = crcea(&ref, seq, seq + sizeof(seq), 0);
 
                         FOREACH_LIST(int, algo,
-                                     CRCEA_BITBYBIT,
+                                     CRCEA_BITWISE_CONDXOR,
+                                     CRCEA_BITWISE_BRANCHASSIGN,
+                                     CRCEA_BITWISE_BRANCHMIX,
+                                     CRCEA_BITWISE_BRANCHLESS,
                                      CRCEA_BITBYBIT_FAST,
                                      CRCEA_BY_SOLO,
                                      CRCEA_BY1_SOLO,
