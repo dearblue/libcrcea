@@ -116,7 +116,7 @@
  *          static crcea_context cc = {
  *              .model = &model,
  *              .inttype = CRCEA_INT32,
- *              .algorithm = CRCEA_BITBYBIT_FAST,
+ *              .algorithm = CRCEA_BITCOMBINE8,
  *              .table = NULL,
  *              .alloc = NULL,
  *          };
@@ -175,7 +175,11 @@
 #define CRCEA_UPDATE_BITWISE_BRANCHASSIGN CRCEA_TOKEN(_update_bitwise_branchassign)
 #define CRCEA_UPDATE_BITWISE_BRANCHMIX  CRCEA_TOKEN(_update_bitwise_branchmix)
 #define CRCEA_UPDATE_BITWISE_BRANCHLESS CRCEA_TOKEN(_update_bitwise_branchless)
-#define CRCEA_UPDATE_BITBYBIT_FAST      CRCEA_TOKEN(_update_bitbybit_fast)
+#define CRCEA_UPDATE_BITCOMBINE2        CRCEA_TOKEN(_update_bitcombine2)
+#define CRCEA_UPDATE_BITCOMBINE4        CRCEA_TOKEN(_update_bitcombine4)
+#define CRCEA_UPDATE_BITCOMBINE8        CRCEA_TOKEN(_update_bitcombine8)
+#define CRCEA_UPDATE_BITCOMBINE16       CRCEA_TOKEN(_update_bitcombine16)
+#define CRCEA_UPDATE_BITCOMBINE32       CRCEA_TOKEN(_update_bitcombine32)
 #define CRCEA_UPDATE_BY_SOLO            CRCEA_TOKEN(_update_by_solo)
 #define CRCEA_UPDATE_BY1_SOLO           CRCEA_TOKEN(_update_by1_solo)
 #define CRCEA_UPDATE_BY2_SOLO           CRCEA_TOKEN(_update_by2_solo)
@@ -342,8 +346,8 @@ CRCEA_FINISH(const crcea_model *model, CRCEA_TYPE state)
             CRCEA_UPDATE_SIMPLE_DECL((MODEL), IN, END, STATE, F);           \
 
 #include "_reference.h"
-#include "_bitbybit.h"
 #include "_bitwise.h"
+#include "_bitcombine.h"
 #include "_by_solo.h"
 #include "_by_duo.h"
 #include "_by_quartet.h"
@@ -416,9 +420,29 @@ CRCEA_UPDATE_UNIFIED(const crcea_model *model, const char *p, const char *pp, CR
         return CRCEA_UPDATE_BITWISE_BRANCHLESS(model, p, pp, state);
 #endif
 
-#ifdef CRCEA_ENABLE_BITBYBIT_FAST
-    case CRCEA_BITBYBIT_FAST:
-        return CRCEA_UPDATE_BITBYBIT_FAST(model, p, pp, state);
+#ifdef CRCEA_ENABLE_BITCOMBINE2
+    case CRCEA_BITCOMBINE2:
+        return CRCEA_UPDATE_BITCOMBINE2(model, p, pp, state);
+#endif
+
+#ifdef CRCEA_ENABLE_BITCOMBINE4
+    case CRCEA_BITCOMBINE4:
+        return CRCEA_UPDATE_BITCOMBINE4(model, p, pp, state);
+#endif
+
+#ifdef CRCEA_ENABLE_BITCOMBINE8
+    case CRCEA_BITCOMBINE8:
+        return CRCEA_UPDATE_BITCOMBINE8(model, p, pp, state);
+#endif
+
+#ifdef CRCEA_ENABLE_BITCOMBINE16
+    case CRCEA_BITCOMBINE16:
+        return CRCEA_UPDATE_BITCOMBINE16(model, p, pp, state);
+#endif
+
+#ifdef CRCEA_ENABLE_BITCOMBINE32
+    case CRCEA_BITCOMBINE32:
+        return CRCEA_UPDATE_BITCOMBINE32(model, p, pp, state);
 #endif
 
 #ifdef CRCEA_ENABLE_BY_SOLO
@@ -646,7 +670,11 @@ CRCEA_END_C_DECL
 #undef CRCEA_UPDATE_BITWISE_BRANCHASSIGN
 #undef CRCEA_UPDATE_BITWISE_BRANCHMIX
 #undef CRCEA_UPDATE_BITWISE_BRANCHLESS
-#undef CRCEA_UPDATE_BITBYBIT_FAST
+#undef CRCEA_UPDATE_BITCOMBINE2
+#undef CRCEA_UPDATE_BITCOMBINE4
+#undef CRCEA_UPDATE_BITCOMBINE8
+#undef CRCEA_UPDATE_BITCOMBINE16
+#undef CRCEA_UPDATE_BITCOMBINE32
 #undef CRCEA_UPDATE_BY_SOLO
 #undef CRCEA_UPDATE_BY1_SOLO
 #undef CRCEA_UPDATE_BY2_SOLO

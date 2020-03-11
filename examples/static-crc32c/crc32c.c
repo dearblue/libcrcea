@@ -43,7 +43,11 @@ DEF_TABLELESS(crc32c_bitwise_condxor,       crc32_update_bitwise_condxor)
 DEF_TABLELESS(crc32c_bitwise_branchassign,  crc32_update_bitwise_branchassign)
 DEF_TABLELESS(crc32c_bitwise_branchmix,     crc32_update_bitwise_branchmix)
 DEF_TABLELESS(crc32c_bitwise_branchless,    crc32_update_bitwise_branchless)
-DEF_TABLELESS(crc32c_bitbybit_fast,         crc32_update_bitbybit_fast)
+DEF_TABLELESS(crc32c_bitcombine2,           crc32_update_bitcombine2)
+DEF_TABLELESS(crc32c_bitcombine4,           crc32_update_bitcombine4)
+DEF_TABLELESS(crc32c_bitcombine8,           crc32_update_bitcombine8)
+DEF_TABLELESS(crc32c_bitcombine16,          crc32_update_bitcombine16)
+DEF_TABLELESS(crc32c_bitcombine32,          crc32_update_bitcombine32)
 
 #define DEF_WITHTABLE(NAME, UPDATE, TABLE)                                  \
     uint32_t                                                                \

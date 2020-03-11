@@ -35,7 +35,11 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 | CRCEA_BITWISE_BRANCHASSIGN                   | ビット単位で計算するアルゴリズム (事前に桁溢れを検出して分岐する) |
 | CRCEA_BITWISE_BRANCHMIX                      | ビット単位で計算するアルゴリズム (シフトと桁溢れの分岐処理を混合する) |
 | CRCEA_BITWISE_BRANCHLESS                     | ビット単位で計算するアルゴリズム (分岐せずに桁溢れの処理を混合する) |
-| CRCEA_BITBYBIT_FAST                          | 1 ビットごとの並列計算が可能なアルゴリズム   |
+| CRCEA_BITCOMBINE2                            | 2ビット単位の並列計算を行うアルゴリズム      |
+| CRCEA_BITCOMBINE4                            | 4ビット単位の並列計算を行うアルゴリズム      |
+| CRCEA_BITCOMBINE8                            | 8ビット単位の並列計算を行うアルゴリズム      |
+| CRCEA_BITCOMBINE16                           | 最大16ビット単位の並列計算を行うアルゴリズム |
+| CRCEA_BITCOMBINE32                           | 最大32ビット単位の並列計算を行うアルゴリズム |
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_SOLO    | 1 ビット単位によるテーブル引きアルゴリズム   |
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_DUO     | 2 ビット単位によるテーブル引きアルゴリズム   |
 | CRCEA_{BY,BY1,BY2,BY4,BY8,BY16,BY32}_QUARTET | 4 ビット単位によるテーブル引きアルゴリズム   |
@@ -45,7 +49,7 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
   * CRCEA_BY1_OCTET は標準的なテーブルアルゴリズムです。
   * CRCEA_BY{2,4,8,16,32}_\* はインテルが発表した Slicing by 4/8 アルゴリズムを元にした変種です。
   * CRCEA_BY_QUARTET はハーフバイトテーブルアルゴリズムです。
-  * CRCEA_BY1_SOLO は CRCEA_BITBYBIT_FAST をテーブルに置き換えたアルゴリズムです。
+  * CRCEA_BY1_SOLO は CRCEA_ENABLE_BITCOMBINE8 をテーブルに置き換えたアルゴリズムに相当します。
 
 ## HOW TO USAGE
 
