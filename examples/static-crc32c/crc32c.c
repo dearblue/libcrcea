@@ -29,93 +29,37 @@ static const uint32_t crc32c_duo_table[16][4];
 static const uint32_t crc32c_quartet_table[8][16];
 static const uint32_t crc32c_octet_table[4][256];
 
-uint32_t
-crc32c_bitbybit(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_bitbybit(&crc32c_model, ptr, (const char *)ptr + len, s);
-    return crc32_finish(&crc32c_model, s);
-}
+#define DEF_TABLELESS(NAME, UPDATE)                                         \
+    uint32_t                                                                \
+    NAME(const void *ptr, size_t len, uint32_t crc)                         \
+    {                                                                       \
+        uint32_t s = crc32_setup(&crc32c_model, crc);                       \
+        s = UPDATE(&crc32c_model, ptr, (const char *)ptr + len, s);         \
+        return crc32_finish(&crc32c_model, s);                              \
+    }                                                                       \
 
-uint32_t
-crc32c_bitbybit_fast(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_bitbybit_fast(&crc32c_model, ptr, (const char *)ptr + len, s);
-    return crc32_finish(&crc32c_model, s);
-}
+DEF_TABLELESS(crc32c_reference,             crc32_update_reference)
+DEF_TABLELESS(crc32c_bitbybit,              crc32_update_bitbybit)
+DEF_TABLELESS(crc32c_bitbybit_fast,         crc32_update_bitbybit_fast)
 
-uint32_t
-crc32c_by1duo(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by1_duo(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_duo_table);
-    return crc32_finish(&crc32c_model, s);
-}
+#define DEF_WITHTABLE(NAME, UPDATE, TABLE)                                  \
+    uint32_t                                                                \
+    NAME(const void *ptr, size_t len, uint32_t crc)                         \
+    {                                                                       \
+        uint32_t s = crc32_setup(&crc32c_model, crc);                       \
+        s = UPDATE(&crc32c_model, ptr, (const char *)ptr + len, s, TABLE);  \
+        return crc32_finish(&crc32c_model, s);                              \
+    }                                                                       \
 
-uint32_t
-crc32c_by2duo(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by2_duo(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_duo_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by4duo(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by4_duo(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_duo_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by1quartet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by1_quartet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_quartet_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by2quartet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by2_quartet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_quartet_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by4quartet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by4_quartet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_quartet_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by1octet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by1_octet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_octet_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by2octet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by2_octet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_octet_table);
-    return crc32_finish(&crc32c_model, s);
-}
-
-uint32_t
-crc32c_by4octet(const void *ptr, size_t len, uint32_t crc)
-{
-    uint32_t s = crc32_setup(&crc32c_model, crc);
-    s = crc32_update_by4_octet(&crc32c_model, ptr, (const char *)ptr + len, s, crc32c_octet_table);
-    return crc32_finish(&crc32c_model, s);
-}
+DEF_WITHTABLE(crc32c_by1duo, crc32_update_by1_duo, crc32c_duo_table)
+DEF_WITHTABLE(crc32c_by2duo, crc32_update_by2_duo, crc32c_duo_table)
+DEF_WITHTABLE(crc32c_by4duo, crc32_update_by4_duo, crc32c_duo_table)
+DEF_WITHTABLE(crc32c_by1quartet, crc32_update_by1_quartet, crc32c_quartet_table)
+DEF_WITHTABLE(crc32c_by2quartet, crc32_update_by2_quartet, crc32c_quartet_table)
+DEF_WITHTABLE(crc32c_by4quartet, crc32_update_by4_quartet, crc32c_quartet_table)
+DEF_WITHTABLE(crc32c_by1octet, crc32_update_by1_octet, crc32c_octet_table)
+DEF_WITHTABLE(crc32c_by2octet, crc32_update_by2_octet, crc32c_octet_table)
+DEF_WITHTABLE(crc32c_by4octet, crc32_update_by4_octet, crc32c_octet_table)
 
 static const uint32_t crc32c_duo_table[16][4] =
 {
