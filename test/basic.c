@@ -35,6 +35,58 @@ xor64(void)
     return x;
 }
 
+static const char *
+lookup_algorithm_name(int algo)
+{
+#define CASE_TO_STRING(N) case N: return #N
+
+    switch (algo) {
+    CASE_TO_STRING(CRCEA_FALLBACK);
+    CASE_TO_STRING(CRCEA_BITWISE_CONDXOR);
+    CASE_TO_STRING(CRCEA_BITWISE_BRANCHASSIGN);
+    CASE_TO_STRING(CRCEA_BITWISE_BRANCHMIX);
+    CASE_TO_STRING(CRCEA_BITWISE_BRANCHLESS);
+    CASE_TO_STRING(CRCEA_BITCOMBINE2);
+    CASE_TO_STRING(CRCEA_BITCOMBINE4);
+    CASE_TO_STRING(CRCEA_BITCOMBINE8);
+    CASE_TO_STRING(CRCEA_BITCOMBINE16);
+    CASE_TO_STRING(CRCEA_BITCOMBINE32);
+    CASE_TO_STRING(CRCEA_BY_SOLO);
+    CASE_TO_STRING(CRCEA_BY1_SOLO);
+    CASE_TO_STRING(CRCEA_BY2_SOLO);
+    CASE_TO_STRING(CRCEA_BY4_SOLO);
+    CASE_TO_STRING(CRCEA_BY8_SOLO);
+    CASE_TO_STRING(CRCEA_BY16_SOLO);
+    CASE_TO_STRING(CRCEA_BY32_SOLO);
+    CASE_TO_STRING(CRCEA_BY_DUO);
+    CASE_TO_STRING(CRCEA_BY1_DUO);
+    CASE_TO_STRING(CRCEA_BY2_DUO);
+    CASE_TO_STRING(CRCEA_BY4_DUO);
+    CASE_TO_STRING(CRCEA_BY8_DUO);
+    CASE_TO_STRING(CRCEA_BY16_DUO);
+    CASE_TO_STRING(CRCEA_BY32_DUO);
+    CASE_TO_STRING(CRCEA_BY_QUARTET);
+    CASE_TO_STRING(CRCEA_BY1_QUARTET);
+    CASE_TO_STRING(CRCEA_BY2_QUARTET);
+    CASE_TO_STRING(CRCEA_BY4_QUARTET);
+    CASE_TO_STRING(CRCEA_BY8_QUARTET);
+    CASE_TO_STRING(CRCEA_BY16_QUARTET);
+    CASE_TO_STRING(CRCEA_BY32_QUARTET);
+    CASE_TO_STRING(CRCEA_BY1_OCTET);
+    CASE_TO_STRING(CRCEA_BY2_OCTET);
+    CASE_TO_STRING(CRCEA_BY4_OCTET);
+    CASE_TO_STRING(CRCEA_BY8_OCTET);
+    CASE_TO_STRING(CRCEA_BY16_OCTET);
+    CASE_TO_STRING(CRCEA_BY32_OCTET);
+    CASE_TO_STRING(CRCEA_BY2_SEXDECTET);
+    CASE_TO_STRING(CRCEA_BY4_SEXDECTET);
+    CASE_TO_STRING(CRCEA_BY8_SEXDECTET);
+    CASE_TO_STRING(CRCEA_BY16_SEXDECTET);
+    CASE_TO_STRING(CRCEA_BY32_SEXDECTET);
+    default: return "unknown (test code bug)";
+    }
+}
+
 
 int
 main(int argc, char *argv[])
@@ -122,12 +174,13 @@ main(int argc, char *argv[])
                             uint32_t s = crcea(&bbb, seq, seq + sizeof(seq), 0);
                             if (r != s) {
                                 bad = 1;
-                                fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%08x, actual 0x%08x (%s)\n",
+                                fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%08x, actual 0x%08x (%s) - %s\n",
                                         *bitsize, (uint32_t)model.polynomial & ~(~0 << 1 << (model.bitsize - 1)),
                                         (model.reflectin ? 'i' : '-'),
                                         (model.reflectout ? 'o' : '-'),
                                         (model.appendzero ? 'z' : '-'),
-                                        r, s, (r == s ? "OK" : "FAILED"));
+                                        r, s, (r == s ? "OK" : "FAILED"),
+                                        lookup_algorithm_name(*algo));
                             }
                         }
                     }
