@@ -48,8 +48,14 @@ lib/libcrcea.a: src/crcea.o
 .c.s:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -S -o $@ $<
 
-src/crcea.o: src/crcea.c include/crcea.h include/crcea/core.h include/crcea/defs.h
+cores = include/crcea/core.h include/crcea/defs.h \
+	include/crcea/_reference.h include/crcea/_fallback.h include/crcea/_table.h \
+	include/crcea/_bitwise.h include/crcea/_bitcombine.h \
+	include/crcea/_by_solo.h include/crcea/_by_duo.h include/crcea/_by_quartet.h \
+	include/crcea/_by_octet.h include/crcea/_by_sexdectet.h
 
-examples/static-crc32c/crc32c.o: examples/static-crc32c/crc32c.c include/crcea/core.h include/crcea/defs.h
+src/crcea.o: src/crcea.c include/crcea.h $(cores)
 
-test/benchmark.s: test/benchmark.c include/crcea/core.h include/crcea/defs.h
+examples/static-crc32c/crc32c.o: examples/static-crc32c/crc32c.c $(cores)
+
+test/benchmark.s: test/benchmark.c $(cores)
