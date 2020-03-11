@@ -398,8 +398,10 @@ static CRCEA_TYPE
 CRCEA_UPDATE_UNIFIED(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, int algo, const void *table)
 {
     switch (algo) {
+#ifdef CRCEA_ENABLE_REFERENCE
     case CRCEA_REFERENCE:
         return CRCEA_UPDATE_REFERENCE(model, p, pp, state);
+#endif
 
 #ifdef CRCEA_ENABLE_BITWISE_CONDXOR
     case CRCEA_BITWISE_CONDXOR:
@@ -617,9 +619,11 @@ CRCEA_UPDATE(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE
 {
     if (p >= pp) { return state; }
 
+#ifdef CRCEA_ENABLE_REFERENCE
     if (algo == CRCEA_REFERENCE) {
         return CRCEA_UPDATE_REFERENCE(model, p, pp, state);
     }
+#endif
 
     if (model->appendzero) {
         return CRCEA_UPDATE_UNIFIED(model, p, pp, state, algo, table);

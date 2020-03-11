@@ -5,6 +5,8 @@
  * @license Creative Commons Zero License (CC0 / Public Domain)
  */
 
+#ifdef CRCEA_ENABLE_REFERENCE
+
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
 CRCEA_UPDATE_REFERENCE(const crcea_model *model, const void *ptr, const void *const end, CRCEA_TYPE state)
 {
@@ -74,3 +76,5 @@ CRCEA_UPDATE_REFERENCE(const crcea_model *model, const void *ptr, const void *co
 
     return state;
 }
+
+#endif /* CRCEA_ENABLE_REFERENCE */
