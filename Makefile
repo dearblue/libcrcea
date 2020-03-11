@@ -15,6 +15,8 @@ all: lib/libcrcea.a test/basic test/benchmark
 clean:
 	-@ rm -vf *.[so] */*.[so] */*/*.[so]
 
+test: testbasic
+
 codesize: lib/libcrcea.a examples/static-crc32c/libcrc32c.a
 	readelf -s lib/libcrcea.a | grep crc
 	readelf -s examples/static-crc32c/libcrc32c.a | grep crc
@@ -28,6 +30,7 @@ testbasic: test/basic
 checkdefs:
 	$(CC) -xc -E -dM -DCRCEA_PREFIX=x -DCRCEA_TYPE=uint8_t include/crcea/core.h | grep CRCEA | sort
 
+.PHONY: all clean test codesize benchmark testbasic checkdefs
 
 test/benchmark: test/benchmark.s
 	$(LD) $(LDFLAGS) -o test/benchmark test/benchmark.s -lz -llzma
