@@ -98,7 +98,7 @@ main(int argc, char *argv[])
         seq[i] = xor64() >> 13;
     }
 
-    FOREACH_LIST(int, bitsize, 3, 5, 8, 13, 16, 21, 29, 32) {
+    FOREACH_LIST(int, bitsize, 3, 5, 8, 13, 16, 21, 29, 32, 41) {
         FOREACH_LIST(int, refin, 0, 1) {
             FOREACH_LIST(int, refout, 0, 1) {
                 FOREACH_LIST(int, append, 0, 1) {
@@ -119,7 +119,7 @@ main(int argc, char *argv[])
                             .alloc = NULL,
                         };
 
-                        uint32_t r = crcea(&ref, seq, seq + sizeof(seq), 0);
+                        uint64_t r = crcea(&ref, seq, seq + sizeof(seq), 0);
 
                         FOREACH_LIST(int, algo,
                                      CRCEA_FALLBACK,
@@ -171,10 +171,10 @@ main(int argc, char *argv[])
                                 .alloc = NULL,
                             };
 
-                            uint32_t s = crcea(&bbb, seq, seq + sizeof(seq), 0);
+                            uint64_t s = crcea(&bbb, seq, seq + sizeof(seq), 0);
                             if (r != s) {
                                 bad = 1;
-                                fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%08x, actual 0x%08x (%s) - %s\n",
+                                fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%016lx, actual 0x%016lx (%s) - %s\n",
                                         *bitsize, (uint32_t)model.polynomial & ~(~0 << 1 << (model.bitsize - 1)),
                                         (model.reflectin ? 'i' : '-'),
                                         (model.reflectout ? 'o' : '-'),

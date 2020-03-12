@@ -143,7 +143,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
 #define CRCEA_BUILD_TABLE_DECL(TYPE, ADAPT, INPUT, SHIFT, SHIFTS, SLICE, SLICES, STORE) \
     TYPE poly = ADAPT(model->polynomial, model->bitsize);                   \
     for (uint32_t b = 0; b < times; b ++, t ++) {                           \
-        TYPE r = INPUT(b, bits);                                            \
+        TYPE r = INPUT((TYPE)b, bits);                                      \
         for (int i = bits; i > 0; i --) {                                   \
             r = SHIFT(r, 1) ^ (poly & -SLICE(r, 0, 1));                     \
         }                                                                   \
