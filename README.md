@@ -153,9 +153,16 @@ crcea_int crcea(crcea_context *cc, const void *src, const void *srcend, crcea_in
 
 ``#include`` する前に、``CRCEA_PREFIX`` と ``CRCEA_TYPE`` の定義が必要です。
 
-また任意で ``CRCEA_MINIMAL`` ``CRCEA_TINY`` ``CRCEA_SMALL`` ``CRCEA_LARGE`` ``CRCEA_ACADEMIC`` を ``#define``
-することで有効化されるアルゴリズムをまとめて指定することが出来ます。
-なにが有効化される・されないについては [include/crcea/defs.h](include/crcea/defs.h) にて確認できます。
+また任意でアルゴリズム選択の目安となるプロファイルを定義することが出来ます。
+
+| プロファイル名    | 有効化されるアルゴリズム    |
+| ----------------- | --------------------------- |
+| `CRCEA_MINIMAL`   | `CRCEA_BITWISE_BRANCHLESS`  |
+| `CRCEA_TINY`      | `CRCEA_FALLBACK`            |
+| `CRCEA_SMALL`     | `CRCEA_BY4_QUARTET`         |
+| `CRCEA_LARGE`     | `CRCEA_BY16_OCTET`          |
+| `CRCEA_DEFAULT`   | `CRCEA_BY4_OCTET`           |
+| `CRCEA_ACADEMIC`  | libcrcea で実装されている全てのアルゴリズム |
 
 ``libcrcea.a`` とのリンクは不要ですが、おそらくコンパイルに時間がかかります。
 
@@ -167,6 +174,7 @@ crcea_int crcea(crcea_context *cc, const void *src, const void *srcend, crcea_in
  * この例は有効アルゴリズムのプリセットを minimal にした上で
  * crcea_update_by4_octet のみを有効にする
  */
+#define CRCEA_DEFAULT_ALGORYTHM CRCEA_BY4_OCTET
 #define CRCEA_MINIMAL
 #define CRCEA_ENABLE_BY4_OCTET
 
