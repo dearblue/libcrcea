@@ -397,6 +397,10 @@ CRCEA_INPUT_TO_STATE(const crcea_model *model, int off, const char *p, const cha
 static CRCEA_TYPE
 CRCEA_UPDATE_UNIFIED(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, int algo, const void *table)
 {
+    if (table == NULL && algo >= CRCEA_TABLE_ALGORITHM) {
+        algo = CRCEA_FALLBACK;
+    }
+
     switch (algo) {
 #ifdef CRCEA_ENABLE_REFERENCE
     case CRCEA_REFERENCE:
