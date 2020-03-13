@@ -91,10 +91,13 @@ lookup_algorithm_name(int algo)
 int
 main(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     int bad = 0;
 
     char seq[191];
-    for (int i = 0; i < sizeof(seq); i ++) {
+    for (unsigned int i = 0; i < sizeof(seq); i ++) {
         seq[i] = xor64() >> 13;
     }
 

@@ -178,6 +178,8 @@ crcea(crcea_context *cc, const void *src, const void *srcend, crcea_int crc)
 static void *
 CRCEA_DEFAULT_MALLOC(void *opaque, size_t size)
 {
+    (void)opaque;
+
     return CRCEA_MALLOC(size);
 }
 #endif

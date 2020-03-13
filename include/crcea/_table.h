@@ -82,7 +82,7 @@ CRCEA_TABLESIZE(int algo)
 CRCEA_VISIBILITY CRCEA_INLINE void
 CRCEA_BUILD_TABLE(const crcea_design *design, int algorithm, void *table)
 {
-    int times, round, bits;
+    unsigned int times, round, bits;
     switch (algorithm) {
     case CRCEA_BY_SOLO:
     case CRCEA_BY1_SOLO:
@@ -150,7 +150,7 @@ CRCEA_BUILD_TABLE(const crcea_design *design, int algorithm, void *table)
         *t = STORE(r);                                                      \
     }                                                                       \
                                                                             \
-    for (int s = 1; s < round; s ++) {                                      \
+    for (unsigned int s = 1; s < round; s ++) {                             \
         const CRCEA_TYPE *q = t - times;                                    \
         for (uint32_t b = 0; b < times; b ++, t ++, q ++) {                 \
             *t = tt[SLICES(*q, 0, bits)] ^ SHIFTS(*q, bits);                \

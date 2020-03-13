@@ -37,6 +37,8 @@
 void
 printtable(uint32_t *table, int mode)
 {
+    (void)mode;
+
     int i, j;
     for (i = 0; i < 2; i ++) {
         printf("0x%04X:", 8 * i);
@@ -85,6 +87,9 @@ xorshift32(void)
 int
 main(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     //size_t size = 1 << 26;
     size_t size = 1 << 26;
     char *src = malloc(size);
