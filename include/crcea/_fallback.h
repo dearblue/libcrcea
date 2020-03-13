@@ -19,7 +19,7 @@
 
 #ifndef CRCEA_UPDATE_FALLBACK
 # define CRCEA_UPDATE_FALLBACK          CRCEA_TOKEN(_update_fallback)
-# define CRCEA_GALOIS_DIVISION2_FOWARDED CRCEA_TOKEN(_gdiv2_fowarded)
+# define CRCEA_GALOIS_DIVISION2_NORMAL  CRCEA_TOKEN(_gdiv2_normal)
 # define CRCEA_GALOIS_DIVISION2_REFLECTED CRCEA_TOKEN(_gdiv2_reflected)
 
 /*
@@ -51,12 +51,12 @@ CRCEA_GALOIS_DIVISION2_REFLECTED(CRCEA_TYPE modpoly, CRCEA_TYPE num)
  * Slicing by Quadruple Duo as fallback
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_FALLBACK(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_FALLBACK(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
     CRCEA_TYPE table[4][4];
 
-    if (model->reflectin) {
-        CRCEA_TYPE modpoly = CRCEA_BITREFLECT(model->polynomial) >> (CRCEA_BITSIZE - model->bitsize);
+    if (design->reflectin) {
+        CRCEA_TYPE modpoly = CRCEA_BITREFLECT(design->polynomial) >> (CRCEA_BITSIZE - design->bitsize);
 
         table[0][0] = 0;
         table[0][1] = CRCEA_GALOIS_DIVISION2_REFLECTED(modpoly, 1);
@@ -75,12 +75,12 @@ CRCEA_UPDATE_FALLBACK(const crcea_model *model, const char *p, const char *pp, C
         table[3][2] = (table[2][2] >> 2) ^ table[0][(uint8_t)table[2][2] & 0x03];
         table[3][3] = (table[2][3] >> 2) ^ table[0][(uint8_t)table[2][3] & 0x03];
     } else {
-        CRCEA_TYPE modpoly = model->polynomial << (CRCEA_BITSIZE - model->bitsize);
+        CRCEA_TYPE modpoly = design->polynomial << (CRCEA_BITSIZE - design->bitsize);
 
         table[0][0] = 0;
-        table[0][1] = CRCEA_GALOIS_DIVISION2_FOWARDED(modpoly, 1);
-        table[0][2] = CRCEA_GALOIS_DIVISION2_FOWARDED(modpoly, 2);
-        table[0][3] = CRCEA_GALOIS_DIVISION2_FOWARDED(modpoly, 3);
+        table[0][1] = CRCEA_GALOIS_DIVISION2_NORMAL(modpoly, 1);
+        table[0][2] = CRCEA_GALOIS_DIVISION2_NORMAL(modpoly, 2);
+        table[0][3] = CRCEA_GALOIS_DIVISION2_NORMAL(modpoly, 3);
         table[1][0] = 0;
         table[1][1] = (table[0][1] << 2) ^ table[0][(uint8_t)(table[0][1] >> (CRCEA_BITSIZE - 2)) & 0x03];
         table[1][2] = (table[0][2] << 2) ^ table[0][(uint8_t)(table[0][2] >> (CRCEA_BITSIZE - 2)) & 0x03];
@@ -114,7 +114,7 @@ CRCEA_UPDATE_FALLBACK(const crcea_model *model, const char *p, const char *pp, C
                 table[0][SLICE8(n, 6, 2)];                                  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_FALLBACK_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_FALLBACK_DECL);
 
     return state;
 }

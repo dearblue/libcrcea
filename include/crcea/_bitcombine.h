@@ -14,10 +14,10 @@
 #ifdef CRCEA_ENABLE_BITCOMBINE2
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITCOMBINE2(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITCOMBINE2(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITCOMBINE2_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    const CRCEA_TYPE g0 = ADAPT(model->polynomial, model->bitsize),         \
+    const CRCEA_TYPE g0 = ADAPT(design->polynomial, design->bitsize),       \
                      g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1));           \
                                                                             \
     CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
@@ -50,7 +50,7 @@ CRCEA_UPDATE_BITCOMBINE2(const crcea_model *model, const char *p, const char *pp
                 (g0 & -SLICE(state, 1, 1));                                 \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITCOMBINE2_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITCOMBINE2_DECL);
 
     return state;
 }
@@ -60,10 +60,10 @@ CRCEA_UPDATE_BITCOMBINE2(const crcea_model *model, const char *p, const char *pp
 #ifdef CRCEA_ENABLE_BITCOMBINE4
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITCOMBINE4(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITCOMBINE4(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITCOMBINE4_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    const CRCEA_TYPE g0 = ADAPT(model->polynomial, model->bitsize),         \
+    const CRCEA_TYPE g0 = ADAPT(design->polynomial, design->bitsize),       \
                      g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1)),           \
                      g2 = SHIFT(g1, 1) ^ (g0 & -SLICE(g1, 0, 1)),           \
                      g3 = SHIFT(g2, 1) ^ (g0 & -SLICE(g2, 0, 1));           \
@@ -94,7 +94,7 @@ CRCEA_UPDATE_BITCOMBINE4(const crcea_model *model, const char *p, const char *pp
                 (g0 & -SLICE(state, 3, 1));                                 \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITCOMBINE4_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITCOMBINE4_DECL);
 
     return state;
 }
@@ -104,10 +104,10 @@ CRCEA_UPDATE_BITCOMBINE4(const crcea_model *model, const char *p, const char *pp
 #ifdef CRCEA_ENABLE_BITCOMBINE8
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITCOMBINE8(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITCOMBINE8(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITCOMBINE8_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    const CRCEA_TYPE g0 = ADAPT(model->polynomial, model->bitsize),         \
+    const CRCEA_TYPE g0 = ADAPT(design->polynomial, design->bitsize),       \
                      g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1)),           \
                      g2 = SHIFT(g1, 1) ^ (g0 & -SLICE(g1, 0, 1)),           \
                      g3 = SHIFT(g2, 1) ^ (g0 & -SLICE(g2, 0, 1)),           \
@@ -140,7 +140,7 @@ CRCEA_UPDATE_BITCOMBINE8(const crcea_model *model, const char *p, const char *pp
                 (g0 & -SLICE(state, 7, 1));                                 \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITCOMBINE8_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITCOMBINE8_DECL);
 
     return state;
 }
@@ -150,10 +150,10 @@ CRCEA_UPDATE_BITCOMBINE8(const crcea_model *model, const char *p, const char *pp
 #ifdef CRCEA_ENABLE_BITCOMBINE16
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITCOMBINE16(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITCOMBINE16(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITCOMBINE16_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    const CRCEA_TYPE g0 = ADAPT(model->polynomial, model->bitsize),         \
+    const CRCEA_TYPE g0 = ADAPT(design->polynomial, design->bitsize),       \
                      g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1)),           \
                      g2 = SHIFT(g1, 1) ^ (g0 & -SLICE(g1, 0, 1)),           \
                      g3 = SHIFT(g2, 1) ^ (g0 & -SLICE(g2, 0, 1)),           \
@@ -203,7 +203,7 @@ CRCEA_UPDATE_BITCOMBINE16(const crcea_model *model, const char *p, const char *p
                 (g0 & -SLICE(state, 7, 1));                                 \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITCOMBINE16_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITCOMBINE16_DECL);
 
     return state;
 }
@@ -213,10 +213,10 @@ CRCEA_UPDATE_BITCOMBINE16(const crcea_model *model, const char *p, const char *p
 #ifdef CRCEA_ENABLE_BITCOMBINE32
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITCOMBINE32(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITCOMBINE32(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITCOMBINE32_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    const CRCEA_TYPE g0 = ADAPT(model->polynomial, model->bitsize),         \
+    const CRCEA_TYPE g0 = ADAPT(design->polynomial, design->bitsize),       \
                      g1 = SHIFT(g0, 1) ^ (g0 & -SLICE(g0, 0, 1)),           \
                      g2 = SHIFT(g1, 1) ^ (g0 & -SLICE(g1, 0, 1)),           \
                      g3 = SHIFT(g2, 1) ^ (g0 & -SLICE(g2, 0, 1)),           \
@@ -300,7 +300,7 @@ CRCEA_UPDATE_BITCOMBINE32(const crcea_model *model, const char *p, const char *p
                 (g0 & -SLICE(state, 7, 1));                                 \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITCOMBINE32_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITCOMBINE32_DECL);
 
     return state;
 }

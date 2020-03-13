@@ -169,7 +169,7 @@ enum crcea_algorithms
     CRCEA_SLICING_BY_16         = CRCEA_BY16_OCTET,
 };
 
-typedef struct crcea_model crcea_model;
+typedef struct crcea_design crcea_design;
 typedef struct crcea_context crcea_context;
 typedef void *(crcea_alloc_f)(void *opaque, size_t size);
 
@@ -183,7 +183,7 @@ typedef uint8_t crcea_int;
 typedef uint64_t crcea_int;
 #endif
 
-struct crcea_model
+struct crcea_design
 {
     uint32_t bitsize:8;
     uint32_t reflectin:1;
@@ -195,7 +195,7 @@ struct crcea_model
 
 struct crcea_context
 {
-    const crcea_model *model;
+    const crcea_design *design;
     int16_t algorithm;  /*< enum crcea_algorithms */
     const void *table;
     crcea_alloc_f *alloc;

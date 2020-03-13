@@ -18,7 +18,7 @@
  * Slicing by #{tuple} Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-#{name}(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+#{name}(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -59,7 +59,7 @@ CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
                 t[0][SLICE8(n, 7, 1)]; \\
     CRCEA_UPDATE_END(); \\
 
-    CRCEA_UPDATE_DECL(model, state, #{decl});
+    CRCEA_UPDATE_DECL(design, state, #{decl});
 
     return state;
 }

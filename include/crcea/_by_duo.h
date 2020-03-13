@@ -11,7 +11,7 @@
  * Slicing by Single Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
@@ -30,7 +30,7 @@ CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRC
         state = SHIFT(state, 2) ^ t[SLICE(state, 0, 2)];                    \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY_DUO_DECL);
 
     return state;
 }
@@ -43,7 +43,7 @@ CRCEA_UPDATE_BY_DUO(const crcea_model *model, const char *p, const char *pp, CRC
  * Slicing by Quadruple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY1_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -66,7 +66,7 @@ CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CR
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY1_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY1_DUO_DECL);
 
     return state;
 }
@@ -79,7 +79,7 @@ CRCEA_UPDATE_BY1_DUO(const crcea_model *model, const char *p, const char *pp, CR
  * Slicing by Octuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY2_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -106,7 +106,7 @@ CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CR
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY2_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY2_DUO_DECL);
 
     return state;
 }
@@ -119,7 +119,7 @@ CRCEA_UPDATE_BY2_DUO(const crcea_model *model, const char *p, const char *pp, CR
  * Slicing by Sexdecuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY4_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -156,7 +156,7 @@ CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CR
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY4_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY4_DUO_DECL);
 
     return state;
 }
@@ -169,7 +169,7 @@ CRCEA_UPDATE_BY4_DUO(const crcea_model *model, const char *p, const char *pp, CR
  * Slicing by Duotriguple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY8_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -226,7 +226,7 @@ CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CR
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY8_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY8_DUO_DECL);
 
     return state;
 }
@@ -239,7 +239,7 @@ CRCEA_UPDATE_BY8_DUO(const crcea_model *model, const char *p, const char *pp, CR
  * Slicing by Quattuorsexaguple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY16_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -336,7 +336,7 @@ CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY16_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY16_DUO_DECL);
 
     return state;
 }
@@ -349,7 +349,7 @@ CRCEA_UPDATE_BY16_DUO(const crcea_model *model, const char *p, const char *pp, C
  * Slicing by Octovigcentuple Duo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_DUO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY32_DUO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[4] = (const CRCEA_TYPE (*)[4])table;
 
@@ -526,7 +526,7 @@ CRCEA_UPDATE_BY32_DUO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 6, 2)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY32_DUO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY32_DUO_DECL);
 
     return state;
 }

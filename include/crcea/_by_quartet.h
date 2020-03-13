@@ -13,7 +13,7 @@
  * This algorithm is Half-Byte Algorithm.
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
@@ -28,7 +28,7 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp,
         state = SHIFT(state, 4) ^ t[SLICE(state, 0, 4)];                    \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY_QUARTET_DECL);
 
     return state;
 }
@@ -41,7 +41,7 @@ CRCEA_UPDATE_BY_QUARTET(const crcea_model *model, const char *p, const char *pp,
  * Slicing by Double Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY1_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -60,7 +60,7 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY1_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY1_QUARTET_DECL);
 
     return state;
 }
@@ -73,7 +73,7 @@ CRCEA_UPDATE_BY1_QUARTET(const crcea_model *model, const char *p, const char *pp
  * Slicing by Quadruple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY2_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -94,7 +94,7 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY2_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY2_QUARTET_DECL);
 
     return state;
 }
@@ -107,7 +107,7 @@ CRCEA_UPDATE_BY2_QUARTET(const crcea_model *model, const char *p, const char *pp
  * Slicing by Octuple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY4_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -134,7 +134,7 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY4_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY4_QUARTET_DECL);
 
     return state;
 }
@@ -147,7 +147,7 @@ CRCEA_UPDATE_BY4_QUARTET(const crcea_model *model, const char *p, const char *pp
  * Slicing by Sexdecuple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY8_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -186,7 +186,7 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY8_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY8_QUARTET_DECL);
 
     return state;
 }
@@ -199,7 +199,7 @@ CRCEA_UPDATE_BY8_QUARTET(const crcea_model *model, const char *p, const char *pp
  * Slicing by Duotriguple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY16_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -262,7 +262,7 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *p
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY16_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY16_QUARTET_DECL);
 
     return state;
 }
@@ -275,7 +275,7 @@ CRCEA_UPDATE_BY16_QUARTET(const crcea_model *model, const char *p, const char *p
  * Slicing by Quattuorsexaguple Quartet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_QUARTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY32_QUARTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[16] = (const CRCEA_TYPE (*)[16])table;
 
@@ -386,7 +386,7 @@ CRCEA_UPDATE_BY32_QUARTET(const crcea_model *model, const char *p, const char *p
                 t[0][SLICE8(n, 4, 4)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY32_QUARTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY32_QUARTET_DECL);
 
     return state;
 }

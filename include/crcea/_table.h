@@ -5,10 +5,10 @@
  * @license Creative Commons Zero License (CC0 / Public Domain)
  */
 
-#define CRCEA_BUILD_TABLE_DEFINE(BITS, MODEL, F)                            \
+#define CRCEA_BUILD_TABLE_DEFINE(BITS, DESIGN, F)                           \
     do {                                                                    \
         if (BITS > 8 && CRCEA_BITSIZE < 16) {                               \
-            if ((MODEL)->reflectin) {                                       \
+            if ((DESIGN)->reflectin) {                                      \
                 F(uint16_t, CRCEA_ADAPT_POLYNOMIAL_R,                       \
                         CRCEA_INPUTW_R, CRCEA_RSH16, CRCEA_RSH,             \
                         CRCEA_SLICE16_R, CRCEA_SLICE_R, CRCEA_STORE_R);     \
@@ -18,7 +18,7 @@
                         CRCEA_SLICE, CRCEA_STORE16);                        \
             }                                                               \
         } else {                                                            \
-            if ((MODEL)->reflectin) {                                       \
+            if ((DESIGN)->reflectin) {                                      \
                 F(CRCEA_TYPE, CRCEA_ADAPT_POLYNOMIAL_R, CRCEA_INPUTW_R,     \
                         CRCEA_RSH, CRCEA_RSH, CRCEA_SLICE_R,                \
                         CRCEA_SLICE_R, CRCEA_STORE_R);                      \
@@ -80,7 +80,7 @@ CRCEA_TABLESIZE(int algo)
 }
 
 CRCEA_VISIBILITY CRCEA_INLINE void
-CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
+CRCEA_BUILD_TABLE(const crcea_design *design, int algorithm, void *table)
 {
     int times, round, bits;
     switch (algorithm) {
@@ -141,7 +141,7 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
     const CRCEA_TYPE *tt = t;
 
 #define CRCEA_BUILD_TABLE_DECL(TYPE, ADAPT, INPUT, SHIFT, SHIFTS, SLICE, SLICES, STORE) \
-    TYPE poly = ADAPT(model->polynomial, model->bitsize);                   \
+    TYPE poly = ADAPT(design->polynomial, design->bitsize);                 \
     for (uint32_t b = 0; b < times; b ++, t ++) {                           \
         TYPE r = INPUT((TYPE)b, bits);                                      \
         for (int i = bits; i > 0; i --) {                                   \
@@ -157,5 +157,5 @@ CRCEA_BUILD_TABLE(const crcea_model *model, int algorithm, void *table)
         }                                                                   \
     }                                                                       \
 
-    CRCEA_BUILD_TABLE_DEFINE(bits, model, CRCEA_BUILD_TABLE_DECL);
+    CRCEA_BUILD_TABLE_DEFINE(bits, design, CRCEA_BUILD_TABLE_DECL);
 }

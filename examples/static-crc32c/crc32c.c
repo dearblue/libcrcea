@@ -15,7 +15,7 @@
 #include <crcea/core.h>
 
 
-static const crcea_model crc32c_model = {
+static const crcea_design crc32c_design = {
     .bitsize = 32,
     //.polynomial = 0x04C11DB7ul,     // zlib/libpng
     .polynomial = 0x1EDC6F41ul,     // CRC-32C
@@ -33,9 +33,9 @@ static const uint32_t crc32c_octet_table[4][256];
     uint32_t                                                                \
     NAME(const void *ptr, size_t len, uint32_t crc)                         \
     {                                                                       \
-        uint32_t s = crc32_setup(&crc32c_model, crc);                       \
-        s = UPDATE(&crc32c_model, ptr, (const char *)ptr + len, s);         \
-        return crc32_finish(&crc32c_model, s);                              \
+        uint32_t s = crc32_setup(&crc32c_design, crc);                      \
+        s = UPDATE(&crc32c_design, ptr, (const char *)ptr + len, s);        \
+        return crc32_finish(&crc32c_design, s);                             \
     }                                                                       \
 
 DEF_TABLELESS(crc32c_reference,             crc32_update_reference)
@@ -54,9 +54,9 @@ DEF_TABLELESS(crc32c_bitcombine32,          crc32_update_bitcombine32)
     uint32_t                                                                \
     NAME(const void *ptr, size_t len, uint32_t crc)                         \
     {                                                                       \
-        uint32_t s = crc32_setup(&crc32c_model, crc);                       \
-        s = UPDATE(&crc32c_model, ptr, (const char *)ptr + len, s, TABLE);  \
-        return crc32_finish(&crc32c_model, s);                              \
+        uint32_t s = crc32_setup(&crc32c_design, crc);                      \
+        s = UPDATE(&crc32c_design, ptr, (const char *)ptr + len, s, TABLE); \
+        return crc32_finish(&crc32c_design, s);                             \
     }                                                                       \
 
 DEF_WITHTABLE(crc32c_by1duo, crc32_update_by1_duo, crc32c_duo_table)

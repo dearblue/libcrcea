@@ -10,7 +10,7 @@
 
 #include <crcea.h>
 
-static const crcea_model crc32_model = {
+static const crcea_design crc32_design = {
     .bitsize = 32,
     .polynomial = 0x04c11db7ul,
     .reflect_input = 1,
@@ -22,7 +22,7 @@ uint32_t
 crc32_bitbybit(const void *ptr, const void *end, uint32_t crc)
 {
     static crcea_context context = {
-        .model = &crc32_model,
+        .design = &crc32_design,
         .algorithm = CRCEA_BITBYBIT,
         .table = NULL,
         .alloc = NULL,
@@ -37,7 +37,7 @@ uint32_t
 crc32_slicing_by8(const void *ptr, const void *end, uint32_t crc)
 {
     static crcea_context context = {
-        .model = &crc32_model,
+        .design = &crc32_design,
         .algorithm = CRCEA_BY8_OCTET,
         .table = NULL,
         .alloc = NULL,

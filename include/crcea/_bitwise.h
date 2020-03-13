@@ -8,10 +8,10 @@
 #ifdef CRCEA_ENABLE_BITWISE_CONDXOR
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITWISE_CONDXOR(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITWISE_CONDXOR(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITWISE_CONDXOR_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize);             \
+    CRCEA_TYPE poly = ADAPT(design->polynomial, design->bitsize);           \
     CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
         int i;                                                              \
         state ^= INPUT(*IN);                                                \
@@ -30,7 +30,7 @@ CRCEA_UPDATE_BITWISE_CONDXOR(const crcea_model *model, const char *p, const char
         }                                                                   \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITWISE_CONDXOR_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITWISE_CONDXOR_DECL);
 
     return state;
 }
@@ -40,10 +40,10 @@ CRCEA_UPDATE_BITWISE_CONDXOR(const crcea_model *model, const char *p, const char
 #ifdef CRCEA_ENABLE_BITWISE_BRANCHASSIGN
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITWISE_BRANCHASSIGN(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITWISE_BRANCHASSIGN(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITWISE_BRANCHASSIGN_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize);             \
+    CRCEA_TYPE poly = ADAPT(design->polynomial, design->bitsize);           \
     CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
         int i;                                                              \
         state ^= INPUT(*IN);                                                \
@@ -66,7 +66,7 @@ CRCEA_UPDATE_BITWISE_BRANCHASSIGN(const crcea_model *model, const char *p, const
         }                                                                   \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITWISE_BRANCHASSIGN_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITWISE_BRANCHASSIGN_DECL);
 
     return state;
 }
@@ -76,10 +76,10 @@ CRCEA_UPDATE_BITWISE_BRANCHASSIGN(const crcea_model *model, const char *p, const
 #ifdef CRCEA_ENABLE_BITWISE_BRANCHMIX
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITWISE_BRANCHMIX(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITWISE_BRANCHMIX(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITWISE_BRANCHMIX_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize);             \
+    CRCEA_TYPE poly = ADAPT(design->polynomial, design->bitsize);           \
     CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
         int i;                                                              \
         state ^= INPUT(*IN);                                                \
@@ -94,7 +94,7 @@ CRCEA_UPDATE_BITWISE_BRANCHMIX(const crcea_model *model, const char *p, const ch
         }                                                                   \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITWISE_BRANCHMIX_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITWISE_BRANCHMIX_DECL);
 
     return state;
 }
@@ -104,10 +104,10 @@ CRCEA_UPDATE_BITWISE_BRANCHMIX(const crcea_model *model, const char *p, const ch
 #ifdef CRCEA_ENABLE_BITWISE_BRANCHLESS
 
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BITWISE_BRANCHLESS(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state)
+CRCEA_UPDATE_BITWISE_BRANCHLESS(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state)
 {
 #define CRCEA_BITWISE_BRANCHLESS_DECL(IN, END, ADAPT, INPUT, SHIFT, SLICE, SLICE8, LOAD16, INDEX16) \
-    CRCEA_TYPE poly = ADAPT(model->polynomial, model->bitsize);             \
+    CRCEA_TYPE poly = ADAPT(design->polynomial, design->bitsize);           \
     CRCEA_UPDATE_STRIPE(IN, END, 1);                                        \
         int i;                                                              \
         state ^= INPUT(*IN);                                                \
@@ -122,7 +122,7 @@ CRCEA_UPDATE_BITWISE_BRANCHLESS(const crcea_model *model, const char *p, const c
         }                                                                   \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BITWISE_BRANCHLESS_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BITWISE_BRANCHLESS_DECL);
 
     return state;
 }

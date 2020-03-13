@@ -103,7 +103,7 @@ main(int argc, char *argv[])
             FOREACH_LIST(int, refout, 0, 1) {
                 FOREACH_LIST(int, append, 0, 1) {
                     FOREACH_LIST(uint32_t, poly, 0x04C11DB7ul, 0x1EDC6F41ul) {
-                        const crcea_model model = {
+                        const crcea_design design = {
                             .bitsize = *bitsize,
                             .polynomial = *poly,
                             .reflectin = *refin,
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
                         };
 
                         crcea_context ref = {
-                            .model = &model,
+                            .design = &design,
                             .algorithm = CRCEA_REFERENCE,
                             .table = NULL,
                             .alloc = NULL,
@@ -165,7 +165,7 @@ main(int argc, char *argv[])
                                      CRCEA_BY16_SEXDECTET,
                                      CRCEA_BY32_SEXDECTET) {
                             crcea_context bbb = {
-                                .model = &model,
+                                .design = &design,
                                 .algorithm = *algo,
                                 .table = NULL,
                                 .alloc = NULL,
@@ -175,10 +175,10 @@ main(int argc, char *argv[])
                             if (r != s) {
                                 bad = 1;
                                 fprintf(stdout, "CRC-%02d-0x%08x (%c%c%c), expect 0x%016lx, actual 0x%016lx (%s) - %s\n",
-                                        *bitsize, (uint32_t)model.polynomial & ~(~0 << 1 << (model.bitsize - 1)),
-                                        (model.reflectin ? 'i' : '-'),
-                                        (model.reflectout ? 'o' : '-'),
-                                        (model.appendzero ? 'z' : '-'),
+                                        *bitsize, (uint32_t)design.polynomial & ~(~0 << 1 << (design.bitsize - 1)),
+                                        (design.reflectin ? 'i' : '-'),
+                                        (design.reflectout ? 'o' : '-'),
+                                        (design.appendzero ? 'z' : '-'),
                                         r, s, (r == s ? "OK" : "FAILED"),
                                         lookup_algorithm_name(*algo));
                             }

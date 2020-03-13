@@ -99,7 +99,7 @@ main(int argc, char *argv[])
 
 #define SIZE 32
 
-    static const crcea_model model = {
+    static const crcea_design design = {
         .bitsize = SIZE,
         .polynomial = 0x04c11db7ul,
         .reflectin = 1,
@@ -111,18 +111,18 @@ main(int argc, char *argv[])
 #define MEASURE00(ALGO, TABLE, SIZE)                                     \
     do {                                                                       \
         static crcea_context cc = { \
-            .model = &model, \
+            .design = &design, \
             .algorithm = (ALGO), \
             .table = (TABLE), \
             .alloc = NULL, \
         }; \
         \
-        crc ## SIZE ## _build_table(&model, cc.algorithm, (TABLE));                                    \
+        crc ## SIZE ## _build_table(&design, cc.algorithm, (TABLE));                                    \
         volatile uint32_t s = ~0; /* 最適化によって s が計算されないことを防止する */ \
         double t1 = ptime();                                                  \
-        s = crc ## SIZE ## _setup(&model, 0);                                            \
-        s = crc ## SIZE ## _update(&model, src, srcend - 1, s, (ALGO), (TABLE));                          \
-        s = crc ## SIZE ## _finish(&model, s);                                                   \
+        s = crc ## SIZE ## _setup(&design, 0);                                            \
+        s = crc ## SIZE ## _update(&design, src, srcend - 1, s, (ALGO), (TABLE));                          \
+        s = crc ## SIZE ## _finish(&design, s);                                                   \
         double t2 = ptime();                                                  \
         double ti = t2 - t1;                                      \
         double rate = (size) / ti / 1024.0 / 1024.0;                                 \

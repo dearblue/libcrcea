@@ -7,7 +7,7 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 
 [クリエイティブ・コモンズ ゼロ ライセンス (CC0 / Public Domain)](http://creativecommons.org/publicdomain/zero/1.0/) の下で利用することが出来ます。
 
-利用者がプログラム実行中に crcea_model 構造体として設定可能な項目は次の通りです:
+利用者がプログラム実行中に crcea_design 構造体として設定可能な項目は次の通りです:
 
 | フィールド名 | 意味                        | 値の範囲     | CRC-32     | CRC-32C    | CRC-32-MPEG-2 | CRC-16-CCITT (mruby) |
 | ------------ | --------------------------- | ------------ | ---------- | ---------- | ------------- | ------------ |
@@ -23,6 +23,9 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 <https://en.wikipedia.org/wiki/Cyclic_redundancy_check> では “appends n 0-bits”、“prefixes a fixed bit pattern” としてまとめられています。
 
 実際の設定値をどうするのかについては、[Catalogue of parametrised CRC algorithms](http://reveng.sourceforge.net/crc-catalogue/all.htm) が良い資料となるでしょう。
+
+`crcea_design` からは初期 CRC 値についてのフィールドを意図的に排除しています。
+これは魔法数が同じであれば CRC の設計を同一視するという独自解釈に基づいてこのような実装にしています。
 
 また、``struct crcea_context`` の ``algorithm`` フィールドに ``enum crcea_algorithms`` の値を代入することでアルゴリズムの変更が行なえます。
 
@@ -65,7 +68,7 @@ C で書かれた汎用 CRC の実装です。mruby-crc-0.2 から分離独立�
 
 使い方は
 
- 1. crcea_model と crcea_context を用意する
+ 1. crcea_design と crcea_context を用意する
  2. crcea_setup() で CRC 値を内部処理の値に変換する
  3. crcea_update() で任意長の入力値を処理する
  4. crcea_finish() で最終 CRC 値に変換する
@@ -82,7 +85,7 @@ main(int argc, char *argv[])
 {
     static const crc32_init = 0ul;
 
-    static const crcea_model crc32_model = {
+    static const crcea_design crc32_design = {
         .bitsize = 32,
         .reflectin = 1,
         .reflectout = 1,
@@ -92,7 +95,7 @@ main(int argc, char *argv[])
     };
 
     static crcea_context crc32_context = {
-        .model = &crc32_model,
+        .design = &crc32_design,
         .algorithm = CRCEA_SLICING_BY_4,
         .table = NULL,
         .alloc = NULL,
@@ -116,7 +119,7 @@ $ cc -o mycrc32 mycrc32.c -lcrcea
 #### 構造体
 
 ```c:c
-struct crcea_model
+struct crcea_design
 {
     uint32_t bitsize:8;
     uint32_t reflectin:1;
@@ -128,7 +131,7 @@ struct crcea_model
 
 struct crcea_context
 {
-    const crcea_model *model;
+    const crcea_design *design;
     int16_t algorithm;  /*< enum crcea_algorithms */
     const void *table;
     crcea_alloc_f *alloc;
@@ -166,7 +169,7 @@ crcea_int crcea(crcea_context *cc, const void *src, const void *srcend, crcea_in
 
 ``libcrcea.a`` とのリンクは不要ですが、おそらくコンパイルに時間がかかります。
 
-高度なコンパイラ (gcc や clang) を用いると、``crcea_model`` の静的・不変データを用意することで、最適化が見込めるかもしれません。
+高度なコンパイラ (gcc や clang) を用いると、``crcea_design`` の静的・不変データを用意することで、最適化が見込めるかもしれません。
 静的・不変な事前に計算されたテーブルを用意すると、さらなる最適化が見込める場合があります。
 
 ```c:mycrc32.c
@@ -193,7 +196,7 @@ main(int argc, char *argv[])
 {
     static const crc32_init = 0ul;
 
-    static const crcea_model crc32_model = {
+    static const crcea_design crc32_design = {
         .bitsize = 32,
         .reflectin = 1,
         .reflectout = 1,
@@ -204,12 +207,12 @@ main(int argc, char *argv[])
 
     int algorithm = CRCEA_SLICING_BY_4;
     void *crc32_table = malloc(private_crc32_tablesize(algorithm));
-    private_crc32_build_table(&crc32_model, algorithm, crc32_table);
+    private_crc32_build_table(&crc32_design, algorithm, crc32_table);
 
     for (int i = 1; i < argc; i ++) {
-        crcea_int s = private_crc32_setup(&crc32_model, crc32_init);
-        s = private_crc32_update_by4_octet(&crc32_model, argv[i], argv[i] + strlen(argv[i]), s, crc32_table);
-        printf("0x%08x : %s\n", private_crc32_finish(&crc32_model, s), argv[i]);
+        crcea_int s = private_crc32_setup(&crc32_design, crc32_init);
+        s = private_crc32_update_by4_octet(&crc32_design, argv[i], argv[i] + strlen(argv[i]), s, crc32_table);
+        printf("0x%08x : %s\n", private_crc32_finish(&crc32_design, s), argv[i]);
     }
 
     return 0;

@@ -13,7 +13,7 @@
  * This algorithm is table algorithm by Dilip V. Sarwate in 1988.
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY1_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
@@ -24,7 +24,7 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[(uint8_t)*IN ^ SLICE(state, 0, 8)];     \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY1_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY1_OCTET_DECL);
 
     return state;
 }
@@ -37,7 +37,7 @@ CRCEA_UPDATE_BY1_OCTET(const crcea_model *model, const char *p, const char *pp, 
  * Slicing by Double Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY2_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
@@ -50,7 +50,7 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY2_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY2_OCTET_DECL);
 
     return state;
 }
@@ -67,7 +67,7 @@ CRCEA_UPDATE_BY2_OCTET(const crcea_model *model, const char *p, const char *pp, 
  * Modified points are byte order free and byte alignment free.
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY4_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
@@ -82,7 +82,7 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY4_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY4_OCTET_DECL);
 
     return state;
 }
@@ -99,7 +99,7 @@ CRCEA_UPDATE_BY4_OCTET(const crcea_model *model, const char *p, const char *pp, 
  * Modified points are byte order free and byte alignment free.
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY8_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
@@ -118,7 +118,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY8_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY8_OCTET_DECL);
 
     return state;
 }
@@ -131,7 +131,7 @@ CRCEA_UPDATE_BY8_OCTET(const crcea_model *model, const char *p, const char *pp, 
  * Slicing by Sexdecuple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY16_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
@@ -158,7 +158,7 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY16_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY16_OCTET_DECL);
 
     return state;
 }
@@ -171,7 +171,7 @@ CRCEA_UPDATE_BY16_OCTET(const crcea_model *model, const char *p, const char *pp,
  * Slicing by Slicing by Duotriguple Octet
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY32_OCTET(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[256] = (const CRCEA_TYPE (*)[256])table;
 
@@ -214,7 +214,7 @@ CRCEA_UPDATE_BY32_OCTET(const crcea_model *model, const char *p, const char *pp,
         state = SHIFT(state, 8) ^ t[0][(uint8_t)*IN ^ SLICE(state, 0, 8)];  \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY32_OCTET_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY32_OCTET_DECL);
 
     return state;
 }

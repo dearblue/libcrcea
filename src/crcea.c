@@ -77,11 +77,11 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 
 #   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
         do {                                                                \
-            if ((C)->model->bitsize > 32) {                                 \
+            if ((C)->design->bitsize > 32) {                                \
                 F(uint64_t, crcea64);                                       \
-            } else if ((C)->model->bitsize > 16) {                          \
+            } else if ((C)->design->bitsize > 16) {                         \
                 F(uint32_t, crcea32);                                       \
-            } else if ((C)->model->bitsize > 8) {                           \
+            } else if ((C)->design->bitsize > 8) {                          \
                 F(uint16_t, crcea16);                                       \
             } else {                                                        \
                 F(uint8_t, crcea8);                                         \
@@ -121,7 +121,7 @@ crcea_prepare_table(crcea_context *cc)
                 return CRCEA_FALLBACK;
             }
 
-#define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(cc->model, cc->algorithm, table);
+#define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(cc->design, cc->algorithm, table);
 
             CRCEA_SWITCH_BY_TYPE(cc, CRCEA_BUILD_TABLE_DECL);
 
@@ -135,7 +135,7 @@ crcea_prepare_table(crcea_context *cc)
 crcea_int
 crcea_setup(crcea_context *cc, crcea_int crc)
 {
-#define CRCEA_SETUP(T, P) return P ## _setup(cc->model, crc)
+#define CRCEA_SETUP(T, P) return P ## _setup(cc->design, crc)
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_SETUP);
 
@@ -148,7 +148,7 @@ crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 #define CRCEA_UPDATE(T, P)                                                  \
     do {                                                                    \
         int algo = crcea_prepare_table(cc);                                 \
-        return P ## _update(cc->model, p, pp, state, algo, cc->table);      \
+        return P ## _update(cc->design, p, pp, state, algo, cc->table);     \
     } while (0);                                                            \
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
@@ -159,7 +159,7 @@ crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 crcea_int
 crcea_finish(crcea_context *cc, crcea_int state)
 {
-#define CRCEA_FINISH(T, P) return P ## _finish(cc->model, state)
+#define CRCEA_FINISH(T, P) return P ## _finish(cc->design, state)
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_FINISH);
 

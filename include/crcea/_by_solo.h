@@ -11,7 +11,7 @@
  * Slicing by Single Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE *t = (const CRCEA_TYPE *)table;
 
@@ -38,7 +38,7 @@ CRCEA_UPDATE_BY_SOLO(const crcea_model *model, const char *p, const char *pp, CR
         state = SHIFT(state, 1) ^ t[SLICE(state, 0, 1)];                    \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY_SOLO_DECL);
 
     return state;
 }
@@ -51,7 +51,7 @@ CRCEA_UPDATE_BY_SOLO(const crcea_model *model, const char *p, const char *pp, CR
  * Slicing by Octuple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY1_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY1_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -82,7 +82,7 @@ CRCEA_UPDATE_BY1_SOLO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY1_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY1_SOLO_DECL);
 
     return state;
 }
@@ -95,7 +95,7 @@ CRCEA_UPDATE_BY1_SOLO(const crcea_model *model, const char *p, const char *pp, C
  * Slicing by Sexdecuple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY2_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY2_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -134,7 +134,7 @@ CRCEA_UPDATE_BY2_SOLO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY2_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY2_SOLO_DECL);
 
     return state;
 }
@@ -147,7 +147,7 @@ CRCEA_UPDATE_BY2_SOLO(const crcea_model *model, const char *p, const char *pp, C
  * Slicing by Duotriguple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY4_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY4_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -204,7 +204,7 @@ CRCEA_UPDATE_BY4_SOLO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY4_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY4_SOLO_DECL);
 
     return state;
 }
@@ -217,7 +217,7 @@ CRCEA_UPDATE_BY4_SOLO(const crcea_model *model, const char *p, const char *pp, C
  * Slicing by Quattuorsexaguple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY8_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY8_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -310,7 +310,7 @@ CRCEA_UPDATE_BY8_SOLO(const crcea_model *model, const char *p, const char *pp, C
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY8_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY8_SOLO_DECL);
 
     return state;
 }
@@ -323,7 +323,7 @@ CRCEA_UPDATE_BY8_SOLO(const crcea_model *model, const char *p, const char *pp, C
  * Slicing by Octovigcentuple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY16_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY16_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -488,7 +488,7 @@ CRCEA_UPDATE_BY16_SOLO(const crcea_model *model, const char *p, const char *pp, 
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY16_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY16_SOLO_DECL);
 
     return state;
 }
@@ -501,7 +501,7 @@ CRCEA_UPDATE_BY16_SOLO(const crcea_model *model, const char *p, const char *pp, 
  * Slicing by Sexquinquagducentuple Solo
  */
 CRCEA_VISIBILITY CRCEA_INLINE CRCEA_TYPE
-CRCEA_UPDATE_BY32_SOLO(const crcea_model *model, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
+CRCEA_UPDATE_BY32_SOLO(const crcea_design *design, const char *p, const char *pp, CRCEA_TYPE state, const void *table)
 {
     const CRCEA_TYPE (*t)[2] = (const CRCEA_TYPE (*)[2])table;
 
@@ -810,7 +810,7 @@ CRCEA_UPDATE_BY32_SOLO(const crcea_model *model, const char *p, const char *pp, 
                 t[0][SLICE8(n, 7, 1)];                                      \
     CRCEA_UPDATE_END();                                                     \
 
-    CRCEA_UPDATE_DECL(model, p, pp, state, CRCEA_BY32_SOLO_DECL);
+    CRCEA_UPDATE_DECL(design, p, pp, state, CRCEA_BY32_SOLO_DECL);
 
     return state;
 }
