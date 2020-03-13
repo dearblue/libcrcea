@@ -170,6 +170,7 @@ enum crcea_algorithms
 };
 
 typedef struct crcea_design crcea_design;
+typedef struct crcea_model crcea_model;
 typedef struct crcea_context crcea_context;
 typedef void *(crcea_alloc_f)(void *opaque, size_t size);
 
@@ -191,6 +192,12 @@ struct crcea_design
     uint32_t appendzero:1;
     crcea_int polynomial;
     crcea_int xoroutput;
+};
+
+struct crcea_model
+{
+    crcea_design design;
+    crcea_int initialcrc;
 };
 
 struct crcea_context
