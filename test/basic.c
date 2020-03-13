@@ -14,12 +14,12 @@
 
 #define ENDOF(L)        (L + ELEMENTOF(L))
 
-#define FOREACH_LIST(TYPE, I, ...) \
-        for (const TYPE items__[] = { __VA_ARGS__ }, \
-                        *items_end__ = ENDOF(items__), \
-                        *I = items__; \
-             I < items_end__; \
-             I ++) \
+#define FOREACH_LIST(TYPE, I, ...)                                      \
+        for (const TYPE items__[] = { __VA_ARGS__ },                    \
+                        *items_end__ = ENDOF(items__),                  \
+                        *I = items__;                                   \
+             I < items_end__;                                           \
+             I ++)                                                      \
 
 
 /*

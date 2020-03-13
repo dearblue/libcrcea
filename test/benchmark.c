@@ -113,28 +113,28 @@ main(int argc, char *argv[])
         .xoroutput = ~0ul,
     };
 
-#define MEASURE00(ALGO, TABLE, SIZE)                                     \
-    do {                                                                       \
-        static crcea_context cc = { \
-            .design = &design, \
-            .algorithm = (ALGO), \
-            .table = (TABLE), \
-            .alloc = NULL, \
-        }; \
-        \
-        crc ## SIZE ## _build_table(&design, cc.algorithm, (TABLE));                                    \
+#define MEASURE00(ALGO, TABLE, SIZE)                                    \
+    do {                                                                \
+        static crcea_context cc = {                                     \
+            .design = &design,                                          \
+            .algorithm = (ALGO),                                        \
+            .table = (TABLE),                                           \
+            .alloc = NULL,                                              \
+        };                                                              \
+                                                                        \
+        crc ## SIZE ## _build_table(&design, cc.algorithm, (TABLE));    \
         volatile uint32_t s = ~0; /* 最適化によって s が計算されないことを防止する */ \
-        double t1 = ptime();                                                  \
-        s = crc ## SIZE ## _setup(&design, 0);                                            \
-        s = crc ## SIZE ## _update(&design, src, srcend - 1, s, (ALGO), (TABLE));                          \
-        s = crc ## SIZE ## _finish(&design, s);                                                   \
-        double t2 = ptime();                                                  \
-        double ti = t2 - t1;                                      \
-        double rate = (size) / ti / 1024.0 / 1024.0;                                 \
-        printf("- { throughput: %8.2f MiB / sec., tablesize: %8d, algoright: %s }\n",    \
-               rate, (int)crc ## SIZE ## _tablesize(cc.algorithm), #ALGO);            \
-        fflush(stdout); \
-    } while (0)                                                                     \
+        double t1 = ptime();                                            \
+        s = crc ## SIZE ## _setup(&design, 0);                          \
+        s = crc ## SIZE ## _update(&design, src, srcend - 1, s, (ALGO), (TABLE)); \
+        s = crc ## SIZE ## _finish(&design, s);                         \
+        double t2 = ptime();                                            \
+        double ti = t2 - t1;                                            \
+        double rate = (size) / ti / 1024.0 / 1024.0;                    \
+        printf("- { throughput: %8.2f MiB / sec., tablesize: %8d, algoright: %s }\n", \
+               rate, (int)crc ## SIZE ## _tablesize(cc.algorithm), #ALGO); \
+        fflush(stdout);                                                 \
+    } while (0)                                                         \
 
 #define MEASURE0(ALGO, TABLE, SIZE) MEASURE00(ALGO, TABLE, SIZE)
 #define MEASURE(ALGO, TABLE) MEASURE0(ALGO, TABLE, SIZE)
@@ -185,19 +185,19 @@ main(int argc, char *argv[])
     MEASURE(CRCEA_BY16_SEXDECTET,   table_s16);
     MEASURE(CRCEA_BY32_SEXDECTET,   table_s16);
 
-#define MEASURE_1(LABEL, TABLESIZE, CODE) \
-    do { \
+#define MEASURE_1(LABEL, TABLESIZE, CODE)                               \
+    do {                                                                \
         volatile uint32_t s; /* 最適化によって s が計算されないことを防止する */ \
-        double t1 = ptime(); \
-        s = (CODE); \
-        double t2 = ptime(); \
-        double ti = t2 - t1; \
-        double rate = (size) / ti / 1024.0 / 1024.0; \
+        double t1 = ptime();                                            \
+        s = (CODE);                                                     \
+        double t2 = ptime();                                            \
+        double ti = t2 - t1;                                            \
+        double rate = (size) / ti / 1024.0 / 1024.0;                    \
         printf("- { throughput: %8.2f MiB / sec., tablesize: %8d, algoright: %s }\n", \
-               rate, (int)(TABLESIZE), LABEL); \
-        fflush(stdout); \
-        (void)s; \
-    } while (0) \
+               rate, (int)(TABLESIZE), LABEL);                          \
+        fflush(stdout);                                                 \
+        (void)s;                                                        \
+    } while (0)                                                         \
 
     {
         /* pre-running */
