@@ -177,7 +177,7 @@ crcea_int crcea(crcea_context *cc, const void *src, const void *srcend, crcea_in
  * この例は有効アルゴリズムのプリセットを minimal にした上で
  * crcea_update_by4_octet のみを有効にする
  */
-#define CRCEA_DEFAULT_ALGORYTHM CRCEA_BY4_OCTET
+#define CRCEA_DEFAULT_ALGORITHM CRCEA_BY4_OCTET
 #define CRCEA_MINIMAL
 #define CRCEA_ENABLE_BY4_OCTET
 
