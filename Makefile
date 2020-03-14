@@ -3,10 +3,11 @@ AR=ar
 LD=$(CC)
 
 CPPFLAGS=-pedantic
-CFLAGS=$(warnings) $(include) $(opti) $(debug) -std=c99 -fPIC
+CFLAGS=$(warnings) $(include) $(opti) $(debug) $(defs) -std=c99 -fPIC
 warnings=-Wall -Wextra -Wno-shift-negative-value -Wno-shift-count-overflow #-Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable
 include=-I./include
 opti=-O3 -funroll-loops
+defs=#-DCRCEA_ONLY_INT64 -DCRCEA_SMALL
 debug=-g -ggdb
 LDFLAGS=
 
