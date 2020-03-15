@@ -32,7 +32,7 @@
  *
  *      This definision is undefined in last of this file.
  *
- * [CRCEA_STRIP_SIZE]
+ * [CRCEA_STRIPE_SIZE]
  *      optional, 1 by default.
  *
  * [CRCEA_VISIBILITY]
