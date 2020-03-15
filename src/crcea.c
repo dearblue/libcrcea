@@ -58,6 +58,24 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
         F(uint8_t, crcea8);                                                 \
 
+#elif defined(CRCEA_ONLY_INT32_INT64)
+#   define CRCEA_PREFIX      crcea32
+#   define CRCEA_TYPE        uint32_t
+#   include "../include/crcea/core.h"
+
+#   define CRCEA_PREFIX      crcea64
+#   define CRCEA_TYPE        uint64_t
+#   include "../include/crcea/core.h"
+
+#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+        do {                                                                \
+            if ((C)->design->bitsize > 32) {                                \
+                F(uint64_t, crcea64);                                       \
+            } else {                                                        \
+                F(uint32_t, crcea32);                                       \
+            }                                                               \
+        } while (0)                                                         \
+
 #else
 #   define CRCEA_PREFIX      crcea16
 #   define CRCEA_TYPE        uint16_t
