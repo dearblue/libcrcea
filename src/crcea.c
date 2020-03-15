@@ -59,10 +59,6 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
         F(uint8_t, crcea8);                                                 \
 
 #else
-#   define CRCEA_PREFIX      crcea8
-#   define CRCEA_TYPE        uint8_t
-#   include "../include/crcea/core.h"
-
 #   define CRCEA_PREFIX      crcea16
 #   define CRCEA_TYPE        uint16_t
 #   include "../include/crcea/core.h"
@@ -81,10 +77,8 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
                 F(uint64_t, crcea64);                                       \
             } else if ((C)->design->bitsize > 16) {                         \
                 F(uint32_t, crcea32);                                       \
-            } else if ((C)->design->bitsize > 8) {                          \
-                F(uint16_t, crcea16);                                       \
             } else {                                                        \
-                F(uint8_t, crcea8);                                         \
+                F(uint16_t, crcea16);                                       \
             }                                                               \
         } while (0)                                                         \
 
