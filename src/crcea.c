@@ -145,7 +145,7 @@ crcea_prepare_table(crcea_context *cc)
 }
 
 crcea_int
-crcea_setup(crcea_context *cc, crcea_int crc)
+crcea_setup(const crcea_context *cc, crcea_int crc)
 {
 #define CRCEA_SETUP(T, P) return P ## _setup(cc->design, crc)
 
@@ -155,12 +155,11 @@ crcea_setup(crcea_context *cc, crcea_int crc)
 }
 
 crcea_int
-crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
+crcea_update(const crcea_context *cc, const void *p, const void *pp, crcea_int state)
 {
 #define CRCEA_UPDATE(T, P)                                                  \
     do {                                                                    \
-        int algo = crcea_prepare_table(cc);                                 \
-        return P ## _update(cc->design, p, pp, state, algo, cc->table);     \
+        return P ## _update(cc->design, p, pp, state, cc->algorithm, cc->table); \
     } while (0);                                                            \
 
     CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
@@ -169,7 +168,7 @@ crcea_update(crcea_context *cc, const void *p, const void *pp, crcea_int state)
 }
 
 crcea_int
-crcea_finish(crcea_context *cc, crcea_int state)
+crcea_finish(const crcea_context *cc, crcea_int state)
 {
 #define CRCEA_FINISH(T, P) return P ## _finish(cc->design, state)
 
@@ -179,7 +178,7 @@ crcea_finish(crcea_context *cc, crcea_int state)
 }
 
 crcea_int
-crcea(crcea_context *cc, const void *src, const void *srcend, crcea_int crc)
+crcea(const crcea_context *cc, const void *src, const void *srcend, crcea_int crc)
 {
     crcea_int s = crcea_setup(cc, crc);
     s = crcea_update(cc, src, srcend, s);
