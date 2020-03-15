@@ -12,6 +12,7 @@
 
 size_t crcea_tablesize(const crcea_context *cc);
 int crcea_prepare_table(crcea_context *cc);
+void crcea_build_table(const crcea_design *design, int algo, void *table);
 crcea_int crcea_setup(const crcea_context *cc, crcea_int crc);
 crcea_int crcea_update(const crcea_context *cc, const void *src, const void *srcend, crcea_int state);
 crcea_int crcea_finish(const crcea_context *cc, crcea_int state);

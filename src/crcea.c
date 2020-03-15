@@ -31,7 +31,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint64_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         F(uint64_t, crcea64);                                               \
 
 #elif defined(CRCEA_ONLY_INT32)
@@ -39,7 +39,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint32_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         F(uint32_t, crcea32);                                               \
 
 #elif defined(CRCEA_ONLY_INT16)
@@ -47,7 +47,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint16_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         F(uint16_t, crcea16);                                               \
 
 #elif defined(CRCEA_ONLY_INT8)
@@ -55,7 +55,7 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint8_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         F(uint8_t, crcea8);                                                 \
 
 #elif defined(CRCEA_ONLY_INT32_INT64)
@@ -67,9 +67,9 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint64_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         do {                                                                \
-            if ((C)->design->bitsize > 32) {                                \
+            if ((D)->bitsize > 32) {                                        \
                 F(uint64_t, crcea64);                                       \
             } else {                                                        \
                 F(uint32_t, crcea32);                                       \
@@ -89,11 +89,11 @@ void *CRCEA_DEFAULT_MALLOC(void *opaque, size_t size);
 #   define CRCEA_TYPE        uint64_t
 #   include "../include/crcea/core.h"
 
-#   define CRCEA_SWITCH_BY_TYPE(C, F)                                       \
+#   define CRCEA_SWITCH_BY_TYPE(D, F)                                       \
         do {                                                                \
-            if ((C)->design->bitsize > 32) {                                \
+            if ((D)->bitsize > 32) {                                        \
                 F(uint64_t, crcea64);                                       \
-            } else if ((C)->design->bitsize > 16) {                         \
+            } else if ((D)->bitsize > 16) {                                 \
                 F(uint32_t, crcea32);                                       \
             } else {                                                        \
                 F(uint16_t, crcea16);                                       \
@@ -107,7 +107,7 @@ crcea_tablesize(const crcea_context *cc)
 {
 #define CRCEA_TABLE_SIZE_DECL(T, P) return P ## _tablesize(cc->algorithm)
 
-    CRCEA_SWITCH_BY_TYPE(cc, CRCEA_TABLE_SIZE_DECL);
+    CRCEA_SWITCH_BY_TYPE(cc->design, CRCEA_TABLE_SIZE_DECL);
 
     return ~(size_t)0;
 }
@@ -133,10 +133,7 @@ crcea_prepare_table(crcea_context *cc)
                 return CRCEA_FALLBACK;
             }
 
-#define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(cc->design, cc->algorithm, table);
-
-            CRCEA_SWITCH_BY_TYPE(cc, CRCEA_BUILD_TABLE_DECL);
-
+            crcea_build_table(cc->design, algo, table);
             cc->table = table;
         }
     }
@@ -144,12 +141,20 @@ crcea_prepare_table(crcea_context *cc)
     return algo;
 }
 
+void
+crcea_build_table(const crcea_design *design, int algo, void *table)
+{
+#define CRCEA_BUILD_TABLE_DECL(T, P) P ## _build_table(design, algo, table);
+
+    CRCEA_SWITCH_BY_TYPE(design, CRCEA_BUILD_TABLE_DECL);
+}
+
 crcea_int
 crcea_setup(const crcea_context *cc, crcea_int crc)
 {
 #define CRCEA_SETUP(T, P) return P ## _setup(cc->design, crc)
 
-    CRCEA_SWITCH_BY_TYPE(cc, CRCEA_SETUP);
+    CRCEA_SWITCH_BY_TYPE(cc->design, CRCEA_SETUP);
 
     return ~(crcea_int)0;
 }
@@ -162,7 +167,7 @@ crcea_update(const crcea_context *cc, const void *p, const void *pp, crcea_int s
         return P ## _update(cc->design, p, pp, state, cc->algorithm, cc->table); \
     } while (0);                                                            \
 
-    CRCEA_SWITCH_BY_TYPE(cc, CRCEA_UPDATE);
+    CRCEA_SWITCH_BY_TYPE(cc->design, CRCEA_UPDATE);
 
     return state;
 }
@@ -172,7 +177,7 @@ crcea_finish(const crcea_context *cc, crcea_int state)
 {
 #define CRCEA_FINISH(T, P) return P ## _finish(cc->design, state)
 
-    CRCEA_SWITCH_BY_TYPE(cc, CRCEA_FINISH);
+    CRCEA_SWITCH_BY_TYPE(cc->design, CRCEA_FINISH);
 
     return ~(crcea_int)0;
 }
